@@ -1,0 +1,68 @@
+# Database files
+**/*.sqlite
+**/*.db
+**/*.db-shm
+**/*.db-wal
+
+# Dependencies
+node_modules
+
+# IDE and editor files
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp
+temp
+.tmp
+bin
+
+# Git
+.git
+.gitignore
+
+# Logs
+*.log
+logs
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist
+build
+*.out
+
+# Test files
+*_test.go
+**/*_test.go
+coverage.out
+coverage.html
+
+# Documentation
+README.md
+*.md
+docs
+
+# CI/CD
+.github
+.gitlab-ci.yml
+Jenkinsfile
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+compose.yml
+.dockerignore
+
+# Environment files
+.env
+.envrc
+envrc.template
+
+# Development tools
+.air.toml

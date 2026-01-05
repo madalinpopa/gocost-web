@@ -1,0 +1,30 @@
+package layouts
+
+import "github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
+import "strconv"
+
+templ footer(data response.Data) {
+	<footer class="bg-slate-950 border-t border-slate-900 py-12 px-6" aria-labelledby="footer-heading">
+		<h2 id="footer-heading" class="sr-only">Footer</h2>
+		<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+			<!-- Left: Logo & Copyright -->
+			<div class="flex items-center gap-4">
+				<div class="w-8 h-8 bg-primary-600 rounded-sm flex items-center justify-center font-bold text-lg text-slate-950 shadow-[2px_2px_0px_0px_rgba(255,255,255,0.1)]">
+					G
+				</div>
+				<p class="text-xs font-bold tracking-widest text-gray-500 uppercase">
+					&copy; { strconv.Itoa(data.CurrentYear) } GoCost
+				</p>
+			</div>
+			<!-- Right: Links -->
+			<nav class="flex gap-8">
+				<a href="https://github.com/coderustle/gocost" target="_blank" class="text-xs font-bold tracking-widest text-gray-500 hover:text-primary-500 uppercase transition-colors">
+					GitHub
+				</a>
+				<a href="mailto:madalin@coderustle.ro" class="text-xs font-bold tracking-widest text-gray-500 hover:text-primary-500 uppercase transition-colors">
+					Contact
+				</a>
+			</nav>
+		</div>
+	</footer>
+}

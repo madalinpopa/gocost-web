@@ -1,0 +1,46 @@
+package layouts
+
+import (
+	response "github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
+	"html/template"
+)
+
+var csrfScript = template.Must(template.New("token").Parse(`<script>document.body.addEventListener('htmx:configRequest', function(evt) {evt.detail.headers['X-CSRF-Token'] = "{{ . }}";});</script>`))
+
+templ CSRFScript(token string) {
+	@templ.FromGoHTML(csrfScript, token)
+}
+
+templ Base(data response.Data) {
+	<!DOCTYPE html>
+	<html class="h-full bg-slate-950" lang="ro">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<meta
+				name="htmx-config"
+				content='{
+          "responseHandling":[
+              {"code":"204", "swap": false},
+              {"code":"[23]..", "swap": true},
+              {"code":"422", "swap": true},
+              {"code":"[45]..", "swap": false, "error":true},
+              {"code":"...", "swap": true}
+          ]
+         }'
+			/>
+			<link rel="icon" href="/static/img/favicon.ico"/>
+			<link rel="stylesheet" href="/static/css/output.css" type="text/css"/>
+			<title>{ data.Title }</title>
+			<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+		</head>
+		<body class="antialiased h-full bg-slate-950 text-white font-sans">
+			{ children... }
+			<script src="/static/js/main.js" type="text/javascript"></script>
+			<script src="/static/js/htmx.min.js" type="text/javascript"></script>
+			<script src="/static/js/alpine.min.js" type="text/javascript"></script>
+			@CSRFScript(data.CSRFToken)
+		</body>
+	</html>
+}

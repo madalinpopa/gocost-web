@@ -1,0 +1,13 @@
+export IMAGE_TAG="v0.0.1"
+export ALLOWED_HOSTS="localhost"
+export DOMAIN="localhost"
+export CURRENCY="$"
+
+# Litestream
+# export DB_PATH="/data/db.sqlite"
+# export DB_REPLICA_PATH="/data/database"
+
+# Development
+export GOOSE_DRIVER="sqlite3"
+export GOOSE_DBSTRING="./data.sqlite"
+export GOOSE_MIGRATION_DIR="./migrations"

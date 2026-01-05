@@ -1,0 +1,304 @@
+package components
+
+import (
+	"fmt"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/views"
+	"math"
+)
+
+templ MonthNavigation(dashboard views.DashboardView, oob bool) {
+	<div
+		id="dashboard-month-nav"
+		class="flex items-center gap-4 rounded-lg bg-slate-900 p-1"
+		if oob {
+			hx-swap-oob="true"
+		}
+	>
+		<button
+			hx-get={ "/home/groups?month=" + dashboard.PrevMonth }
+			hx-target="#dashboard-groups"
+			hx-replace-url={ "/home?month=" + dashboard.PrevMonth }
+			class="rounded-md p-2 text-slate-400 hover:bg-slate-800 hover:text-white"
+		>
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+			</svg>
+		</button>
+		<span class="min-w-[150px] text-center text-lg font-semibold text-white">{ dashboard.CurrentMonth }</span>
+		<button
+			hx-get={ "/home/groups?month=" + dashboard.NextMonth }
+			hx-target="#dashboard-groups"
+			hx-replace-url={ "/home?month=" + dashboard.NextMonth }
+			class="rounded-md p-2 text-slate-400 hover:bg-slate-800 hover:text-white"
+		>
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+				<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+			</svg>
+		</button>
+	</div>
+}
+
+templ BalanceDisplay(dashboard views.DashboardView, oob bool) {
+	<div
+		id="dashboard-balance"
+		class="flex items-center gap-3"
+		if oob {
+			hx-swap-oob="true"
+		}
+	>
+		<span class="text-sm font-medium text-slate-400">Balance</span>
+		<div
+			class={ "text-xl font-mono font-bold",
+              templ.KV("text-white", dashboard.Balance >= 0),
+              templ.KV("text-rose-500", dashboard.Balance < 0) }
+		>
+			if dashboard.Balance >= 0 {
+				{ dashboard.Currency } { fmt.Sprintf("%.2f", dashboard.Balance) }
+			} else {
+				- { dashboard.Currency } { fmt.Sprintf("%.2f", math.Abs(dashboard.Balance)) }
+			}
+		</div>
+		<button
+			@click="$dispatch('open-modal', { id: 'income-list-modal' })"
+			hx-get={ "/incomes?month=" + dashboard.CurrentMonthParam }
+			hx-target="#income-list-container"
+			hx-trigger="click"
+			class="ml-2 rounded-full p-1 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+			title="View Monthly Incomes"
+		>
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 17.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"></path>
+			</svg>
+		</button>
+	</div>
+}
+
+templ DashboardActions() {
+	<div class="flex items-center gap-2">
+		<button
+			@click="$dispatch('open-modal', { id: 'add-income-modal' })"
+			class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+		>
+			+ Income
+		</button>
+		<button
+			@click="$dispatch('open-modal', { id: 'add-group-modal' })"
+			class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+		>
+			+ New Group
+		</button>
+	</div>
+}
+
+templ ExpenseItem(expense views.ExpenseView, categoryId string) {
+	<div class="flex items-center justify-between text-sm group/expense">
+		<div class="flex items-center gap-2 min-w-0">
+			<span class="font-mono text-slate-300">{ expense.Currency } { fmt.Sprintf("%.2f", expense.Amount) }</span>
+			<span class="truncate text-slate-500 group-hover/expense:text-slate-300 transition-colors" title={ expense.Description }>{ expense.Description }</span>
+		</div>
+		<div class="flex items-center gap-2">
+			<!-- Edit Button (Visible on Hover) -->
+			<button
+				type="button"
+				class="opacity-0 group-hover/expense:opacity-100 transition-opacity text-slate-500 hover:text-white"
+				@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'edit-expense-modal', context: { expenseId: '%s', categoryId: '%s', amount: '%g', description: '%s', spentAt: '%s', status: '%s', paidAt: '%s' } })",
+                    expense.ID, categoryId, expense.Amount, expense.Description, expense.SpentAt, expense.Status, expense.PaidAt) }
+				title="Edit Expense"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+					<path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"></path>
+				</svg>
+			</button>
+			<!-- Delete Button (Visible on Hover) -->
+			<button
+				type="button"
+				hx-delete={ "/expenses/" + expense.ID }
+				hx-confirm="Are you sure you want to delete this expense?"
+				class="opacity-0 group-hover/expense:opacity-100 transition-opacity text-slate-500 hover:text-rose-500"
+				title="Delete Expense"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+					<path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"></path>
+				</svg>
+			</button>
+			<!-- Toggle Status Button -->
+			if expense.Status == views.StatusPaid {
+				<button
+					type="button"
+					hx-patch={ "/expenses/" + expense.ID + "/toggle-status" }
+					hx-swap="outerHTML"
+					hx-target="this"
+					class="cursor-pointer rounded bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-500 shrink-0 hover:bg-emerald-500/20 transition-colors"
+				>
+					Paid
+				</button>
+			} else {
+				<button
+					type="button"
+					hx-patch={ "/expenses/" + expense.ID + "/toggle-status" }
+					hx-swap="outerHTML"
+					hx-target="this"
+					class="cursor-pointer rounded bg-rose-500/10 px-2 py-0.5 text-xs font-medium text-rose-500 shrink-0 hover:bg-rose-500/20 transition-colors"
+				>
+					Unpaid
+				</button>
+			}
+		</div>
+	</div>
+}
+
+templ CategoryProgressBar(category views.CategoryView) {
+	if category.Budget > 0 {
+		<div class="mb-6">
+			{{
+				percentage := (category.Spent / category.Budget) * 100
+				if percentage > 100 {
+					percentage = 100
+				}
+				barColor := "bg-emerald-500"
+				if category.Spent > category.Budget {
+					barColor = "bg-rose-500"
+				} else if percentage > 85 {
+					barColor = "bg-amber-500"
+				}
+			}}
+			<div class="flex items-center justify-between text-xs mb-1.5">
+				<span class="text-slate-400">
+					{ category.Currency }{ fmt.Sprintf("%.2f", category.Spent) }
+					<span class="text-slate-600">/ { category.Currency }{ fmt.Sprintf("%.0f", category.Budget) }</span>
+				</span>
+				if category.Spent > category.Budget {
+					<span class="text-rose-500 font-medium">-{ category.Currency }{ fmt.Sprintf("%.2f", category.Spent - category.Budget) }</span>
+				} else {
+					<span class="text-emerald-500 font-medium">{ category.Currency }{ fmt.Sprintf("%.2f", category.Budget - category.Spent) } left</span>
+				}
+			</div>
+			<div class="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden">
+				<div class={ "h-full rounded-full transition-all duration-500", barColor } style={ fmt.Sprintf("width: %.2f%%", percentage) }></div>
+			</div>
+		</div>
+	}
+}
+
+templ CategoryHeader(category views.CategoryView, groupId string, month string) {
+	<div class="mb-4 flex items-start justify-between">
+		<div class="flex-1 pr-4">
+			<div class="flex items-center gap-3">
+				<h3 class="font-medium text-white">{ category.Name }</h3>
+				if category.Type == views.TypeRecurrent {
+					<span class="inline-flex items-center gap-1 rounded-full bg-indigo-500/10 px-2 py-0.5 text-xs font-medium text-indigo-400">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-3 w-3">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"></path>
+						</svg>
+						Recurrent
+					</span>
+				} else {
+					<span class="inline-flex items-center gap-1 rounded-full bg-slate-700/50 px-2 py-0.5 text-xs font-medium text-slate-400">
+						Monthly
+					</span>
+				}
+			</div>
+		</div>
+		<div class="flex items-center gap-2">
+			<button
+				@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'add-expense-modal', context: { categoryId: '%s', month: '%s' } })", category.ID, month) }
+				class="text-slate-500 hover:text-white"
+				title="Add Expense"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
+				</svg>
+			</button>
+			<button
+				@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'edit-category-modal', context: { categoryId: '%s', groupId: '%s', name: '%s', description: '%s', type: '%s', startMonth: '%s', endMonth: '%s', budget: '%g' } })", category.ID, groupId, category.Name, category.Description, category.Type, category.StartMonth, category.EndMonth, category.Budget) }
+				class="text-slate-500 hover:text-white"
+				title="Edit Category"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+					<path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"></path>
+				</svg>
+			</button>
+			<button
+				hx-delete={ fmt.Sprintf("/groups/%s/categories/%s", groupId, category.ID) }
+				hx-confirm="Are you sure you want to delete this category? All expenses will be lost."
+				class="text-slate-500 hover:text-rose-500 transition-colors"
+				title="Delete Category"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+					<path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"></path>
+				</svg>
+			</button>
+		</div>
+	</div>
+}
+
+templ CategoryCard(category views.CategoryView, groupId string, month string) {
+	<div class="p-6">
+		@CategoryHeader(category, groupId, month)
+		@CategoryProgressBar(category)
+		<!-- Expenses List -->
+		<div class="space-y-3">
+			for _, expense := range category.Expenses {
+				@ExpenseItem(expense, category.ID)
+			}
+			if len(category.Expenses) == 0 {
+				<div class="text-xs text-slate-600 italic">No expenses recorded</div>
+			}
+		</div>
+	</div>
+}
+
+templ GroupCard(group views.GroupView, month string) {
+	<div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50">
+		<!-- Group Header -->
+		<div class="border-b border-slate-800 bg-slate-900 px-6 py-4 flex justify-between items-center">
+			<div class="flex items-center gap-3">
+				<h2 class="text-lg font-semibold text-white">{ group.Name }</h2>
+				<button
+					@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'edit-group-modal', context: { groupId: '%s', name: '%s', description: '%s', order: '%d' } })", group.ID, group.Name, group.Description, group.Order) }
+					class="text-slate-500 hover:text-white"
+					title="Edit Group"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+						<path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"></path>
+					</svg>
+				</button>
+				<button
+					hx-delete={ "/groups/" + group.ID }
+					hx-confirm="Are you sure you want to delete this group? All categories and expenses will be lost."
+					class="text-slate-500 hover:text-rose-500 transition-colors"
+					title="Delete Group"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+						<path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"></path>
+					</svg>
+				</button>
+			</div>
+			<button
+				@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'add-category-modal', context: { groupId: '%s' } })", group.ID) }
+				class="text-sm text-slate-400 hover:text-indigo-400"
+			>
+				+ Add Category
+			</button>
+		</div>
+		<!-- Categories Grid -->
+		<div class="grid grid-cols-1 divide-y divide-slate-800 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
+			for _, category := range group.Categories {
+				@CategoryCard(category, group.ID, month)
+			}
+		</div>
+	</div>
+}
+
+templ GroupsList(groups []views.GroupView, month string) {
+	<div class="space-y-8 fade-in">
+		for _, group := range groups {
+			@GroupCard(group, month)
+		}
+		if len(groups) == 0 {
+			<div class="text-center text-slate-500 py-10">
+				No groups found.
+			</div>
+		}
+	</div>
+}

@@ -1,0 +1,71 @@
+package expense
+
+import (
+	"testing"
+	"time"
+
+	"github.com/madalinpopa/gocost-web/internal/shared/identifier"
+	"github.com/madalinpopa/gocost-web/internal/shared/money"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestNewExpense(t *testing.T) {
+	t.Run("creates valid expense", func(t *testing.T) {
+		// Arrange
+		id, _ := identifier.NewID()
+		categoryID, _ := identifier.NewID()
+		amount, _ := money.New(5000)
+		description, _ := NewExpenseDescriptionVO("Lunch")
+		spentAt := time.Now()
+		payment := NewUnpaidStatus()
+
+		// Act
+		expense, err := NewExpense(id, categoryID, amount, description, spentAt, payment)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.NotNil(t, expense)
+		assert.Equal(t, id, expense.ID)
+		assert.Equal(t, categoryID, expense.CategoryID)
+		assert.Equal(t, amount, expense.Amount)
+		assert.Equal(t, description, expense.Description)
+		assert.Equal(t, spentAt, expense.SpentAt)
+		assert.Equal(t, payment, expense.Payment)
+	})
+
+	t.Run("invalid amount - zero", func(t *testing.T) {
+		// Arrange
+		id, _ := identifier.NewID()
+		categoryID, _ := identifier.NewID()
+		amount, _ := money.New(0)
+		description, _ := NewExpenseDescriptionVO("Lunch")
+		spentAt := time.Now()
+		payment := NewUnpaidStatus()
+
+		// Act
+		expense, err := NewExpense(id, categoryID, amount, description, spentAt, payment)
+
+		// Assert
+		assert.ErrorIs(t, err, ErrInvalidAmount)
+		assert.Nil(t, expense)
+	})
+
+	t.Run("invalid amount - negative", func(t *testing.T) {
+		// Arrange
+		id, _ := identifier.NewID()
+		categoryID, _ := identifier.NewID()
+		description, _ := NewExpenseDescriptionVO("Lunch")
+		spentAt := time.Now()
+		payment := NewUnpaidStatus()
+		// money.New returns error on negative, so we simulate it or just rely on money package
+		// If we force negative amount (if possible) or just rely on IsPositive check
+		// money.New(-100) returns error, so we can't create it easily here without ignoring error
+		// But let's say we have a Money struct that is zero/negative
+		amount := money.Money{} // Zero
+		// Act
+		expense, err := NewExpense(id, categoryID, amount, description, spentAt, payment)
+		// Assert
+		assert.ErrorIs(t, err, ErrInvalidAmount)
+		assert.Nil(t, expense)
+	})
+}

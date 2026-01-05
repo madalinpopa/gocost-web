@@ -1,0 +1,604 @@
+package components
+
+import (
+	"fmt"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/form"
+)
+
+templ InputField(id string, label string, placeholder string, inputType string, value string, err string) {
+	<div>
+		<label for={ id } class="block text-sm font-medium leading-6 text-white">{ label }</label>
+		<div class="mt-2">
+			<input
+				type={ inputType }
+				name={ id }
+				id={ id }
+				value={ value }
+				class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 text-white ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", err != "") }
+				placeholder={ placeholder }
+			/>
+		</div>
+		if err != "" {
+			<p class="mt-2 text-sm text-red-500">{ err }</p>
+		}
+	</div>
+}
+
+templ AmountField(id string, label string, value string, err string) {
+	<div>
+		<label for={ id } class="block text-sm font-medium leading-6 text-white">{ label }</label>
+		<div class="relative mt-2 rounded-md shadow-sm">
+			<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+				<span class="text-slate-400 sm:text-sm">$</span>
+			</div>
+			<input
+				type="text"
+				name={ id }
+				id={ id }
+				value={ value }
+				class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 pl-7 pr-12 text-white ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", err != "") }
+				placeholder="0.00"
+			/>
+		</div>
+		if err != "" {
+			<p class="mt-2 text-sm text-red-500">{ err }</p>
+		}
+	</div>
+}
+
+templ ModalButtons(cancelText string, confirmText string) {
+	<div class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+		<button
+			type="submit"
+			class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2"
+		>
+			{ confirmText }
+		</button>
+		<button
+			type="button"
+			class="mt-3 inline-flex w-full justify-center rounded-md bg-slate-800 px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-slate-700 hover:bg-slate-700 sm:col-start-1 sm:mt-0"
+			@click="open = false"
+		>
+			{ cancelText }
+		</button>
+	</div>
+}
+
+// AddIncomeForm is the form content for adding income.
+// It is separated to allow HTMX replacement on validation error without closing the modal.
+templ AddIncomeForm(f *form.CreateIncomeForm) {
+	{{
+		var amountVal, descVal, dateVal string
+		var amountErr, descErr, dateErr string
+		if f != nil {
+			if f.Amount > 0 {
+				amountVal = fmt.Sprintf("%g", f.Amount)
+			}
+			descVal = f.Description
+			dateVal = f.Date
+			amountErr = f.FieldErrors["income-amount"]
+			descErr = f.FieldErrors["income-desc"]
+			dateErr = f.FieldErrors["income-date"]
+		}
+	}}
+	<form
+		id="add-income-form"
+		class="space-y-4"
+		hx-post="/incomes"
+		hx-swap="outerHTML"
+	>
+		if f != nil && len(f.NonFieldErrors) > 0 {
+			<div class="rounded-md bg-red-50 p-4 mb-4">
+				<div class="flex">
+					<div class="ml-3">
+						<h3 class="text-sm font-medium text-red-800">Error</h3>
+						<div class="mt-2 text-sm text-red-700">
+							<ul role="list" class="list-disc pl-5 space-y-1">
+								for _, err := range f.NonFieldErrors {
+									<li>{ err }</li>
+								}
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+		@AmountField("income-amount", "Amount", amountVal, amountErr)
+		@InputField("income-desc", "Description", "Salary, Freelance...", "text", descVal, descErr)
+		@InputField("income-date", "Received At", "", "date", dateVal, dateErr)
+		@ModalButtons("Cancel", "Add Income")
+	</form>
+}
+
+templ AddIncomeModal() {
+	@Modal("add-income-modal", "Add Income") {
+		@AddIncomeForm(nil)
+	}
+}
+
+templ AddGroupForm(f *form.CreateGroupForm) {
+	{{
+		var nameVal, descVal, orderVal string
+		var nameErr, descErr, orderErr string
+		if f != nil {
+			nameVal = f.Name
+			descVal = f.Description
+			if f.Order > 0 {
+				orderVal = fmt.Sprintf("%d", f.Order)
+			}
+			nameErr = f.FieldErrors["group-name"]
+			descErr = f.FieldErrors["group-desc"]
+			orderErr = f.FieldErrors["group-order"]
+		}
+	}}
+	<form
+		id="add-group-form"
+		class="space-y-4"
+		hx-post="/groups"
+		hx-swap="outerHTML"
+	>
+		if f != nil && len(f.NonFieldErrors) > 0 {
+			<div class="rounded-md bg-red-50 p-4 mb-4">
+				<div class="flex">
+					<div class="ml-3">
+						<h3 class="text-sm font-medium text-red-800">Error</h3>
+						<div class="mt-2 text-sm text-red-700">
+							<ul role="list" class="list-disc pl-5 space-y-1">
+								for _, err := range f.NonFieldErrors {
+									<li>{ err }</li>
+								}
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+		@InputField("group-name", "Group Name", "Housing, Food...", "text", nameVal, nameErr)
+		@InputField("group-desc", "Description", "Shared expenses for...", "text", descVal, descErr)
+		@InputField("group-order", "Display Order", "0", "number", orderVal, orderErr)
+		@ModalButtons("Cancel", "Create Group")
+	</form>
+}
+
+templ AddGroupModal() {
+	@Modal("add-group-modal", "New Group") {
+		@AddGroupForm(nil)
+	}
+}
+
+templ EditGroupForm(f *form.UpdateGroupForm) {
+	{{
+		var idVal, nameVal, descVal, orderVal string
+		var nameErr, descErr, orderErr string
+		if f != nil {
+			idVal = f.ID
+			nameVal = f.Name
+			descVal = f.Description
+			if f.Order > 0 {
+				orderVal = fmt.Sprintf("%d", f.Order)
+			}
+			nameErr = f.FieldErrors["edit-group-name"]
+			descErr = f.FieldErrors["edit-group-desc"]
+			orderErr = f.FieldErrors["edit-group-order"]
+		}
+	}}
+	<form
+		id="edit-group-form"
+		class="space-y-4"
+		x-data={ fmt.Sprintf("{ groupId: '%s' }", idVal) }
+		@open-modal.window="if ($event.detail.id === 'edit-group-modal' && $event.detail.context) { 
+            groupId = $event.detail.context.groupId; 
+            $nextTick(() => {
+                if ($el.querySelector('#edit-group-name')) $el.querySelector('#edit-group-name').value = $event.detail.context.name;
+                if ($el.querySelector('#edit-group-desc')) $el.querySelector('#edit-group-desc').value = $event.detail.context.description;
+                if ($el.querySelector('#edit-group-order')) $el.querySelector('#edit-group-order').value = $event.detail.context.order;
+            });
+        }"
+		hx-post="/groups/edit"
+		hx-swap="outerHTML"
+	>
+		if f != nil && len(f.NonFieldErrors) > 0 {
+			<div class="rounded-md bg-red-50 p-4 mb-4">
+				<div class="flex">
+					<div class="ml-3">
+						<h3 class="text-sm font-medium text-red-800">Error</h3>
+						<div class="mt-2 text-sm text-red-700">
+							<ul role="list" class="list-disc pl-5 space-y-1">
+								for _, err := range f.NonFieldErrors {
+									<li>{ err }</li>
+								}
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+		<input type="hidden" name="group-id" x-model="groupId"/>
+		@InputField("edit-group-name", "Group Name", "Housing, Food...", "text", nameVal, nameErr)
+		@InputField("edit-group-desc", "Description", "Shared expenses for...", "text", descVal, descErr)
+		@InputField("edit-group-order", "Display Order", "0", "number", orderVal, orderErr)
+		@ModalButtons("Cancel", "Save Changes")
+	</form>
+}
+
+templ EditGroupModal() {
+	@Modal("edit-group-modal", "Edit Group") {
+		@EditGroupForm(nil)
+	}
+}
+
+templ AddCategoryForm(f *form.CreateCategoryForm) {
+	{{
+		var nameVal, descVal, typeVal, startVal, endVal, groupIDVal, budgetVal string
+		var nameErr, descErr, typeErr, startErr, endErr, budgetErr string
+		typeVal = "monthly" // Default
+
+		if f != nil {
+			nameVal = f.Name
+			descVal = f.Description
+			if f.Type != "" {
+				typeVal = f.Type
+			}
+			startVal = f.StartMonth
+			endVal = f.EndMonth
+			groupIDVal = f.GroupID
+			if f.Budget > 0 {
+				budgetVal = fmt.Sprintf("%.2f", f.Budget)
+			}
+
+			nameErr = f.FieldErrors["category-name"]
+			descErr = f.FieldErrors["category-desc"]
+			typeErr = f.FieldErrors["type"]
+			startErr = f.FieldErrors["category-start"]
+			endErr = f.FieldErrors["category-end"]
+			budgetErr = f.FieldErrors["category-budget"]
+		}
+	}}
+	<form
+		id="add-category-form"
+		class="space-y-4"
+		x-data={ fmt.Sprintf("{ categoryType: '%s', groupId: '%s' }", typeVal, groupIDVal) }
+		@open-modal.window="if ($event.detail.id === 'add-category-modal' && $event.detail.context) groupId = $event.detail.context.groupId"
+		hx-post="/categories"
+		hx-swap="outerHTML"
+	>
+		if f != nil && len(f.NonFieldErrors) > 0 {
+			<div class="rounded-md bg-red-50 p-4 mb-4">
+				<div class="flex">
+					<div class="ml-3">
+						<h3 class="text-sm font-medium text-red-800">Error</h3>
+						<div class="mt-2 text-sm text-red-700">
+							<ul role="list" class="list-disc pl-5 space-y-1">
+								for _, err := range f.NonFieldErrors {
+									<li>{ err }</li>
+								}
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+		<input type="hidden" name="group-id" x-model="groupId"/>
+		if f != nil && f.FieldErrors["group-id"] != "" {
+			<div class="rounded-md bg-red-50 p-4 mb-4">
+				<p class="text-sm text-red-700">{ f.FieldErrors["group-id"] }</p>
+			</div>
+		}
+		@InputField("category-name", "Category Name", "Rent, Groceries...", "text", nameVal, nameErr)
+		@InputField("category-desc", "Description", "Details...", "text", descVal, descErr)
+		@AmountField("category-budget", "Budget", budgetVal, budgetErr)
+		<div>
+			<label for="category-type" class="block text-sm font-medium leading-6 text-white">Type</label>
+			<div class="mt-2">
+				<select
+					id="category-type"
+					name="type"
+					x-model="categoryType"
+					class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 text-white ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", typeErr != "") }
+				>
+					<option value="monthly">This month only</option>
+					<option value="recurrent">Recurrent</option>
+				</select>
+			</div>
+			if typeErr != "" {
+				<p class="mt-2 text-sm text-red-500">{ typeErr }</p>
+			}
+		</div>
+		@InputField("category-start", "Start Month", "YYYY-MM", "month", startVal, startErr)
+		<div x-show="categoryType === 'recurrent'">
+			@InputField("category-end", "End Month", "YYYY-MM", "month", endVal, endErr)
+		</div>
+		@ModalButtons("Cancel", "Add Category")
+	</form>
+}
+
+templ AddCategoryModal() {
+	@Modal("add-category-modal", "New Category") {
+		@AddCategoryForm(nil)
+	}
+}
+
+templ EditCategoryForm(f *form.UpdateCategoryForm) {
+	{{
+		var idVal, nameVal, descVal, typeVal, startVal, endVal, groupIDVal, budgetVal string
+		var nameErr, descErr, typeErr, startErr, endErr, budgetErr string
+		typeVal = "monthly" // Default
+
+		if f != nil {
+			idVal = f.ID
+			nameVal = f.Name
+			descVal = f.Description
+			if f.Type != "" {
+				typeVal = f.Type
+			}
+			startVal = f.StartMonth
+			endVal = f.EndMonth
+			groupIDVal = f.GroupID
+			if f.Budget > 0 {
+				budgetVal = fmt.Sprintf("%.2f", f.Budget)
+			}
+
+			nameErr = f.FieldErrors["edit-name"]
+			descErr = f.FieldErrors["edit-desc"]
+			typeErr = f.FieldErrors["type"]
+			startErr = f.FieldErrors["edit-start"]
+			endErr = f.FieldErrors["edit-end"]
+			budgetErr = f.FieldErrors["edit-budget"]
+		}
+	}}
+	<form
+		id="edit-category-form"
+		class="space-y-4"
+		x-data={ fmt.Sprintf("{ categoryType: '%s', groupId: '%s', categoryId: '%s' }", typeVal, groupIDVal, idVal) }
+		@open-modal.window="if ($event.detail.id === 'edit-category-modal' && $event.detail.context) { 
+            categoryId = $event.detail.context.categoryId; 
+            groupId = $event.detail.context.groupId; 
+            categoryType = $event.detail.context.type ? $event.detail.context.type.toLowerCase() : 'monthly';
+            $nextTick(() => {
+                if ($el.querySelector('#edit-name')) $el.querySelector('#edit-name').value = $event.detail.context.name;
+                if ($el.querySelector('#edit-desc')) $el.querySelector('#edit-desc').value = $event.detail.context.description;
+                if ($el.querySelector('#edit-start')) $el.querySelector('#edit-start').value = $event.detail.context.startMonth;
+                if ($el.querySelector('#edit-end')) $el.querySelector('#edit-end').value = $event.detail.context.endMonth;
+                if ($el.querySelector('#edit-budget')) $el.querySelector('#edit-budget').value = $event.detail.context.budget;
+            });
+        }"
+		hx-post="/categories/edit"
+		hx-swap="outerHTML"
+	>
+		if f != nil && len(f.NonFieldErrors) > 0 {
+			<div class="rounded-md bg-red-50 p-4 mb-4">
+				<div class="flex">
+					<div class="ml-3">
+						<h3 class="text-sm font-medium text-red-800">Error</h3>
+						<div class="mt-2 text-sm text-red-700">
+							<ul role="list" class="list-disc pl-5 space-y-1">
+								for _, err := range f.NonFieldErrors {
+									<li>{ err }</li>
+								}
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+		<input type="hidden" name="category-id" x-model="categoryId"/>
+		<input type="hidden" name="group-id" x-model="groupId"/>
+		@InputField("edit-name", "Category Name", "Rent, Groceries...", "text", nameVal, nameErr)
+		@InputField("edit-desc", "Description", "Details...", "text", descVal, descErr)
+		@AmountField("edit-budget", "Budget", budgetVal, budgetErr)
+		<div>
+			<label for="edit-category-type" class="block text-sm font-medium leading-6 text-white">Type</label>
+			<div class="mt-2">
+				<select
+					id="edit-category-type"
+					name="type"
+					x-model="categoryType"
+					class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 text-white ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", typeErr != "") }
+				>
+					<option value="monthly">This month only</option>
+					<option value="recurrent">Recurrent</option>
+				</select>
+			</div>
+			if typeErr != "" {
+				<p class="mt-2 text-sm text-red-500">{ typeErr }</p>
+			}
+		</div>
+		@InputField("edit-start", "Start Month", "YYYY-MM", "month", startVal, startErr)
+		<div x-show="categoryType === 'recurrent'">
+			@InputField("edit-end", "End Month", "YYYY-MM", "month", endVal, endErr)
+		</div>
+		@ModalButtons("Cancel", "Save Changes")
+	</form>
+}
+
+templ EditCategoryModal() {
+	@Modal("edit-category-modal", "Edit Category") {
+		@EditCategoryForm(nil)
+	}
+}
+
+templ AddExpenseForm(f *form.CreateExpenseForm) {
+	{{
+		var amountVal, descVal, statusVal, categoryIDVal, monthVal string
+		var amountErr, descErr, statusErr, monthErr string
+		statusVal = "paid" // Default
+
+		if f != nil {
+			if f.Amount > 0 {
+				amountVal = fmt.Sprintf("%g", f.Amount)
+			}
+			descVal = f.Description
+			if f.PaymentStatus != "" {
+				statusVal = f.PaymentStatus
+			}
+			categoryIDVal = f.CategoryID
+			monthVal = f.Month
+
+			amountErr = f.FieldErrors["expense-amount"]
+			descErr = f.FieldErrors["expense-desc"]
+			statusErr = f.FieldErrors["payment-status"]
+			monthErr = f.FieldErrors["month"]
+		}
+	}}
+	<form
+		id="add-expense-form"
+		class="space-y-4"
+		x-data={ fmt.Sprintf("{ status: '%s', categoryId: '%s', month: '%s' }", statusVal, categoryIDVal, monthVal) }
+		@open-modal.window="if ($event.detail.id === 'add-expense-modal' && $event.detail.context) {
+			categoryId = $event.detail.context.categoryId;
+			month = $event.detail.context.month;
+		}"
+		hx-post="/expenses"
+		hx-swap="outerHTML"
+	>
+		if f != nil && len(f.NonFieldErrors) > 0 {
+			<div class="rounded-md bg-red-50 p-4 mb-4">
+				<div class="flex">
+					<div class="ml-3">
+						<h3 class="text-sm font-medium text-red-800">Error</h3>
+						<div class="mt-2 text-sm text-red-700">
+							<ul role="list" class="list-disc pl-5 space-y-1">
+								for _, err := range f.NonFieldErrors {
+									<li>{ err }</li>
+								}
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+		<input type="hidden" name="category-id" x-model="categoryId"/>
+		if f != nil && f.FieldErrors["category-id"] != "" {
+			<div class="rounded-md bg-red-50 p-4 mb-4">
+				<p class="text-sm text-red-700">{ f.FieldErrors["category-id"] }</p>
+			</div>
+		}
+		<input type="hidden" name="month" x-model="month"/>
+		if monthErr != "" {
+			<div class="rounded-md bg-red-50 p-4 mb-4">
+				<p class="text-sm text-red-700">{ monthErr }</p>
+			</div>
+		}
+		@AmountField("expense-amount", "Amount", amountVal, amountErr)
+		@InputField("expense-desc", "Description", "Details...", "text", descVal, descErr)
+		<div>
+			<label for="expense-status" class="block text-sm font-medium leading-6 text-white">Payment Status</label>
+			<div class="mt-2">
+				<select
+					id="expense-status"
+					name="payment-status"
+					x-model="status"
+					class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 text-white ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", statusErr != "") }
+				>
+					<option value="paid">Paid</option>
+					<option value="unpaid">Unpaid</option>
+				</select>
+			</div>
+			if statusErr != "" {
+				<p class="mt-2 text-sm text-red-500">{ statusErr }</p>
+			}
+		</div>
+		@ModalButtons("Cancel", "Add Expense")
+	</form>
+}
+
+templ AddExpenseModal() {
+	@Modal("add-expense-modal", "Add Expense") {
+		@AddExpenseForm(nil)
+	}
+}
+
+templ EditExpenseForm(f *form.UpdateExpenseForm) {
+	{{
+		var idVal, amountVal, descVal, statusVal, categoryIDVal string
+		var amountErr, descErr, statusErr string
+		statusVal = "paid" // Default
+
+		if f != nil {
+			idVal = f.ID
+			if f.Amount > 0 {
+				amountVal = fmt.Sprintf("%g", f.Amount)
+			}
+			descVal = f.Description
+			if f.PaymentStatus != "" {
+				statusVal = f.PaymentStatus
+			}
+			categoryIDVal = f.CategoryID
+
+			amountErr = f.FieldErrors["edit-amount"]
+			descErr = f.FieldErrors["edit-desc"]
+			statusErr = f.FieldErrors["payment-status"]
+		}
+	}}
+	<form
+		id="edit-expense-form"
+		class="space-y-4"
+		x-data={ fmt.Sprintf("{ status: '%s', expenseId: '%s', categoryId: '%s' }", statusVal, idVal, categoryIDVal) }
+		@open-modal.window="if ($event.detail.id === 'edit-expense-modal' && $event.detail.context) { 
+            expenseId = $event.detail.context.expenseId; 
+            categoryId = $event.detail.context.categoryId; 
+            status = $event.detail.context.status.toLowerCase();
+            $nextTick(() => {
+                if ($el.querySelector('#edit-amount')) $el.querySelector('#edit-amount').value = $event.detail.context.amount;
+                if ($el.querySelector('#edit-desc')) $el.querySelector('#edit-desc').value = $event.detail.context.description;
+            });
+        }"
+		hx-post="/expenses/edit"
+		hx-swap="outerHTML"
+	>
+		if f != nil && len(f.NonFieldErrors) > 0 {
+			<div class="rounded-md bg-red-50 p-4 mb-4">
+				<div class="flex">
+					<div class="ml-3">
+						<h3 class="text-sm font-medium text-red-800">Error</h3>
+						<div class="mt-2 text-sm text-red-700">
+							<ul role="list" class="list-disc pl-5 space-y-1">
+								for _, err := range f.NonFieldErrors {
+									<li>{ err }</li>
+								}
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+		<input type="hidden" name="expense-id" x-model="expenseId"/>
+		<input type="hidden" name="category-id" x-model="categoryId"/>
+		@AmountField("edit-amount", "Amount", amountVal, amountErr)
+		@InputField("edit-desc", "Description", "Details...", "text", descVal, descErr)
+		<div>
+			<label for="edit-status" class="block text-sm font-medium leading-6 text-white">Payment Status</label>
+			<div class="mt-2">
+				<select
+					id="edit-status"
+					name="payment-status"
+					x-model="status"
+					class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 text-white ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", statusErr != "") }
+				>
+					<option value="paid">Paid</option>
+					<option value="unpaid">Unpaid</option>
+				</select>
+			</div>
+			if statusErr != "" {
+				<p class="mt-2 text-sm text-red-500">{ statusErr }</p>
+			}
+		</div>
+		@ModalButtons("Cancel", "Save Changes")
+	</form>
+}
+
+templ EditExpenseModal() {
+	@Modal("edit-expense-modal", "Edit Expense") {
+		@EditExpenseForm(nil)
+	}
+}
+
+templ IncomeListModal() {
+	@Modal("income-list-modal", "Monthly Incomes") {
+		<div id="income-list-container" class="min-h-[100px]">
+			<div class="flex justify-center items-center py-4">
+				<span class="text-slate-500">Loading...</span>
+			</div>
+		</div>
+	}
+}

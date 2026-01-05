@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+/*@plugin "@tailwindcss/form";*/
+/*@plugin "@tailwindcss/typography";*/
+
+@theme {
+
+    /* Primary Color - Teal (Fresh, Growth, Money) */
+    --color-primary-50: #f0fdfa;
+    --color-primary-100: #ccfbf1;
+    --color-primary-200: #99f6e4;
+    --color-primary-300: #5eead4;
+    --color-primary-400: #2dd4bf;
+    --color-primary-500: #14b8a6;
+    --color-primary-600: #0d9488; /* Base */
+    --color-primary-700: #0f766e;
+    --color-primary-800: #115e59;
+    --color-primary-900: #134e4a;
+    --color-primary-950: #042f2e;
+
+    /* Secondary Color - Orange (Energy, Warmth, Distinct from Red) */
+    --color-secondary-50: #fff7ed;
+    --color-secondary-100: #ffedd5;
+    --color-secondary-200: #fed7aa;
+    --color-secondary-300: #fdba74;
+    --color-secondary-400: #fb923c;
+    --color-secondary-500: #f97316;
+    --color-secondary-600: #ea580c; /* Base */
+    --color-secondary-700: #c2410c;
+    --color-secondary-800: #9a3412;
+    --color-secondary-900: #7c2d12;
+    --color-secondary-950: #431407;
+
+    /* Accent Color - Purple (Community, Open Source, Fun) */
+    --color-accent-50: #faf5ff;
+    --color-accent-100: #f3e8ff;
+    --color-accent-200: #e9d5ff;
+    --color-accent-300: #d8b4fe;
+    --color-accent-400: #c084fc;
+    --color-accent-500: #a855f7;
+    --color-accent-600: #9333ea; /* Base */
+    --color-accent-700: #7e22ce;
+    --color-accent-800: #6b21a8;
+    --color-accent-900: #581c87;
+    --color-accent-950: #3b0764;
+
+    --color-text: #334155; /* Slate 700 */
+    --color-text-light: #f8fafc; /* Slate 50 */
+    --color-dark: #0f172a; /* Slate 900 */
+
+    /* Fonts */
+    --font-inter: 'Inter', sans-serif;
+    --font-lato: 'Lato', sans-serif;
+    --font-noto: 'Noto Serif', serif;
+    --font-courgette: 'Courgette', cursive;
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+.required-field::after {
+    content: '*';
+    color: #ea580c; /* Secondary-600 */
+    margin-left: 0.25rem;
+}
+
+/* Hide the indicator by default */
+.htmx-indicator {
+    opacity: 0;
+    transition: opacity 200ms ease-in;
+    pointer-events: none;
+}
+
+/* Show the indicator when active */
+.htmx-request .htmx-indicator {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Maintain opacity and show pointer events when HTMX is making a request */
+.htmx-request {
+    pointer-events: none;
+}
+
+/* Ensure elements inside the loading container continue to receive events */
+.htmx-request .htmx-indicator {
+    pointer-events: all;
+}

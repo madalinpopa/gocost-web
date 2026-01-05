@@ -1,0 +1,23 @@
+package components
+
+templ Error(message string) {
+	if message != "" {
+		<p class="mt-2 text-sm text-secondary-600" x-data="{ show: true }" x-show="show" x-cloak x-init="setTimeout(() => show = false, 5000)" x-transition>
+			<span class="flex items-center">
+				<iconify-icon icon="heroicons:exclamation-circle" class="w-4 mr-1"></iconify-icon>
+				{ message }
+			</span>
+		</p>
+	}
+}
+
+func checkFieldError(field string, fieldErrors map[string]string) bool {
+	_, ok := fieldErrors[field]
+	return ok
+}
+
+templ FieldError(field string, fieldErrors map[string]string) {
+	if checkFieldError(field, fieldErrors) {
+		<p class="text-red-600">{ fieldErrors[field] }</p>
+	}
+}

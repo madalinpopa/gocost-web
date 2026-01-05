@@ -1,0 +1,107 @@
+name: CI Checks
+run-name: CI Checks
+
+on:
+  push:
+    tags: ["v*"]
+    branches-ignore: ["v*"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.25
+
+      - name: Generate templ code
+        run: go tool templ generate
+
+      - name: Downloads
+        run: go get -t ./...
+
+      - name: Test
+        run: make test
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.25
+
+      - name: Generate templ code
+        run: go tool templ generate
+
+      - name: Build project
+        run: make build/web
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapp
+          path: bin/server
+          overwrite: "true"
+          retention-days: 1
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      packages: write
+      contents: write
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: webapp
+          path: bin
+
+      - name: Get tag name
+        id: get_tag
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create release
+        uses: elgohr/Github-Release-Action@v5
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          workdir: bin
+          title: ${{ steps.get_tag.outputs.TAG_NAME }}
+          tag: ${{ steps.get_tag.outputs.TAG_NAME }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ steps.get_tag.outputs.TAG_NAME }}
+            ghcr.io/${{ github.repository }}:latest
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}:latest
+          cache-to: type=inline

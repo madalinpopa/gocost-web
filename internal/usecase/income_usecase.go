@@ -1,0 +1,257 @@
+package usecase
+
+import (
+	"context"
+	"errors"
+	"log/slog"
+	"time"
+
+	"github.com/madalinpopa/gocost-web/internal/domain/income"
+	"github.com/madalinpopa/gocost-web/internal/domain/uow"
+	"github.com/madalinpopa/gocost-web/internal/shared/identifier"
+	"github.com/madalinpopa/gocost-web/internal/shared/money"
+)
+
+type IncomeUseCaseImpl struct {
+	uow    uow.UnitOfWork
+	logger *slog.Logger
+}
+
+func NewIncomeUseCase(uow uow.UnitOfWork, logger *slog.Logger) IncomeUseCaseImpl {
+	return IncomeUseCaseImpl{
+		uow:    uow,
+		logger: logger,
+	}
+}
+
+func (u IncomeUseCaseImpl) Create(ctx context.Context, userID string, req *CreateIncomeRequest) (*IncomeResponse, error) {
+	if req == nil {
+		return nil, errors.New("request cannot be nil")
+	}
+
+	uID, err := identifier.ParseID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	amount, err := money.NewFromFloat(req.Amount)
+	if err != nil {
+		return nil, err
+	}
+
+	source, err := income.NewSourceVO(req.Source)
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := identifier.NewID()
+	if err != nil {
+		return nil, err
+	}
+
+	inc, err := income.NewIncome(id, uID, amount, source, req.ReceivedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	repo := u.uow.IncomeRepository()
+	if err := repo.Save(ctx, *inc); err != nil {
+		return nil, err
+	}
+
+	return &IncomeResponse{
+		ID:         inc.ID.String(),
+		Amount:     inc.Amount.Amount(),
+		Source:     inc.Source.Value(),
+		ReceivedAt: inc.ReceivedAt,
+	}, nil
+}
+
+func (u IncomeUseCaseImpl) Update(ctx context.Context, userID string, req *UpdateIncomeRequest) (*IncomeResponse, error) {
+	if req == nil {
+		return nil, errors.New("request cannot be nil")
+	}
+
+	uID, err := identifier.ParseID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	incID, err := identifier.ParseID(req.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	repo := u.uow.IncomeRepository()
+	inc, err := repo.FindByID(ctx, incID)
+	if err != nil {
+		return nil, err
+	}
+
+	if inc.UserID != uID {
+		return nil, errors.New("unauthorized")
+	}
+
+	amount, err := money.NewFromFloat(req.Amount)
+	if err != nil {
+		return nil, err
+	}
+
+	source, err := income.NewSourceVO(req.Source)
+	if err != nil {
+		return nil, err
+	}
+
+	updatedInc, err := income.NewIncome(inc.ID, inc.UserID, amount, source, req.ReceivedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := repo.Save(ctx, *updatedInc); err != nil {
+		return nil, err
+	}
+
+	return &IncomeResponse{
+		ID:         updatedInc.ID.String(),
+		Amount:     updatedInc.Amount.Amount(),
+		Source:     updatedInc.Source.Value(),
+		ReceivedAt: updatedInc.ReceivedAt,
+	}, nil
+}
+
+func (u IncomeUseCaseImpl) Delete(ctx context.Context, userID string, id string) error {
+	uID, err := identifier.ParseID(userID)
+	if err != nil {
+		return err
+	}
+
+	incID, err := identifier.ParseID(id)
+	if err != nil {
+		return err
+	}
+
+	repo := u.uow.IncomeRepository()
+	inc, err := repo.FindByID(ctx, incID)
+	if err != nil {
+		return err
+	}
+
+	if inc.UserID != uID {
+		return errors.New("unauthorized")
+	}
+
+	return repo.Delete(ctx, incID)
+}
+
+func (u IncomeUseCaseImpl) Get(ctx context.Context, userID string, id string) (*IncomeResponse, error) {
+	uID, err := identifier.ParseID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	incID, err := identifier.ParseID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	repo := u.uow.IncomeRepository()
+	inc, err := repo.FindByID(ctx, incID)
+	if err != nil {
+		return nil, err
+	}
+
+	if inc.UserID != uID {
+		return nil, errors.New("unauthorized")
+	}
+
+	return &IncomeResponse{
+		ID:         inc.ID.String(),
+		Amount:     inc.Amount.Amount(),
+		Source:     inc.Source.Value(),
+		ReceivedAt: inc.ReceivedAt,
+	}, nil
+}
+
+func (u IncomeUseCaseImpl) List(ctx context.Context, userID string) ([]*IncomeResponse, error) {
+	uID, err := identifier.ParseID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	repo := u.uow.IncomeRepository()
+	incomes, err := repo.FindByUserID(ctx, uID)
+	if err != nil {
+		return nil, err
+	}
+
+	responses := make([]*IncomeResponse, len(incomes))
+	for i, inc := range incomes {
+		responses[i] = &IncomeResponse{
+			ID:         inc.ID.String(),
+			Amount:     inc.Amount.Amount(),
+			Source:     inc.Source.Value(),
+			ReceivedAt: inc.ReceivedAt,
+		}
+	}
+
+	return responses, nil
+}
+
+func (u IncomeUseCaseImpl) ListByMonth(ctx context.Context, userID string, month string) ([]*IncomeResponse, error) {
+	uID, err := identifier.ParseID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	parsedMonth, err := time.Parse("2006-01", month)
+	if err != nil {
+		return nil, err
+	}
+
+	repo := u.uow.IncomeRepository()
+	incomes, err := repo.FindByUserID(ctx, uID)
+	if err != nil {
+		return nil, err
+	}
+
+	responses := make([]*IncomeResponse, 0)
+	for _, inc := range incomes {
+		if inc.ReceivedAt.Year() == parsedMonth.Year() && inc.ReceivedAt.Month() == parsedMonth.Month() {
+			responses = append(responses, &IncomeResponse{
+				ID:         inc.ID.String(),
+				Amount:     inc.Amount.Amount(),
+				Source:     inc.Source.Value(),
+				ReceivedAt: inc.ReceivedAt,
+			})
+		}
+	}
+
+	return responses, nil
+}
+
+func (u IncomeUseCaseImpl) Total(ctx context.Context, userID string, month string) (float64, error) {
+	uID, err := identifier.ParseID(userID)
+	if err != nil {
+		return 0, err
+	}
+
+	parsedMonth, err := time.Parse("2006-01", month)
+	if err != nil {
+		return 0, err
+	}
+
+	repo := u.uow.IncomeRepository()
+	incomes, err := repo.FindByUserID(ctx, uID)
+	if err != nil {
+		return 0, err
+	}
+
+	var total float64
+	for _, inc := range incomes {
+		if inc.ReceivedAt.Year() == parsedMonth.Year() && inc.ReceivedAt.Month() == parsedMonth.Month() {
+			total += inc.Amount.Amount()
+		}
+	}
+
+	return total, nil
+}

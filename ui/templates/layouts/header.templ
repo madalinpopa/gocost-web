@@ -1,0 +1,73 @@
+package layouts
+
+import "github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
+
+templ header(data response.Data) {
+	<header class="bg-slate-950 border-b border-slate-900">
+		<nav class="mx-auto max-w-7xl flex items-center justify-between p-6 lg:px-8" aria-label="Global">
+			<div class="flex lg:flex-1">
+				<a
+					if data.User.ID != "" {
+						href="/home"
+					} else {
+						href="/"
+					}
+					class="-m-1.5 p-1.5 flex items-center gap-2"
+				>
+					<div class="w-8 h-8 bg-primary-600 rounded-sm flex items-center justify-center font-bold text-lg text-slate-950 shadow-[2px_2px_0px_0px_rgba(255,255,255,0.1)]">
+						G
+					</div>
+					<span class="text-sm font-bold tracking-widest text-white uppercase">GoCost</span>
+				</a>
+			</div>
+			<div class="flex lg:flex-1 lg:justify-end">
+				if data.User.ID != "" {
+					<div class="relative ml-3" x-data="{ open: false }">
+						<div>
+							<button type="button" @click="open = !open" @click.outside="open = false" class="relative flex items-center gap-2 max-w-xs rounded-full text-sm focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden cursor-pointer" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+								<span class="absolute -inset-1.5"></span>
+								<span class="sr-only">Open user menu</span>
+								<div class="h-8 w-8 rounded-full bg-slate-800 flex items-center justify-center text-white font-bold border border-slate-700">
+									if len(data.User.Username) > 0 {
+										{ string(data.User.Username[0]) }
+									} else {
+										U
+									}
+								</div>
+								<span class="text-white hidden md:block font-medium">{ data.User.Username }</span>
+								<svg class="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"></path>
+								</svg>
+							</button>
+						</div>
+						<div
+							x-show="open"
+							x-transition:enter="transition ease-out duration-100"
+							x-transition:enter-start="transform opacity-0 scale-95"
+							x-transition:enter-end="transform opacity-100 scale-100"
+							x-transition:leave="transition ease-in duration-75"
+							x-transition:leave-start="transform opacity-100 scale-100"
+							x-transition:leave-end="transform opacity-0 scale-95"
+							class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 ring-1 shadow-lg ring-black/5 focus:outline-hidden"
+							role="menu"
+							aria-orientation="vertical"
+							aria-labelledby="user-menu-button"
+							tabindex="-1"
+							style="display: none;"
+						>
+							<a href="/home" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" tabindex="-1" id="user-menu-item-0">Home</a>
+							<form action="/logout" method="post">
+								<input type="hidden" name="csrf_token" value={ data.CSRFToken }/>
+								<button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" role="menuitem" tabindex="-1" id="user-menu-item-3">Sign out</button>
+							</form>
+						</div>
+					</div>
+				} else {
+					<a href="/login" class="text-xs font-bold tracking-widest uppercase text-white hover:text-primary-500 transition-colors">
+						Login
+					</a>
+				}
+			</div>
+		</nav>
+	</header>
+}

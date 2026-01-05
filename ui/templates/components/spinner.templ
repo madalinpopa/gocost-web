@@ -1,0 +1,20 @@
+package components
+
+templ Spinner() {
+	<div id="spinner" class="htmx-indicator absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-10 pointer-events-none">
+		<div class="pointer-events-auto">
+			<svg width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="text-accent-600 animate-spin">
+				<g>
+					<circle cx="3" cy="12" r="2"></circle>
+					<circle cx="21" cy="12" r="2"></circle>
+					<circle cx="12" cy="21" r="2"></circle>
+					<circle cx="12" cy="3" r="2"></circle>
+					<circle cx="5.64" cy="5.64" r="2"></circle>
+					<circle cx="18.36" cy="18.36" r="2"></circle>
+					<circle cx="5.64" cy="18.36" r="2"></circle>
+					<circle cx="18.36" cy="5.64" r="2"></circle>
+				</g>
+			</svg>
+		</div>
+	</div>
+}
