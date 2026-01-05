@@ -1,6 +1,6 @@
 services:
   gocost:
-    image: coderustle/gocost:${IMAGE_TAG:-latest}
+    image: ghcr.io/madalinpopa/gocost-web:${IMAGE_TAG:-latest}
     ports:
       - "4000:4000"
     environment:

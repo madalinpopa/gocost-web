@@ -69,9 +69,11 @@ Optional:
 
 Use the provided `Dockerfile` and `compose.yml` to build and run the app locally.
 
+### Using Docker Compose
+
 ```bash
 # build the image for local use
-docker build -t coderustle/gocost:local .
+docker build -t ghcr.io/madalinpopa/gocost-web:local .
 
 # create the external network used by compose (safe if it already exists)
 docker network create public
@@ -82,6 +84,24 @@ IMAGE_TAG=local docker compose up
 
 Optional environment overrides (set before `docker compose up`):
 `ALLOWED_HOSTS`, `DOMAIN`, `CURRENCY`.
+
+### Using Docker Run
+
+To run the container without Docker Compose:
+
+```bash
+# build the image
+docker build -t ghcr.io/madalinpopa/gocost-web:local .
+
+# run the container
+docker run -d \
+  --name gocost \
+  -p 4000:4000 \
+  -e ALLOWED_HOSTS=localhost \
+  -e DOMAIN=localhost \
+  -v gocost_data:/app/data \
+  ghcr.io/madalinpopa/gocost-web:local
+```
 
 ## Development
 
