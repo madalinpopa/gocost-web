@@ -27,7 +27,7 @@ RUN ["templ", "generate"]
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Build Go project
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-FROM --platform=$TARGETPLATFORM golang:${GO_VERSION}-alpine AS build
+FROM golang:${GO_VERSION}-alpine AS build
 
 # Re-declare ARG for use in this stage
 
