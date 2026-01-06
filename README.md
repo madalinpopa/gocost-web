@@ -9,10 +9,11 @@ Golang-based web application for personal expense management, focused on a clean
 ## Overview
 
 ### Typical Workflow
-- **Pick a month**: move between months to review past spending or plan upcoming costs.
-- **Set up categories**: create monthly-only categories for one-offs and recurring categories for ongoing costs.
-- **Record expenses**: add amounts to each category and mark them as paid or unpaid.
-- **Review status**: visually scan paid vs. unpaid items and adjust categories as plans change.
+- **Pick a month**: Move between months to review past spending or plan upcoming costs.
+- **Create Groups**: Create groups (e.g., Housing, Transportation) to organize your expenses.
+- **Set up Categories**: Inside each group, create categories (e.g., Rent, Groceries). Define a budget for the category and choose if it is recurrent or for the current month only.
+- **Record Expenses**: Add specific expenses to a category (e.g., "Weekly Shop"). Mark them as paid or unpaid to track cash flow.
+- **Review Status**: Visually track spending against your category budgets and see what's left to pay.
 
 ### Core Features
 - **Category Management**: Organize expenses into groups (e.g., Housing, Transportation).
