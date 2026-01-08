@@ -25,7 +25,6 @@ func TestNew(t *testing.T) {
 }
 
 func TestConfig_LoadEnvironments(t *testing.T) {
-
 	tests := []struct {
 		name    string
 		envVars map[string]string
@@ -82,7 +81,6 @@ func TestConfig_LoadEnvironments(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			os.Clearenv()
 
 			// Set environment variables for the test
@@ -110,7 +108,6 @@ func TestConfig_LoadEnvironments(t *testing.T) {
 					t.Errorf("LoadEnvironments() got = %+v, want %+v", cfg, tt.want)
 				}
 			}
-
 		})
 	}
 }

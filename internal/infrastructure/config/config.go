@@ -8,6 +8,8 @@ import (
 )
 
 type Config struct {
+	// Version specifies the application version
+	Version string
 
 	// Addr specifies the address for the service
 	Addr string
@@ -53,7 +55,6 @@ func (c *Config) WithDatabaseDsn(dsn string) *Config {
 
 // LoadEnvironments loads environment variables into the Config struct using Viper's automatic environment handling.
 func (c *Config) LoadEnvironments() error {
-
 	viper.AutomaticEnv()
 
 	// Helps with handling underscores in env vars
