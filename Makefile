@@ -117,19 +117,16 @@ docker/deploy:
 
 .PHONY: docker/build
 docker/build:
-	docker build . -t coderustle/gocost --platform linux/amd64
-
-.PHONY: docker/push
-docker/push:
-	docker push coderustle/gocost
+	docker build . -t gocost:latest --build-args _VERSION=`git describe --tags --always`
 
 .PHONY: docker/run
 docker/run:
-	docker run -d --rm --name gocost \
-               -v gocost_data:/app/data \
-               -v gocost_uploads:/app/uploads \
-               -p 4000:4000 \
-               coderustle/gocost:latest
+	docker run -it --rm --name gocost \
+							-e ALLOWED_HOSTS=localhost \
+							-e DOMAIN=localhost \
+							-v gocost_data:/app/data \
+              -p 4000:4000 \
+              gocost:latest
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   Run release commands
