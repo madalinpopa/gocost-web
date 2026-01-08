@@ -43,6 +43,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&dsn, "dsn", "data.sqlite", "database connection string")
 
 	rootCmd.AddCommand(migrateCmd)
+	rootCmd.AddCommand(versionCmd)
 
 	logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
 }
