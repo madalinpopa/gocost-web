@@ -36,6 +36,7 @@ type Data struct {
 	CSRFToken   string
 	Toast       *ToastMessage
 	User        session.AuthenticatedUser
+	Version     string
 }
 
 func (d *Data) SetToast(toastType ToastType, message string) {
@@ -87,7 +88,6 @@ func (t *Template) Render(w http.ResponseWriter, r *http.Request, c templ.Compon
 		t.logger.Error(err.Error(), "method", method, "url", url, "trace", trace)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
-
 }
 
 func (t *Template) GetData(r *http.Request) Data {
@@ -101,5 +101,6 @@ func (t *Template) GetData(r *http.Request) Data {
 		CurrentYear: time.Now().Year(),
 		CSRFToken:   nosurf.Token(r),
 		User:        user,
+		Version:     t.config.Version,
 	}
 }
