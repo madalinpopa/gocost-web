@@ -10,9 +10,10 @@ import (
 )
 
 var (
-	logger *slog.Logger
-	conf   *config.Config
-	dsn    string
+	logger  *slog.Logger
+	conf    *config.Config
+	dsn     string
+	version string = "dev"
 )
 
 var rootCmd = &cobra.Command{
@@ -21,6 +22,7 @@ var rootCmd = &cobra.Command{
 For more information, visit https://gocost.app`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		conf = config.New().WithDatabaseDsn(dsn)
+		conf.Version = version
 
 		err := conf.LoadEnvironments()
 		if err != nil {

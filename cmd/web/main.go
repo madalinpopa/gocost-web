@@ -27,6 +27,7 @@ var (
 	port    int
 	dsn     string
 	env     string
+	version string = "dev"
 )
 
 type application struct {
@@ -101,6 +102,8 @@ func run() error {
 		WithServerAddr(address, port).
 		WithDatabaseDsn(dsn).
 		WithEnvironment(env)
+
+	conf.Version = version
 
 	logger.Info("loading environments")
 	err := conf.LoadEnvironments()
