@@ -96,10 +96,12 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
+          build-args: |
+            VERSION=${{ steps.get_tag.outputs.TAG_NAME }}
           tags: |
             ghcr.io/${{ github.repository }}:${{ steps.get_tag.outputs.TAG_NAME }}
             ghcr.io/${{ github.repository }}:latest
