@@ -1,4 +1,5 @@
 # Global build arguments for base image versions
+ARG VERSION=latest
 ARG NODE_VERSION=22
 ARG TEMPL_VERSION=v0.3.943
 ARG GO_VERSION=1.25
@@ -49,8 +50,8 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY --from=templ /app .
-RUN go build -ldflags="-s -w" -o main ./cmd/web && \
-    go build -ldflags="-s -w" -o gocost ./cmd/cli
+RUN go build -ldflags="-s -w -X main.version=${VERSION}" -o main ./cmd/web && \
+    go build -ldflags="-s -w -X main.version=${VERSION}" -o gocost ./cmd/cli
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Final stage
