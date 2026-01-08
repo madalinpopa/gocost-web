@@ -53,7 +53,7 @@ Required:
 Optional:
 - `CURRENCY`: symbol shown in the UI (default: `$`).
 - `DB_PATH`: SQLite file path used by the Docker entrypoint (default: `/app/data/data.sqlite`).
-- `IMAGE_TAG`: Docker image tag used by `compose.yml` (default: `latest`).
+- `VERSION`: Docker image tag used by `compose.yml` (default: `latest`).
 - `GOOSE_DRIVER`, `GOOSE_DBSTRING`, `GOOSE_MIGRATION_DIR`: used by `goose` during development (see `envrc.template`).
 
 ### Project Structure
@@ -80,7 +80,7 @@ docker build -t ghcr.io/madalinpopa/gocost-web:local .
 docker network create public
 
 # start the app on http://localhost:4000
-IMAGE_TAG=local docker compose up
+VERSION=local docker compose up
 ```
 
 Optional environment overrides (set before `docker compose up`):
