@@ -51,7 +51,7 @@ dev/templ:
 .PHONY: dev/server
 dev/server:
 	go tool air \
-	--build.cmd "go build $(LDFLAGS) -o ./tmp/bin/ ./cmd/web/" --build.bin "tmp/bin/web" --build.delay "100" \
+	--build.cmd "go build -o ./tmp/bin/ ./cmd/web/" --build.bin "tmp/bin/web" --build.delay "100" \
 	--build.exclude_dir "node_modules" \
 	--build.include_ext "go" \
 	--build.stop_on_error "false" \
