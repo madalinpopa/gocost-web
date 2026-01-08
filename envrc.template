@@ -1,7 +1,7 @@
-export IMAGE_TAG="v0.0.1"
-export ALLOWED_HOSTS="localhost"
-export DOMAIN="localhost"
 export CURRENCY="$"
+export VERSION="latest"
+export DOMAIN="localhost"
+export ALLOWED_HOSTS="localhost"
 
 # Litestream
 # export DB_PATH="/data/db.sqlite"
