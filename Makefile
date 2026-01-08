@@ -1,6 +1,10 @@
 
 .DEFAULT_GOAL := test
 
+# Get version from git
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+LDFLAGS := -ldflags="-s -w -X main.version=$(VERSION)"
+
 .PHONY: init
 init:
 	go mod download
@@ -20,11 +24,11 @@ secrets:
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 .PHONY: build/web
 build/web:
-	go build -o bin/server ./cmd/web/
+	go build $(LDFLAGS) -o bin/server ./cmd/web/
 
 .PHONY: build/cli
 build/cli:
-	go build -o bin/gocost ./cmd/cli
+	go build $(LDFLAGS) -o bin/gocost ./cmd/cli
 
 .PHONY: templ
 templ:
@@ -47,7 +51,7 @@ dev/templ:
 .PHONY: dev/server
 dev/server:
 	go tool air \
-	--build.cmd "go build -o ./tmp/bin/ ./cmd/web/" --build.bin "tmp/bin/web" --build.delay "100" \
+	--build.cmd "go build $(LDFLAGS) -o ./tmp/bin/ ./cmd/web/" --build.bin "tmp/bin/web" --build.delay "100" \
 	--build.exclude_dir "node_modules" \
 	--build.include_ext "go" \
 	--build.stop_on_error "false" \
@@ -117,7 +121,7 @@ docker/deploy:
 
 .PHONY: docker/build
 docker/build:
-	docker build . -t gocost:latest --build-args _VERSION=`git describe --tags --always`
+	docker build . -t gocost:latest --build-arg VERSION=$(VERSION)
 
 .PHONY: docker/run
 docker/run:
