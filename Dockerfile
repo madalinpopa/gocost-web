@@ -32,6 +32,7 @@ FROM golang:${GO_VERSION}-alpine AS build
 
 # Re-declare ARG for use in this stage
 
+ARG VERSION
 ARG TARGETOS
 ARG TARGETARCH
 ARG CGO_ENABLED=1
