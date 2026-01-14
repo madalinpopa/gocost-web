@@ -5,18 +5,18 @@ import (
 	"errors"
 	"log/slog"
 
+	"github.com/madalinpopa/gocost-web/internal/domain"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
-	"github.com/madalinpopa/gocost-web/internal/domain/uow"
 	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
 	"github.com/madalinpopa/gocost-web/internal/platform/money"
 )
 
 type CategoryUseCaseImpl struct {
-	uow    uow.UnitOfWork
+	uow    domain.UnitOfWork
 	logger *slog.Logger
 }
 
-func NewCategoryUseCase(uow uow.UnitOfWork, logger *slog.Logger) CategoryUseCaseImpl {
+func NewCategoryUseCase(uow domain.UnitOfWork, logger *slog.Logger) CategoryUseCaseImpl {
 	return CategoryUseCaseImpl{
 		uow:    uow,
 		logger: logger,

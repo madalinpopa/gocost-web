@@ -6,18 +6,18 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/madalinpopa/gocost-web/internal/domain"
 	"github.com/madalinpopa/gocost-web/internal/domain/income"
-	"github.com/madalinpopa/gocost-web/internal/domain/uow"
 	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
 	"github.com/madalinpopa/gocost-web/internal/platform/money"
 )
 
 type IncomeUseCaseImpl struct {
-	uow    uow.UnitOfWork
+	uow    domain.UnitOfWork
 	logger *slog.Logger
 }
 
-func NewIncomeUseCase(uow uow.UnitOfWork, logger *slog.Logger) IncomeUseCaseImpl {
+func NewIncomeUseCase(uow domain.UnitOfWork, logger *slog.Logger) IncomeUseCaseImpl {
 	return IncomeUseCaseImpl{
 		uow:    uow,
 		logger: logger,

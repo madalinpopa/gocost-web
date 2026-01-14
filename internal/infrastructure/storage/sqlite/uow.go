@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/madalinpopa/gocost-web/internal/domain"
 	"github.com/madalinpopa/gocost-web/internal/domain/expense"
 	"github.com/madalinpopa/gocost-web/internal/domain/identity"
 	"github.com/madalinpopa/gocost-web/internal/domain/income"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
-	"github.com/madalinpopa/gocost-web/internal/domain/uow"
 )
 
 // SqliteUnitOfWork implements uow.UnitOfWork for SQLite.
@@ -23,7 +23,7 @@ func NewUnitOfWork(db *sql.DB) *SqliteUnitOfWork {
 }
 
 // Ensure SqliteUnitOfWork implements uow.UnitOfWork
-var _ uow.UnitOfWork = (*SqliteUnitOfWork)(nil)
+var _ domain.UnitOfWork = (*SqliteUnitOfWork)(nil)
 
 func (u *SqliteUnitOfWork) UserRepository() identity.UserRepository {
 	if u.tx != nil {
@@ -53,7 +53,7 @@ func (u *SqliteUnitOfWork) TrackingRepository() tracking.GroupRepository {
 	return NewSQLiteTrackingRepository(u.db)
 }
 
-func (u *SqliteUnitOfWork) Begin(ctx context.Context) (uow.UnitOfWork, error) {
+func (u *SqliteUnitOfWork) Begin(ctx context.Context) (domain.UnitOfWork, error) {
 	tx, err := u.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err

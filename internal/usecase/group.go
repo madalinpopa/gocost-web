@@ -5,17 +5,17 @@ import (
 	"errors"
 	"log/slog"
 
+	"github.com/madalinpopa/gocost-web/internal/domain"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
-	"github.com/madalinpopa/gocost-web/internal/domain/uow"
 	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
 )
 
 type GroupUseCaseImpl struct {
-	uow    uow.UnitOfWork
+	uow    domain.UnitOfWork
 	logger *slog.Logger
 }
 
-func NewGroupUseCase(uow uow.UnitOfWork, logger *slog.Logger) GroupUseCaseImpl {
+func NewGroupUseCase(uow domain.UnitOfWork, logger *slog.Logger) GroupUseCaseImpl {
 	return GroupUseCaseImpl{
 		uow:    uow,
 		logger: logger,

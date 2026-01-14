@@ -5,8 +5,8 @@ import (
 	"errors"
 	"log/slog"
 
+	"github.com/madalinpopa/gocost-web/internal/domain"
 	"github.com/madalinpopa/gocost-web/internal/domain/identity"
-	"github.com/madalinpopa/gocost-web/internal/domain/uow"
 	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
 	"github.com/madalinpopa/gocost-web/internal/platform/security"
 )
@@ -16,12 +16,12 @@ var ErrInvalidCredentials = errors.New("invalid credentials")
 const minPasswordLength = 8
 
 type AuthUseCaseImpl struct {
-	uow    uow.UnitOfWork
+	uow    domain.UnitOfWork
 	logger *slog.Logger
 	hasher security.PasswordHasher
 }
 
-func NewAuthUseCase(uow uow.UnitOfWork, logger *slog.Logger, h security.PasswordHasher) AuthUseCaseImpl {
+func NewAuthUseCase(uow domain.UnitOfWork, logger *slog.Logger, h security.PasswordHasher) AuthUseCaseImpl {
 	return AuthUseCaseImpl{
 		uow:    uow,
 		logger: logger,

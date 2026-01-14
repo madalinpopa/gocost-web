@@ -3,11 +3,11 @@ package usecase
 import (
 	"context"
 
+	"github.com/madalinpopa/gocost-web/internal/domain"
 	"github.com/madalinpopa/gocost-web/internal/domain/expense"
 	"github.com/madalinpopa/gocost-web/internal/domain/identity"
 	"github.com/madalinpopa/gocost-web/internal/domain/income"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
-	"github.com/madalinpopa/gocost-web/internal/domain/uow"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -36,12 +36,12 @@ func (m *MockUnitOfWork) TrackingRepository() tracking.GroupRepository {
 	return m.TrackingRepo
 }
 
-func (m *MockUnitOfWork) Begin(ctx context.Context) (uow.UnitOfWork, error) {
+func (m *MockUnitOfWork) Begin(ctx context.Context) (domain.UnitOfWork, error) {
 	args := m.Called(ctx)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(uow.UnitOfWork), args.Error(1)
+	return args.Get(0).(domain.UnitOfWork), args.Error(1)
 }
 
 func (m *MockUnitOfWork) Commit() error {
