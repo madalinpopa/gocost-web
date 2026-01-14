@@ -1,4 +1,4 @@
-package params
+package web
 
 import (
 	"net/http"

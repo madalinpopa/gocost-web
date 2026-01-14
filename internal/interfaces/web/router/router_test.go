@@ -9,7 +9,7 @@ import (
 
 	"github.com/justinas/alice"
 	"github.com/madalinpopa/gocost-web/internal/config"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/middleware"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,7 +36,7 @@ func createTestRouter() *Router {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	cfg := config.New()
 
-	m := &middleware.Middleware{}
+	m := &web.Middleware{}
 
 	// Create router
 	router := &Router{
@@ -59,7 +59,7 @@ func createTestRouter() *Router {
 func TestNew(t *testing.T) {
 	t.Run("creates router with all middleware chains", func(t *testing.T) {
 		// Arrange
-		m := &middleware.Middleware{}
+		m := &web.Middleware{}
 
 		// Act
 		router := New(m)

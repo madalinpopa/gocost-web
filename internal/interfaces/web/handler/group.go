@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/form"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
@@ -12,11 +11,11 @@ import (
 )
 
 type GroupHandler struct {
-	app   app.HandlerContext
+	app   HandlerContext
 	group usecase.GroupUseCase
 }
 
-func NewGroupHandler(app app.HandlerContext, group usecase.GroupUseCase) GroupHandler {
+func NewGroupHandler(app HandlerContext, group usecase.GroupUseCase) GroupHandler {
 	return GroupHandler{
 		app:   app,
 		group: group,

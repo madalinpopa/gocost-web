@@ -46,7 +46,7 @@ func TestNew_NonProductionDefaults(t *testing.T) {
 	db := newTestDB(t)
 	cfg := config.New().WithEnvironment("development")
 
-	manager := web.New(db, cfg)
+	manager := web.NewSession(db, cfg)
 	assert.NotNil(t, manager)
 	if manager == nil {
 		return
@@ -75,7 +75,7 @@ func TestNew_ProductionCookie(t *testing.T) {
 	db := newTestDB(t)
 	cfg := config.New().WithEnvironment("production")
 
-	manager := web.New(db, cfg)
+	manager := web.NewSession(db, cfg)
 	assert.NotNil(t, manager)
 	if manager == nil {
 		return

@@ -12,10 +12,9 @@ import (
 	"time"
 
 	"github.com/go-playground/form/v4"
-	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/domain/identity"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -24,7 +23,7 @@ import (
 func newTestRegisterHandler(session *MockSessionManager, auth *MockAuthUseCase) RegisterHandler {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	cfg := config.New()
-	templater := response.NewTemplate(logger, cfg)
+	templater := web.NewTemplate(logger, cfg)
 	decoder := form.NewDecoder()
 
 	if session == nil {
@@ -34,13 +33,13 @@ func newTestRegisterHandler(session *MockSessionManager, auth *MockAuthUseCase) 
 		auth = new(MockAuthUseCase)
 	}
 
-	appCtx := app.HandlerContext{
+	appCtx := HandlerContext{
 		Config:   cfg,
 		Logger:   logger,
 		Decoder:  decoder,
 		Session:  session,
 		Template: templater,
-		Response: response.NewResponse(logger),
+		Response: web.NewResponse(logger),
 	}
 
 	return NewRegisterHandler(appCtx, auth)

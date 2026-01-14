@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/form"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/views"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
@@ -12,12 +11,12 @@ import (
 )
 
 type IncomeHandler struct {
-	app     app.HandlerContext
+	app     HandlerContext
 	income  usecase.IncomeUseCase
 	expense usecase.ExpenseUseCase
 }
 
-func NewIncomeHandler(app app.HandlerContext, income usecase.IncomeUseCase, expense usecase.ExpenseUseCase) IncomeHandler {
+func NewIncomeHandler(app HandlerContext, income usecase.IncomeUseCase, expense usecase.ExpenseUseCase) IncomeHandler {
 	return IncomeHandler{
 		app:     app,
 		income:  income,

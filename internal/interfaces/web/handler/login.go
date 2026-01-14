@@ -5,18 +5,17 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/form"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/madalinpopa/gocost-web/ui/templates/pages/public"
 )
 
 type LoginHandler struct {
-	app  app.HandlerContext
+	app  HandlerContext
 	auth usecase.AuthUseCase
 }
 
-func NewLoginHandler(app app.HandlerContext, auth usecase.AuthUseCase) LoginHandler {
+func NewLoginHandler(app HandlerContext, auth usecase.AuthUseCase) LoginHandler {
 	return LoginHandler{
 		app:  app,
 		auth: auth,

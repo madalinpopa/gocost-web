@@ -11,13 +11,10 @@ import (
 	"time"
 
 	"github.com/go-playground/form/v4"
-	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/infrastructure/storage/sqlite"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/middleware"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/router"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 )
@@ -38,10 +35,10 @@ type application struct {
 }
 
 func newApplication(db *sql.DB, logger *slog.Logger, conf *config.Config) *application {
-	tt := response.NewTemplate(logger, conf)
-	ss := web.New(db, conf)
-	mm := middleware.New(logger, conf, ss)
-	r := response.NewResponse(logger)
+	tt := web.NewTemplate(logger, conf)
+	ss := web.NewSession(db, conf)
+	mm := web.NewMiddleware(logger, conf, ss)
+	r := web.NewResponse(logger)
 	fd := form.NewDecoder()
 
 	fd.RegisterCustomTypeFunc(func(vals []string) (any, error) {
@@ -50,7 +47,7 @@ func newApplication(db *sql.DB, logger *slog.Logger, conf *config.Config) *appli
 
 	uow := sqlite.NewUnitOfWork(db)
 
-	appContext := app.HandlerContext{
+	appContext := handler.HandlerContext{
 		Config:   conf,
 		Logger:   logger,
 		Decoder:  fd,

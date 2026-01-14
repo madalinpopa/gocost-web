@@ -6,8 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/madalinpopa/gocost-web/internal/app"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/params"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/views"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/madalinpopa/gocost-web/ui/templates/components"
@@ -15,7 +14,7 @@ import (
 )
 
 type HomeHandler struct {
-	app        app.HandlerContext
+	app        HandlerContext
 	incomeUC   usecase.IncomeUseCase
 	expenseUC  usecase.ExpenseUseCase
 	groupUC    usecase.GroupUseCase
@@ -23,7 +22,7 @@ type HomeHandler struct {
 }
 
 func NewHomeHandler(
-	app app.HandlerContext,
+	app HandlerContext,
 	incomeUC usecase.IncomeUseCase,
 	expenseUC usecase.ExpenseUseCase,
 	groupUC usecase.GroupUseCase,
@@ -42,7 +41,7 @@ func (hh HomeHandler) ShowHomePage(w http.ResponseWriter, r *http.Request) {
 	data := hh.app.Template.GetData(r)
 
 	// Determine the month to display
-	currentDate, prevDate, nextDate := params.GetMonthParam(r)
+	currentDate, prevDate, nextDate := web.GetMonthParam(r)
 	monthStr := currentDate.Format("2006-01")
 
 	dashboardData, err := hh.fetchDashboardData(r.Context(), data.User.ID, currentDate)
@@ -61,7 +60,7 @@ func (hh HomeHandler) ShowHomePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hh HomeHandler) GetDashboardGroups(w http.ResponseWriter, r *http.Request) {
-	currentDate, prevDate, nextDate := params.GetMonthParam(r)
+	currentDate, prevDate, nextDate := web.GetMonthParam(r)
 	userID := hh.app.Session.GetUserID(r.Context())
 	monthStr := currentDate.Format("2006-01")
 

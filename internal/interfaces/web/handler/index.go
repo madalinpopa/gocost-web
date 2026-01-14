@@ -3,15 +3,14 @@ package handler
 import (
 	"net/http"
 
-	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/ui/templates/pages/public"
 )
 
 type IndexHandler struct {
-	app app.HandlerContext
+	app HandlerContext
 }
 
-func NewIndexHandler(app app.HandlerContext) IndexHandler {
+func NewIndexHandler(app HandlerContext) IndexHandler {
 	return IndexHandler{
 		app: app,
 	}

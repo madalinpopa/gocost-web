@@ -1,4 +1,4 @@
-package middleware
+package web
 
 import (
 	"context"
@@ -11,8 +11,6 @@ import (
 
 	"github.com/justinas/nosurf"
 	"github.com/madalinpopa/gocost-web/internal/config"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
 )
 
 // responseWriter is a wrapper around responseWriter that captures the status code of the response.
@@ -30,12 +28,12 @@ func (rw *responseWriter) WriteHeader(status int) {
 type Middleware struct {
 	logger  *slog.Logger
 	config  *config.Config
-	session web.AuthSessionManager
-	res     response.Response
+	session AuthSessionManager
+	res     Response
 }
 
-func New(l *slog.Logger, c *config.Config, s web.AuthSessionManager) *Middleware {
-	res := response.NewResponse(l)
+func NewMiddleware(l *slog.Logger, c *config.Config, s AuthSessionManager) *Middleware {
+	res := NewResponse(l)
 	return &Middleware{
 		logger:  l,
 		config:  c,
@@ -112,7 +110,7 @@ func (m *Middleware) Logging(next http.Handler) http.Handler {
 // Recover handles panics during HTTP request processing, logs the error, and sends a 500 response with connection closed.
 func (m *Middleware) Recover(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		res := response.NewResponse(m.logger)
+		res := NewResponse(m.logger)
 
 		defer func() {
 			if err := recover(); err != nil {
@@ -205,14 +203,14 @@ func (m *Middleware) Authenticate(next http.Handler) http.Handler {
 		}
 
 		// Create a user object from the session data.
-		user := web.AuthenticatedUser{
+		user := AuthenticatedUser{
 			ID:       userID,
 			Username: m.session.GetUsername(r.Context()),
 		}
 
 		// Add the authentication status and user info to the request context.
-		ctx := context.WithValue(r.Context(), web.IsAuthenticatedKey, true)
-		ctx = context.WithValue(ctx, web.AuthenticatedUserKey, user)
+		ctx := context.WithValue(r.Context(), IsAuthenticatedKey, true)
+		ctx = context.WithValue(ctx, AuthenticatedUserKey, user)
 		r = r.WithContext(ctx)
 
 		// Call the next handler in the chain.

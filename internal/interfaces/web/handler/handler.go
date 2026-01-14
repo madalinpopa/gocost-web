@@ -1,7 +1,11 @@
 package handler
 
 import (
-	"github.com/madalinpopa/gocost-web/internal/app"
+	"log/slog"
+
+	"github.com/go-playground/form/v4"
+	"github.com/madalinpopa/gocost-web/internal/config"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 )
 
@@ -25,7 +29,7 @@ type Handlers struct {
 	Private PrivateHandlers
 }
 
-func New(app app.HandlerContext, uc *usecase.UseCase) Handlers {
+func New(app HandlerContext, uc *usecase.UseCase) Handlers {
 	return Handlers{
 		Public: PublicHandlers{
 			IndexHandler:    NewIndexHandler(app),
@@ -41,4 +45,14 @@ func New(app app.HandlerContext, uc *usecase.UseCase) Handlers {
 			ExpenseHandler:  NewExpenseHandler(app, uc.ExpenseUseCase),
 		},
 	}
+}
+
+// HandlerContext holds the application-wide dependencies. It is used as dependency injection container.
+type HandlerContext struct {
+	Config   *config.Config
+	Logger   *slog.Logger
+	Decoder  *form.Decoder
+	Session  web.AuthSessionManager
+	Template *web.Template
+	Response web.Response
 }

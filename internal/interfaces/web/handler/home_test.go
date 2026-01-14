@@ -8,9 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/config"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
 )
@@ -25,13 +24,13 @@ func TestHomeHandler_ShowHomePage(t *testing.T) {
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
 
-		appCtx := app.HandlerContext{
+		appCtx := HandlerContext{
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
-			Response: response.Response{
+			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
-			Template: response.NewTemplate(slog.New(slog.NewTextHandler(io.Discard, nil)), nil), // Minimal setup
+			Template: web.NewTemplate(slog.New(slog.NewTextHandler(io.Discard, nil)), nil), // Minimal setup
 			Config:   &config.Config{Currency: "$"},
 		}
 
@@ -88,10 +87,10 @@ func TestHomeHandler_GetDashboardGroups(t *testing.T) {
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
 
-		appCtx := app.HandlerContext{
+		appCtx := HandlerContext{
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
-			Response: response.Response{
+			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
 			Config: &config.Config{Currency: "$"},

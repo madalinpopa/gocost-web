@@ -43,8 +43,8 @@ type Manager struct {
 	Manager *scs.SessionManager
 }
 
-// New initializes and returns a new instance of Manager with a SQLite store and a 12-hour session lifetime.
-func New(db *sql.DB, c *config.Config) *Manager {
+// NewSession initializes and returns a new instance of Manager with a SQLite store and a 12-hour session lifetime.
+func NewSession(db *sql.DB, c *config.Config) *Manager {
 	sessionManager := scs.New()
 	sessionManager.Store = sqlite3store.New(db)
 	sessionManager.Lifetime = 1 * time.Hour

@@ -10,9 +10,8 @@ import (
 	"testing"
 
 	"github.com/go-playground/form/v4"
-	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/config"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -21,17 +20,17 @@ import (
 func newTestLoginHandler(authMock *MockAuthUseCase, sessionMock *MockSessionManager) LoginHandler {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	cfg := config.New()
-	templater := response.NewTemplate(logger, cfg)
+	templater := web.NewTemplate(logger, cfg)
 
 	if sessionMock == nil {
 		sessionMock = new(MockSessionManager)
 	}
 
-	appCtx := app.HandlerContext{
+	appCtx := HandlerContext{
 		Config:   cfg,
 		Logger:   logger,
 		Template: templater,
-		Response: response.NewResponse(logger),
+		Response: web.NewResponse(logger),
 		Decoder:  form.NewDecoder(),
 		Session:  sessionMock,
 	}

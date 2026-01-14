@@ -12,10 +12,9 @@ import (
 	"time"
 
 	"github.com/go-playground/form/v4"
-	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/domain/expense"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
@@ -29,11 +28,11 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
 
-		appCtx := app.HandlerContext{
+		appCtx := HandlerContext{
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
-			Response: response.Response{
+			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
 		}
@@ -81,11 +80,11 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
 
-		appCtx := app.HandlerContext{
+		appCtx := HandlerContext{
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
-			Response: response.Response{
+			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
 		}
@@ -129,11 +128,11 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
 
-		appCtx := app.HandlerContext{
+		appCtx := HandlerContext{
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
-			Response: response.Response{
+			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
 		}
@@ -164,11 +163,11 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
 
-		appCtx := app.HandlerContext{
+		appCtx := HandlerContext{
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
-			Response: response.Response{
+			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
 		}
@@ -207,11 +206,11 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
 
-		appCtx := app.HandlerContext{
+		appCtx := HandlerContext{
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
-			Response: response.Response{
+			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
 		}
@@ -252,11 +251,11 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
 
-		appCtx := app.HandlerContext{
+		appCtx := HandlerContext{
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
-			Response: response.Response{
+			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
 		}
@@ -307,11 +306,11 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
 
-		appCtx := app.HandlerContext{
+		appCtx := HandlerContext{
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
-			Response: response.Response{
+			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
 		}
@@ -339,11 +338,11 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
 
-		appCtx := app.HandlerContext{
+		appCtx := HandlerContext{
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
-			Response: response.Response{
+			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
 		}
@@ -387,11 +386,11 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
 
-		appCtx := app.HandlerContext{
+		appCtx := HandlerContext{
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
-			Response: response.Response{
+			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
 		}
@@ -432,10 +431,10 @@ func TestExpenseHandler_DeleteExpense(t *testing.T) {
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
 
-		appCtx := app.HandlerContext{
+		appCtx := HandlerContext{
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
-			Response: response.Response{
+			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
 		}
@@ -465,10 +464,10 @@ func TestExpenseHandler_DeleteExpense(t *testing.T) {
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
 
-		appCtx := app.HandlerContext{
+		appCtx := HandlerContext{
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
-			Response: response.Response{
+			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
 		}

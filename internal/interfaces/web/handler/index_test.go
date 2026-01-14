@@ -7,16 +7,15 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/config"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/stretchr/testify/assert"
 )
 
 func newTestIndexHandler() IndexHandler {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	templater := response.NewTemplate(logger, config.New())
-	appCtx := app.HandlerContext{Template: templater}
+	templater := web.NewTemplate(logger, config.New())
+	appCtx := HandlerContext{Template: templater}
 
 	return NewIndexHandler(appCtx)
 }

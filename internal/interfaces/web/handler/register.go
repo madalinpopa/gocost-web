@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/domain/identity"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/form"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
@@ -13,11 +12,11 @@ import (
 )
 
 type RegisterHandler struct {
-	app  app.HandlerContext
+	app  HandlerContext
 	auth usecase.AuthUseCase
 }
 
-func NewRegisterHandler(app app.HandlerContext, auth usecase.AuthUseCase) RegisterHandler {
+func NewRegisterHandler(app HandlerContext, auth usecase.AuthUseCase) RegisterHandler {
 	return RegisterHandler{
 		app:  app,
 		auth: auth,

@@ -3,16 +3,15 @@ package handler
 import (
 	"net/http"
 
-	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 )
 
 type LogoutHandler struct {
-	app  app.HandlerContext
+	app  HandlerContext
 	auth usecase.AuthUseCase
 }
 
-func NewLogoutHandler(app app.HandlerContext, auth usecase.AuthUseCase) LogoutHandler {
+func NewLogoutHandler(app HandlerContext, auth usecase.AuthUseCase) LogoutHandler {
 	return LogoutHandler{
 		app:  app,
 		auth: auth,

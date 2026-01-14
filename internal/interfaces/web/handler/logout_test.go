@@ -8,8 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/madalinpopa/gocost-web/internal/app"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -21,10 +20,10 @@ func newTestLogoutHandler(session *MockSessionManager) LogoutHandler {
 		session = new(MockSessionManager)
 	}
 
-	appCtx := app.HandlerContext{
+	appCtx := HandlerContext{
 		Logger:   logger,
 		Session:  session,
-		Response: response.NewResponse(logger),
+		Response: web.NewResponse(logger),
 	}
 
 	return NewLogoutHandler(appCtx, new(MockAuthUseCase))

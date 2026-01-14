@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/form"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
@@ -12,11 +11,11 @@ import (
 )
 
 type CategoryHandler struct {
-	app      app.HandlerContext
+	app      HandlerContext
 	category usecase.CategoryUseCase
 }
 
-func NewCategoryHandler(app app.HandlerContext, category usecase.CategoryUseCase) CategoryHandler {
+func NewCategoryHandler(app HandlerContext, category usecase.CategoryUseCase) CategoryHandler {
 	return CategoryHandler{
 		app:      app,
 		category: category,
