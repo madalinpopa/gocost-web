@@ -1,4 +1,4 @@
-package public
+package handler
 
 import (
 	"io"
@@ -12,20 +12,19 @@ import (
 	"github.com/go-playground/form/v4"
 	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/config"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler/mocks"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-func newTestLoginHandler(authMock *mocks.MockAuthUseCase, sessionMock *mocks.MockSessionManager) LoginHandler {
+func newTestLoginHandler(authMock *MockAuthUseCase, sessionMock *MockSessionManager) LoginHandler {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	cfg := config.New()
 	templater := response.NewTemplate(logger, cfg)
 
 	if sessionMock == nil {
-		sessionMock = new(mocks.MockSessionManager)
+		sessionMock = new(MockSessionManager)
 	}
 
 	appCtx := app.HandlerContext{
@@ -38,7 +37,7 @@ func newTestLoginHandler(authMock *mocks.MockAuthUseCase, sessionMock *mocks.Moc
 	}
 
 	if authMock == nil {
-		authMock = new(mocks.MockAuthUseCase)
+		authMock = new(MockAuthUseCase)
 	}
 
 	return NewLoginHandler(appCtx, authMock)
@@ -84,8 +83,8 @@ func TestLoginHandler_ShowLoginForm(t *testing.T) {
 
 func TestLoginHandler_SubmitLoginForm(t *testing.T) {
 	t.Run("successful login", func(t *testing.T) {
-		authMock := new(mocks.MockAuthUseCase)
-		sessionMock := new(mocks.MockSessionManager)
+		authMock := new(MockAuthUseCase)
+		sessionMock := new(MockSessionManager)
 		handler := newTestLoginHandler(authMock, sessionMock)
 
 		formVals := url.Values{}
@@ -123,8 +122,8 @@ func TestLoginHandler_SubmitLoginForm(t *testing.T) {
 	})
 
 	t.Run("invalid credentials", func(t *testing.T) {
-		authMock := new(mocks.MockAuthUseCase)
-		sessionMock := new(mocks.MockSessionManager)
+		authMock := new(MockAuthUseCase)
+		sessionMock := new(MockSessionManager)
 		handler := newTestLoginHandler(authMock, sessionMock)
 
 		formVals := url.Values{}

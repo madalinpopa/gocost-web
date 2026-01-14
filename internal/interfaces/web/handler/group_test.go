@@ -1,4 +1,4 @@
-package private
+package handler
 
 import (
 	"errors"
@@ -13,7 +13,6 @@ import (
 	"github.com/go-playground/form/v4"
 	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler/mocks"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
@@ -23,9 +22,9 @@ import (
 func TestGroupHandler_CreateGroup(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// Arrange
-		mockSession := new(mocks.MockSessionManager)
-		mockGroupUC := new(mocks.MockGroupUseCase)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockSession := new(MockSessionManager)
+		mockGroupUC := new(MockGroupUseCase)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Session: mockSession,
@@ -69,9 +68,9 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 
 	t.Run("invalid form data", func(t *testing.T) {
 		// Arrange
-		mockSession := new(mocks.MockSessionManager)
-		mockGroupUC := new(mocks.MockGroupUseCase)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockSession := new(MockSessionManager)
+		mockGroupUC := new(MockGroupUseCase)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Session: mockSession,
@@ -106,9 +105,9 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 
 	t.Run("usecase error - user facing", func(t *testing.T) {
 		// Arrange
-		mockSession := new(mocks.MockSessionManager)
-		mockGroupUC := new(mocks.MockGroupUseCase)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockSession := new(MockSessionManager)
+		mockGroupUC := new(MockGroupUseCase)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Session: mockSession,
@@ -147,9 +146,9 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 
 	t.Run("usecase error - internal", func(t *testing.T) {
 		// Arrange
-		mockSession := new(mocks.MockSessionManager)
-		mockGroupUC := new(mocks.MockGroupUseCase)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockSession := new(MockSessionManager)
+		mockGroupUC := new(MockGroupUseCase)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Session: mockSession,
@@ -190,9 +189,9 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 func TestGroupHandler_DeleteGroup(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// Arrange
-		mockSession := new(mocks.MockSessionManager)
-		mockGroupUC := new(mocks.MockGroupUseCase)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockSession := new(MockSessionManager)
+		mockGroupUC := new(MockGroupUseCase)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Session: mockSession,
@@ -223,9 +222,9 @@ func TestGroupHandler_DeleteGroup(t *testing.T) {
 
 	t.Run("usecase error", func(t *testing.T) {
 		// Arrange
-		mockSession := new(mocks.MockSessionManager)
-		mockGroupUC := new(mocks.MockGroupUseCase)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockSession := new(MockSessionManager)
+		mockGroupUC := new(MockGroupUseCase)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Session: mockSession,

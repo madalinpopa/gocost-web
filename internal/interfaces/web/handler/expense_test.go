@@ -1,4 +1,4 @@
-package private
+package handler
 
 import (
 	"errors"
@@ -15,7 +15,6 @@ import (
 	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/domain/expense"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler/mocks"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
 	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
@@ -26,9 +25,9 @@ import (
 func TestExpenseHandler_CreateExpense(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// Arrange
-		mockExpenseUC := new(mocks.MockExpenseUseCase)
-		mockSession := new(mocks.MockSessionManager)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockSession := new(MockSessionManager)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
@@ -78,9 +77,9 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 
 	t.Run("success paid", func(t *testing.T) {
 		// Arrange
-		mockExpenseUC := new(mocks.MockExpenseUseCase)
-		mockSession := new(mocks.MockSessionManager)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockSession := new(MockSessionManager)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
@@ -126,9 +125,9 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 
 	t.Run("invalid form data", func(t *testing.T) {
 		// Arrange
-		mockExpenseUC := new(mocks.MockExpenseUseCase)
-		mockSession := new(mocks.MockSessionManager)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockSession := new(MockSessionManager)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
@@ -161,9 +160,9 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 
 	t.Run("usecase error - user facing", func(t *testing.T) {
 		// Arrange
-		mockExpenseUC := new(mocks.MockExpenseUseCase)
-		mockSession := new(mocks.MockSessionManager)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockSession := new(MockSessionManager)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
@@ -204,9 +203,9 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 
 	t.Run("usecase error - internal", func(t *testing.T) {
 		// Arrange
-		mockExpenseUC := new(mocks.MockExpenseUseCase)
-		mockSession := new(mocks.MockSessionManager)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockSession := new(MockSessionManager)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
@@ -249,9 +248,9 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 func TestExpenseHandler_EditExpense(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// Arrange
-		mockExpenseUC := new(mocks.MockExpenseUseCase)
-		mockSession := new(mocks.MockSessionManager)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockSession := new(MockSessionManager)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
@@ -304,9 +303,9 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 
 	t.Run("invalid form data", func(t *testing.T) {
 		// Arrange
-		mockExpenseUC := new(mocks.MockExpenseUseCase)
-		mockSession := new(mocks.MockSessionManager)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockSession := new(MockSessionManager)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
@@ -336,9 +335,9 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 
 	t.Run("usecase error - translated", func(t *testing.T) {
 		// Arrange
-		mockExpenseUC := new(mocks.MockExpenseUseCase)
-		mockSession := new(mocks.MockSessionManager)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockSession := new(MockSessionManager)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
@@ -384,9 +383,9 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 
 	t.Run("usecase error - expense not found", func(t *testing.T) {
 		// Arrange
-		mockExpenseUC := new(mocks.MockExpenseUseCase)
-		mockSession := new(mocks.MockSessionManager)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockSession := new(MockSessionManager)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
@@ -429,9 +428,9 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 func TestExpenseHandler_DeleteExpense(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// Arrange
-		mockExpenseUC := new(mocks.MockExpenseUseCase)
-		mockSession := new(mocks.MockSessionManager)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockSession := new(MockSessionManager)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
@@ -462,9 +461,9 @@ func TestExpenseHandler_DeleteExpense(t *testing.T) {
 
 	t.Run("usecase error", func(t *testing.T) {
 		// Arrange
-		mockExpenseUC := new(mocks.MockExpenseUseCase)
-		mockSession := new(mocks.MockSessionManager)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockSession := new(MockSessionManager)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),

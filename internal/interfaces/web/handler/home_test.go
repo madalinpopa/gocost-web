@@ -1,4 +1,4 @@
-package private
+package handler
 
 import (
 	"io"
@@ -10,7 +10,6 @@ import (
 
 	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/config"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler/mocks"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
@@ -19,12 +18,12 @@ import (
 func TestHomeHandler_ShowHomePage(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// Arrange
-		mockIncomeUC := new(mocks.MockIncomeUseCase)
-		mockExpenseUC := new(mocks.MockExpenseUseCase)
-		mockGroupUC := new(mocks.MockGroupUseCase)
-		mockCategoryUC := new(mocks.MockCategoryUseCase)
-		mockSession := new(mocks.MockSessionManager)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockIncomeUC := new(MockIncomeUseCase)
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockGroupUC := new(MockGroupUseCase)
+		mockCategoryUC := new(MockCategoryUseCase)
+		mockSession := new(MockSessionManager)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
@@ -82,12 +81,12 @@ func TestHomeHandler_ShowHomePage(t *testing.T) {
 
 func TestHomeHandler_GetDashboardGroups(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		mockIncomeUC := new(mocks.MockIncomeUseCase)
-		mockExpenseUC := new(mocks.MockExpenseUseCase)
-		mockGroupUC := new(mocks.MockGroupUseCase)
-		mockCategoryUC := new(mocks.MockCategoryUseCase)
-		mockSession := new(mocks.MockSessionManager)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockIncomeUC := new(MockIncomeUseCase)
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockGroupUC := new(MockGroupUseCase)
+		mockCategoryUC := new(MockCategoryUseCase)
+		mockSession := new(MockSessionManager)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),

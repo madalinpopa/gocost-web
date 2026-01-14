@@ -1,4 +1,4 @@
-package private
+package handler
 
 import (
 	"errors"
@@ -13,7 +13,6 @@ import (
 	"github.com/go-playground/form/v4"
 	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler/mocks"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
@@ -23,8 +22,8 @@ import (
 func TestCategoryHandler_CreateCategory(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// Arrange
-		mockCategoryUC := new(mocks.MockCategoryUseCase)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockCategoryUC := new(MockCategoryUseCase)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
@@ -72,8 +71,8 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 
 	t.Run("invalid form data", func(t *testing.T) {
 		// Arrange
-		mockCategoryUC := new(mocks.MockCategoryUseCase)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockCategoryUC := new(MockCategoryUseCase)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
@@ -107,8 +106,8 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 
 	t.Run("usecase error - user facing", func(t *testing.T) {
 		// Arrange
-		mockCategoryUC := new(mocks.MockCategoryUseCase)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockCategoryUC := new(MockCategoryUseCase)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
@@ -146,8 +145,8 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 
 	t.Run("usecase error - internal", func(t *testing.T) {
 		// Arrange
-		mockCategoryUC := new(mocks.MockCategoryUseCase)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockCategoryUC := new(MockCategoryUseCase)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
@@ -187,8 +186,8 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 func TestCategoryHandler_DeleteCategory(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// Arrange
-		mockCategoryUC := new(mocks.MockCategoryUseCase)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockCategoryUC := new(MockCategoryUseCase)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
@@ -217,8 +216,8 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 
 	t.Run("usecase error", func(t *testing.T) {
 		// Arrange
-		mockCategoryUC := new(mocks.MockCategoryUseCase)
-		mockErrorHandler := new(mocks.MockErrorHandler)
+		mockCategoryUC := new(MockCategoryUseCase)
+		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := app.HandlerContext{
 			Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),

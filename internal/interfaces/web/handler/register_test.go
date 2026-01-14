@@ -1,4 +1,4 @@
-package public
+package handler
 
 import (
 	"io"
@@ -15,24 +15,23 @@ import (
 	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/domain/identity"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler/mocks"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-func newTestRegisterHandler(session *mocks.MockSessionManager, auth *mocks.MockAuthUseCase) RegisterHandler {
+func newTestRegisterHandler(session *MockSessionManager, auth *MockAuthUseCase) RegisterHandler {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	cfg := config.New()
 	templater := response.NewTemplate(logger, cfg)
 	decoder := form.NewDecoder()
 
 	if session == nil {
-		session = new(mocks.MockSessionManager)
+		session = new(MockSessionManager)
 	}
 	if auth == nil {
-		auth = new(mocks.MockAuthUseCase)
+		auth = new(MockAuthUseCase)
 	}
 
 	appCtx := app.HandlerContext{
@@ -89,8 +88,8 @@ func TestRegisterHandler_ShowRegisterForm(t *testing.T) {
 
 func TestRegisterHandler_SubmitRegisterForm(t *testing.T) {
 	t.Run("successful registration redirects to home", func(t *testing.T) {
-		session := new(mocks.MockSessionManager)
-		auth := new(mocks.MockAuthUseCase)
+		session := new(MockSessionManager)
+		auth := new(MockAuthUseCase)
 		handler := newTestRegisterHandler(session, auth)
 
 		formData := url.Values{}
@@ -128,8 +127,8 @@ func TestRegisterHandler_SubmitRegisterForm(t *testing.T) {
 	})
 
 	t.Run("validation error re-renders form", func(t *testing.T) {
-		session := new(mocks.MockSessionManager)
-		auth := new(mocks.MockAuthUseCase)
+		session := new(MockSessionManager)
+		auth := new(MockAuthUseCase)
 		handler := newTestRegisterHandler(session, auth)
 
 		formData := url.Values{}
@@ -156,8 +155,8 @@ func TestRegisterHandler_SubmitRegisterForm(t *testing.T) {
 	})
 
 	t.Run("registration error (user exists) re-renders form with error", func(t *testing.T) {
-		session := new(mocks.MockSessionManager)
-		auth := new(mocks.MockAuthUseCase)
+		session := new(MockSessionManager)
+		auth := new(MockAuthUseCase)
 		handler := newTestRegisterHandler(session, auth)
 
 		formData := url.Values{}

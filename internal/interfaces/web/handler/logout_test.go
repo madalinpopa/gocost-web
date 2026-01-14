@@ -1,4 +1,4 @@
-package public
+package handler
 
 import (
 	"errors"
@@ -9,17 +9,16 @@ import (
 	"testing"
 
 	"github.com/madalinpopa/gocost-web/internal/app"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler/mocks"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-func newTestLogoutHandler(session *mocks.MockSessionManager) LogoutHandler {
+func newTestLogoutHandler(session *MockSessionManager) LogoutHandler {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 	if session == nil {
-		session = new(mocks.MockSessionManager)
+		session = new(MockSessionManager)
 	}
 
 	appCtx := app.HandlerContext{
@@ -28,12 +27,12 @@ func newTestLogoutHandler(session *mocks.MockSessionManager) LogoutHandler {
 		Response: response.NewResponse(logger),
 	}
 
-	return NewLogoutHandler(appCtx, new(mocks.MockAuthUseCase))
+	return NewLogoutHandler(appCtx, new(MockAuthUseCase))
 }
 
 func TestLogoutHandler_SubmitLogout(t *testing.T) {
 	t.Run("redirects to login on success", func(t *testing.T) {
-		session := new(mocks.MockSessionManager)
+		session := new(MockSessionManager)
 		handler := newTestLogoutHandler(session)
 		req := httptest.NewRequest(http.MethodPost, "/logout", nil)
 		rec := httptest.NewRecorder()
@@ -54,7 +53,7 @@ func TestLogoutHandler_SubmitLogout(t *testing.T) {
 	})
 
 	t.Run("returns server error when renew fails", func(t *testing.T) {
-		session := new(mocks.MockSessionManager)
+		session := new(MockSessionManager)
 		handler := newTestLogoutHandler(session)
 		req := httptest.NewRequest(http.MethodPost, "/logout", nil)
 		rec := httptest.NewRecorder()
@@ -75,7 +74,7 @@ func TestLogoutHandler_SubmitLogout(t *testing.T) {
 	})
 
 	t.Run("returns server error when destroy fails", func(t *testing.T) {
-		session := new(mocks.MockSessionManager)
+		session := new(MockSessionManager)
 		handler := newTestLogoutHandler(session)
 		req := httptest.NewRequest(http.MethodPost, "/logout", nil)
 		rec := httptest.NewRecorder()

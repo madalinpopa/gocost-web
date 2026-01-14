@@ -2,24 +2,22 @@ package handler
 
 import (
 	"github.com/madalinpopa/gocost-web/internal/app"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler/private"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler/public"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 )
 
 type PublicHandlers struct {
-	IndexHandler    public.IndexHandler
-	LoginHandler    public.LoginHandler
-	LogoutHandler   public.LogoutHandler
-	RegisterHandler public.RegisterHandler
+	IndexHandler    IndexHandler
+	LoginHandler    LoginHandler
+	LogoutHandler   LogoutHandler
+	RegisterHandler RegisterHandler
 }
 
 type PrivateHandlers struct {
-	HomeHandler     private.HomeHandler
-	IncomeHandler   private.IncomeHandler
-	GroupHandler    private.GroupHandler
-	CategoryHandler private.CategoryHandler
-	ExpenseHandler  private.ExpenseHandler
+	HomeHandler     HomeHandler
+	IncomeHandler   IncomeHandler
+	GroupHandler    GroupHandler
+	CategoryHandler CategoryHandler
+	ExpenseHandler  ExpenseHandler
 }
 
 type Handlers struct {
@@ -30,17 +28,17 @@ type Handlers struct {
 func New(app app.HandlerContext, uc *usecase.UseCase) Handlers {
 	return Handlers{
 		Public: PublicHandlers{
-			IndexHandler:    public.NewIndexHandler(app),
-			LoginHandler:    public.NewLoginHandler(app, uc.AuthUseCase),
-			LogoutHandler:   public.NewLogoutHandler(app, uc.AuthUseCase),
-			RegisterHandler: public.NewRegisterHandler(app, uc.AuthUseCase),
+			IndexHandler:    NewIndexHandler(app),
+			LoginHandler:    NewLoginHandler(app, uc.AuthUseCase),
+			LogoutHandler:   NewLogoutHandler(app, uc.AuthUseCase),
+			RegisterHandler: NewRegisterHandler(app, uc.AuthUseCase),
 		},
 		Private: PrivateHandlers{
-			HomeHandler:     private.NewHomeHandler(app, uc.IncomeUseCase, uc.ExpenseUseCase, uc.GroupUseCase, uc.CategoryUseCase),
-			IncomeHandler:   private.NewIncomeHandler(app, uc.IncomeUseCase, uc.ExpenseUseCase),
-			GroupHandler:    private.NewGroupHandler(app, uc.GroupUseCase),
-			CategoryHandler: private.NewCategoryHandler(app, uc.CategoryUseCase),
-			ExpenseHandler:  private.NewExpenseHandler(app, uc.ExpenseUseCase),
+			HomeHandler:     NewHomeHandler(app, uc.IncomeUseCase, uc.ExpenseUseCase, uc.GroupUseCase, uc.CategoryUseCase),
+			IncomeHandler:   NewIncomeHandler(app, uc.IncomeUseCase, uc.ExpenseUseCase),
+			GroupHandler:    NewGroupHandler(app, uc.GroupUseCase),
+			CategoryHandler: NewCategoryHandler(app, uc.CategoryUseCase),
+			ExpenseHandler:  NewExpenseHandler(app, uc.ExpenseUseCase),
 		},
 	}
 }
