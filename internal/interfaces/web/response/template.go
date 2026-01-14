@@ -10,7 +10,7 @@ import (
 	"github.com/a-h/templ"
 	"github.com/google/uuid"
 	"github.com/justinas/nosurf"
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/config"
+	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/infrastructure/session"
 )
 

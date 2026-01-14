@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/justinas/alice"
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/config"
+	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/middleware"
 	"github.com/stretchr/testify/assert"
 )

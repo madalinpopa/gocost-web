@@ -12,7 +12,7 @@ import (
 
 	"github.com/go-playground/form/v4"
 	"github.com/madalinpopa/gocost-web/internal/app"
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/config"
+	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/infrastructure/session"
 	"github.com/madalinpopa/gocost-web/internal/infrastructure/storage/sqlite"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler"

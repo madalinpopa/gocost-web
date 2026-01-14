@@ -13,7 +13,7 @@ import (
 
 	"github.com/go-playground/form/v4"
 	"github.com/madalinpopa/gocost-web/internal/app"
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/config"
+	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler/mocks"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
@@ -206,9 +206,9 @@ func TestIncomeHandler_ListIncomes(t *testing.T) {
 		mockExpenseUC := new(mocks.MockExpenseUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 		appCtx := app.ApplicationContext{
-			Session: mockSession,
+			Session:  mockSession,
 			Response: response.Response{Handle: mockErrorHandler},
-			Config: &config.Config{Currency: "$"},
+			Config:   &config.Config{Currency: "$"},
 		}
 		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
 
@@ -233,9 +233,9 @@ func TestIncomeHandler_DeleteIncome(t *testing.T) {
 		mockExpenseUC := new(mocks.MockExpenseUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 		appCtx := app.ApplicationContext{
-			Session: mockSession,
+			Session:  mockSession,
 			Response: response.Response{Handle: mockErrorHandler},
-			Config: &config.Config{Currency: "$"},
+			Config:   &config.Config{Currency: "$"},
 		}
 		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
 
@@ -244,10 +244,10 @@ func TestIncomeHandler_DeleteIncome(t *testing.T) {
 		rec := httptest.NewRecorder()
 
 		mockSession.On("GetUserID", req.Context()).Return("user-123")
-		
+
 		receivedAt, _ := time.Parse("2006-01-02", "2023-10-15")
 		mockIncomeUC.On("Get", req.Context(), "user-123", "inc-1").Return(&usecase.IncomeResponse{
-			ID: "inc-1",
+			ID:         "inc-1",
 			ReceivedAt: receivedAt,
 		}, nil)
 
@@ -263,4 +263,3 @@ func TestIncomeHandler_DeleteIncome(t *testing.T) {
 		mockExpenseUC.AssertExpectations(t)
 	})
 }
-

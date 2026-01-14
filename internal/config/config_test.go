@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/config"
+	"github.com/madalinpopa/gocost-web/internal/config"
 )
 
 func TestNew(t *testing.T) {

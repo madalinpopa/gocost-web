@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/justinas/nosurf"
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/config"
+	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/infrastructure/session"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
 )

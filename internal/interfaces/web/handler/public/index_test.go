@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/madalinpopa/gocost-web/internal/app"
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/config"
+	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
 	"github.com/stretchr/testify/assert"
 )

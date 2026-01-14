@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/config"
+	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/spf13/cobra"
 )
 

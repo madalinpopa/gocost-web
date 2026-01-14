@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/madalinpopa/gocost-web/internal/app"
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/config"
+	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler/mocks"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
@@ -51,9 +51,11 @@ func TestHomeHandler_ShowHomePage(t *testing.T) {
 		mockExpenseUC.On("Total", req.Context(), userID, "2023-10").Return(500.0, nil)
 
 		groups := []*usecase.GroupResponse{
-			{ID: "g1", Name: "Group 1", Categories: []usecase.CategoryResponse{
-				{ID: "c1", Name: "Cat 1", StartMonth: "2023-01"},
-			}},
+			{
+				ID: "g1", Name: "Group 1", Categories: []usecase.CategoryResponse{
+					{ID: "c1", Name: "Cat 1", StartMonth: "2023-01"},
+				},
+			},
 		}
 		mockGroupUC.On("List", req.Context(), userID).Return(groups, nil)
 

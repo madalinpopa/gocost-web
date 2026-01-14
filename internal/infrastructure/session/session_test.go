@@ -9,7 +9,7 @@ import (
 
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/config"
+	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/infrastructure/session"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"

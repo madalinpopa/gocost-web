@@ -13,8 +13,8 @@ import (
 
 	"github.com/go-playground/form/v4"
 	"github.com/madalinpopa/gocost-web/internal/app"
+	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/domain/identity"
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/config"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler/mocks"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
@@ -108,7 +108,9 @@ func TestRegisterHandler_SubmitRegisterForm(t *testing.T) {
 			Password:        "password123",
 		}
 
-		auth.On("Register", req.Context(), expectedReq).Return(&usecase.UserResponse{ID: "user-1", Username: "testuser"}, nil)
+		auth.On("Register", req.Context(), expectedReq).Return(&usecase.UserResponse{
+			ID: "user-1", Username: "testuser",
+		}, nil)
 		session.On("RenewToken", req.Context()).Return(nil)
 		session.On("SetUserID", req.Context(), "user-1").Return()
 		session.On("SetUsername", req.Context(), "testuser").Return()
@@ -120,7 +122,7 @@ func TestRegisterHandler_SubmitRegisterForm(t *testing.T) {
 
 		assert.Equal(t, http.StatusFound, res.StatusCode)
 		assert.Equal(t, "/home", res.Header.Get("HX-Redirect"))
-		
+
 		session.AssertExpectations(t)
 		auth.AssertExpectations(t)
 	})
@@ -149,7 +151,7 @@ func TestRegisterHandler_SubmitRegisterForm(t *testing.T) {
 		assert.Contains(t, body, "please enter a valid e-mail address")
 		assert.Contains(t, body, "username must be at least 3 characters long")
 		assert.Contains(t, body, "password must be at least 8 characters long")
-		
+
 		auth.AssertNotCalled(t, "Register", mock.Anything, mock.Anything)
 	})
 
@@ -177,7 +179,7 @@ func TestRegisterHandler_SubmitRegisterForm(t *testing.T) {
 		assert.Equal(t, http.StatusUnprocessableEntity, res.StatusCode)
 		body := rec.Body.String()
 		assert.Contains(t, body, "An account with this email or username already exists.")
-		
+
 		auth.AssertExpectations(t)
 		session.AssertNotCalled(t, "RenewToken", mock.Anything)
 	})
