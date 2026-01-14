@@ -1,7 +1,7 @@
 package layouts
 
 import (
-	response "github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
+    "github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"html/template"
 )
 
@@ -11,7 +11,7 @@ templ CSRFScript(token string) {
 	@templ.FromGoHTML(csrfScript, token)
 }
 
-templ Base(data response.Data) {
+templ Base(data web.Data) {
 	<!DOCTYPE html>
 	<html class="h-full bg-slate-950" lang="ro">
 		<head>

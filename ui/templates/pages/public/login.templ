@@ -1,11 +1,11 @@
 package public
 
 import "github.com/madalinpopa/gocost-web/ui/templates/layouts"
-import "github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
+import "github.com/madalinpopa/gocost-web/internal/interfaces/web"
 import "github.com/madalinpopa/gocost-web/ui/templates/components"
 import "github.com/madalinpopa/gocost-web/internal/interfaces/web/form"
 
-templ LoginPage(data response.Data) {
+templ LoginPage(data web.Data) {
 	@layouts.Main(data) {
 		<div class="h-full flex flex-col relative overflow-hidden selection:bg-primary-500 selection:text-white">
 			<main class="grow flex items-center justify-center px-4 py-16 relative z-10">
