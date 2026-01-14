@@ -11,7 +11,7 @@ import (
 
 	"github.com/justinas/nosurf"
 	"github.com/madalinpopa/gocost-web/internal/config"
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/session"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
 )
 
@@ -30,11 +30,11 @@ func (rw *responseWriter) WriteHeader(status int) {
 type Middleware struct {
 	logger  *slog.Logger
 	config  *config.Config
-	session session.AuthSessionManager
+	session web.AuthSessionManager
 	res     response.Response
 }
 
-func New(l *slog.Logger, c *config.Config, s session.AuthSessionManager) *Middleware {
+func New(l *slog.Logger, c *config.Config, s web.AuthSessionManager) *Middleware {
 	res := response.NewResponse(l)
 	return &Middleware{
 		logger:  l,
@@ -205,14 +205,14 @@ func (m *Middleware) Authenticate(next http.Handler) http.Handler {
 		}
 
 		// Create a user object from the session data.
-		user := session.AuthenticatedUser{
+		user := web.AuthenticatedUser{
 			ID:       userID,
 			Username: m.session.GetUsername(r.Context()),
 		}
 
 		// Add the authentication status and user info to the request context.
-		ctx := context.WithValue(r.Context(), session.IsAuthenticatedKey, true)
-		ctx = context.WithValue(ctx, session.AuthenticatedUserKey, user)
+		ctx := context.WithValue(r.Context(), web.IsAuthenticatedKey, true)
+		ctx = context.WithValue(ctx, web.AuthenticatedUserKey, user)
 		r = r.WithContext(ctx)
 
 		// Call the next handler in the chain.

@@ -1,4 +1,4 @@
-package session_test
+package web_test
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
 	"github.com/madalinpopa/gocost-web/internal/config"
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/session"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 )
@@ -30,7 +30,7 @@ func newTestDB(t *testing.T) *sql.DB {
 	return db
 }
 
-func newTestManagerWithContext(t *testing.T) (*session.Manager, context.Context) {
+func newTestManagerWithContext(t *testing.T) (*web.Manager, context.Context) {
 	t.Helper()
 
 	sessionManager := scs.New()
@@ -39,14 +39,14 @@ func newTestManagerWithContext(t *testing.T) (*session.Manager, context.Context)
 		t.Fatalf("load session context: %v", err)
 	}
 
-	return &session.Manager{Manager: sessionManager}, ctx
+	return &web.Manager{Manager: sessionManager}, ctx
 }
 
 func TestNew_NonProductionDefaults(t *testing.T) {
 	db := newTestDB(t)
 	cfg := config.New().WithEnvironment("development")
 
-	manager := session.New(db, cfg)
+	manager := web.New(db, cfg)
 	assert.NotNil(t, manager)
 	if manager == nil {
 		return
@@ -75,7 +75,7 @@ func TestNew_ProductionCookie(t *testing.T) {
 	db := newTestDB(t)
 	cfg := config.New().WithEnvironment("production")
 
-	manager := session.New(db, cfg)
+	manager := web.New(db, cfg)
 	assert.NotNil(t, manager)
 	if manager == nil {
 		return

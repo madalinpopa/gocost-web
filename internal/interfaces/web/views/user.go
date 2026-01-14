@@ -3,7 +3,7 @@ package views
 import (
 	"context"
 
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/session"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 )
 
@@ -21,7 +21,7 @@ func NewUserViewFromResponse(res *usecase.UserResponse) *UserView {
 	}
 }
 
-func NewUserFromSession(ctx context.Context, s session.AuthSessionManager) *UserView {
+func NewUserFromSession(ctx context.Context, s web.AuthSessionManager) *UserView {
 	return &UserView{
 		ID:       s.GetUserID(ctx),
 		Username: s.GetUsername(ctx),

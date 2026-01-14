@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/justinas/nosurf"
 	"github.com/madalinpopa/gocost-web/internal/config"
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/session"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 )
 
 type ToastType string
@@ -35,7 +35,7 @@ type Data struct {
 	CurrentYear int
 	CSRFToken   string
 	Toast       *ToastMessage
-	User        session.AuthenticatedUser
+	User        web.AuthenticatedUser
 	Version     string
 }
 
@@ -91,8 +91,8 @@ func (t *Template) Render(w http.ResponseWriter, r *http.Request, c templ.Compon
 }
 
 func (t *Template) GetData(r *http.Request) Data {
-	var user session.AuthenticatedUser
-	if u, ok := r.Context().Value(session.AuthenticatedUserKey).(session.AuthenticatedUser); ok {
+	var user web.AuthenticatedUser
+	if u, ok := r.Context().Value(web.AuthenticatedUserKey).(web.AuthenticatedUser); ok {
 		user = u
 	}
 

@@ -13,8 +13,8 @@ import (
 	"github.com/go-playground/form/v4"
 	"github.com/madalinpopa/gocost-web/internal/app"
 	"github.com/madalinpopa/gocost-web/internal/config"
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/session"
 	"github.com/madalinpopa/gocost-web/internal/infrastructure/storage/sqlite"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/middleware"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
@@ -39,7 +39,7 @@ type application struct {
 
 func newApplication(db *sql.DB, logger *slog.Logger, conf *config.Config) *application {
 	tt := response.NewTemplate(logger, conf)
-	ss := session.New(db, conf)
+	ss := web.New(db, conf)
 	mm := middleware.New(logger, conf, ss)
 	r := response.NewResponse(logger)
 	fd := form.NewDecoder()
