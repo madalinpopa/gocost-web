@@ -26,7 +26,7 @@ func TestHomeHandler_ShowHomePage(t *testing.T) {
 		mockSession := new(mocks.MockSessionManager)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
 			Response: response.Response{
@@ -89,7 +89,7 @@ func TestHomeHandler_GetDashboardGroups(t *testing.T) {
 		mockSession := new(mocks.MockSessionManager)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
 			Response: response.Response{

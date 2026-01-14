@@ -27,7 +27,7 @@ type Handlers struct {
 	Private PrivateHandlers
 }
 
-func New(app app.ApplicationContext, uc *usecase.UseCase) Handlers {
+func New(app app.HandlerContext, uc *usecase.UseCase) Handlers {
 	return Handlers{
 		Public: PublicHandlers{
 			IndexHandler:    public.NewIndexHandler(app),

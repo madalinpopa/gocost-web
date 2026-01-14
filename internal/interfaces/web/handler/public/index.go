@@ -8,10 +8,10 @@ import (
 )
 
 type IndexHandler struct {
-	app app.ApplicationContext
+	app app.HandlerContext
 }
 
-func NewIndexHandler(app app.ApplicationContext) IndexHandler {
+func NewIndexHandler(app app.HandlerContext) IndexHandler {
 	return IndexHandler{
 		app: app,
 	}

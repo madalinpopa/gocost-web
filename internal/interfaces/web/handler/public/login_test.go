@@ -28,7 +28,7 @@ func newTestLoginHandler(authMock *mocks.MockAuthUseCase, sessionMock *mocks.Moc
 		sessionMock = new(mocks.MockSessionManager)
 	}
 
-	appCtx := app.ApplicationContext{
+	appCtx := app.HandlerContext{
 		Config:   cfg,
 		Logger:   logger,
 		Template: templater,

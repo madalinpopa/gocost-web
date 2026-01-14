@@ -12,11 +12,11 @@ import (
 )
 
 type LoginHandler struct {
-	app  app.ApplicationContext
+	app  app.HandlerContext
 	auth usecase.AuthUseCase
 }
 
-func NewLoginHandler(app app.ApplicationContext, auth usecase.AuthUseCase) LoginHandler {
+func NewLoginHandler(app app.HandlerContext, auth usecase.AuthUseCase) LoginHandler {
 	return LoginHandler{
 		app:  app,
 		auth: auth,

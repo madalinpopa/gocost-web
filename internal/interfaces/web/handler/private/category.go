@@ -12,11 +12,11 @@ import (
 )
 
 type CategoryHandler struct {
-	app      app.ApplicationContext
+	app      app.HandlerContext
 	category usecase.CategoryUseCase
 }
 
-func NewCategoryHandler(app app.ApplicationContext, category usecase.CategoryUseCase) CategoryHandler {
+func NewCategoryHandler(app app.HandlerContext, category usecase.CategoryUseCase) CategoryHandler {
 	return CategoryHandler{
 		app:      app,
 		category: category,

@@ -12,11 +12,11 @@ import (
 )
 
 type GroupHandler struct {
-	app   app.ApplicationContext
+	app   app.HandlerContext
 	group usecase.GroupUseCase
 }
 
-func NewGroupHandler(app app.ApplicationContext, group usecase.GroupUseCase) GroupHandler {
+func NewGroupHandler(app app.HandlerContext, group usecase.GroupUseCase) GroupHandler {
 	return GroupHandler{
 		app:   app,
 		group: group,

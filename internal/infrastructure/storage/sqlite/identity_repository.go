@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	"github.com/madalinpopa/gocost-web/internal/domain/identity"
-	"github.com/madalinpopa/gocost-web/internal/shared/identifier"
+	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
 )
 
 type SQLiteUserRepository struct {

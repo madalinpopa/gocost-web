@@ -3,8 +3,8 @@ package usecase
 import (
 	"log/slog"
 
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/security"
 	"github.com/madalinpopa/gocost-web/internal/infrastructure/storage/sqlite"
+	"github.com/madalinpopa/gocost-web/internal/platform/security"
 )
 
 type UseCase struct {

@@ -9,8 +9,8 @@ import (
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/response"
 )
 
-// ApplicationContext holds the application-wide dependencies. It is used as dependency injection container.
-type ApplicationContext struct {
+// HandlerContext holds the application-wide dependencies. It is used as dependency injection container.
+type HandlerContext struct {
 	Config   *config.Config
 	Logger   *slog.Logger
 	Decoder  *form.Decoder

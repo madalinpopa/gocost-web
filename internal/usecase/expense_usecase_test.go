@@ -9,8 +9,8 @@ import (
 
 	"github.com/madalinpopa/gocost-web/internal/domain/expense"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
-	"github.com/madalinpopa/gocost-web/internal/shared/identifier"
-	"github.com/madalinpopa/gocost-web/internal/shared/money"
+	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
+	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -320,7 +320,9 @@ func TestExpenseUseCase_ListByMonth(t *testing.T) {
 
 	t.Run("returns list of expenses by month", func(t *testing.T) {
 		expenseRepo := &MockExpenseRepository{}
-		expenseRepo.On("FindByUserIDAndMonth", mock.Anything, mock.Anything, "2023-10").Return([]expense.Expense{*exp1, *exp2}, nil)
+		expenseRepo.On("FindByUserIDAndMonth", mock.Anything, mock.Anything, "2023-10").Return([]expense.Expense{
+			*exp1, *exp2,
+		}, nil)
 
 		usecase := newTestExpenseUseCase(nil, expenseRepo)
 

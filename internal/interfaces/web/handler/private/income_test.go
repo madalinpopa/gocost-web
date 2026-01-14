@@ -29,7 +29,7 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 		mockExpenseUC := new(mocks.MockExpenseUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
@@ -79,7 +79,7 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 		mockExpenseUC := new(mocks.MockExpenseUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
@@ -119,7 +119,7 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 		mockExpenseUC := new(mocks.MockExpenseUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
@@ -160,7 +160,7 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 		mockExpenseUC := new(mocks.MockExpenseUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
@@ -205,7 +205,7 @@ func TestIncomeHandler_ListIncomes(t *testing.T) {
 		mockIncomeUC := new(mocks.MockIncomeUseCase)
 		mockExpenseUC := new(mocks.MockExpenseUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Session:  mockSession,
 			Response: response.Response{Handle: mockErrorHandler},
 			Config:   &config.Config{Currency: "$"},
@@ -232,7 +232,7 @@ func TestIncomeHandler_DeleteIncome(t *testing.T) {
 		mockIncomeUC := new(mocks.MockIncomeUseCase)
 		mockExpenseUC := new(mocks.MockExpenseUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Session:  mockSession,
 			Response: response.Response{Handle: mockErrorHandler},
 			Config:   &config.Config{Currency: "$"},

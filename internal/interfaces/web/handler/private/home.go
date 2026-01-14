@@ -15,7 +15,7 @@ import (
 )
 
 type HomeHandler struct {
-	app        app.ApplicationContext
+	app        app.HandlerContext
 	incomeUC   usecase.IncomeUseCase
 	expenseUC  usecase.ExpenseUseCase
 	groupUC    usecase.GroupUseCase
@@ -23,7 +23,7 @@ type HomeHandler struct {
 }
 
 func NewHomeHandler(
-	app app.ApplicationContext,
+	app app.HandlerContext,
 	incomeUC usecase.IncomeUseCase,
 	expenseUC usecase.ExpenseUseCase,
 	groupUC usecase.GroupUseCase,

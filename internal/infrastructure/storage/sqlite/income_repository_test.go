@@ -7,8 +7,8 @@ import (
 
 	"github.com/madalinpopa/gocost-web/internal/domain/income"
 	"github.com/madalinpopa/gocost-web/internal/infrastructure/storage/sqlite"
-	"github.com/madalinpopa/gocost-web/internal/shared/identifier"
-	"github.com/madalinpopa/gocost-web/internal/shared/money"
+	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
+	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -80,7 +80,7 @@ func TestSQLiteIncomeRepository(t *testing.T) {
 		require.NoError(t, repo.Save(ctx, *inc1))
 
 		// Ensure strictly newer time for second income to test sorting
-		time.Sleep(time.Millisecond * 10) 
+		time.Sleep(time.Millisecond * 10)
 		inc2 := createRandomIncome(t, user.ID)
 		require.NoError(t, repo.Save(ctx, *inc2))
 
@@ -93,7 +93,7 @@ func TestSQLiteIncomeRepository(t *testing.T) {
 		incomes, err := repo.FindByUserID(ctx, user.ID)
 		assert.NoError(t, err)
 		assert.Len(t, incomes, 2)
-		
+
 		// Expect DESC order by received_at (inc2 is newer)
 		assert.Equal(t, inc2.ID, incomes[0].ID)
 		assert.Equal(t, inc1.ID, incomes[1].ID)

@@ -27,7 +27,7 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		mockGroupUC := new(mocks.MockGroupUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
@@ -73,7 +73,7 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		mockGroupUC := new(mocks.MockGroupUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
@@ -110,7 +110,7 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		mockGroupUC := new(mocks.MockGroupUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
@@ -151,7 +151,7 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		mockGroupUC := new(mocks.MockGroupUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
@@ -194,7 +194,7 @@ func TestGroupHandler_DeleteGroup(t *testing.T) {
 		mockGroupUC := new(mocks.MockGroupUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Session: mockSession,
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Response: response.Response{
@@ -227,7 +227,7 @@ func TestGroupHandler_DeleteGroup(t *testing.T) {
 		mockGroupUC := new(mocks.MockGroupUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Session: mockSession,
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Response: response.Response{

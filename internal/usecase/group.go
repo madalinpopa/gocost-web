@@ -7,7 +7,7 @@ import (
 
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
 	"github.com/madalinpopa/gocost-web/internal/domain/uow"
-	"github.com/madalinpopa/gocost-web/internal/shared/identifier"
+	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
 )
 
 type GroupUseCaseImpl struct {

@@ -13,11 +13,11 @@ import (
 )
 
 type RegisterHandler struct {
-	app  app.ApplicationContext
+	app  app.HandlerContext
 	auth usecase.AuthUseCase
 }
 
-func NewRegisterHandler(app app.ApplicationContext, auth usecase.AuthUseCase) RegisterHandler {
+func NewRegisterHandler(app app.HandlerContext, auth usecase.AuthUseCase) RegisterHandler {
 	return RegisterHandler{
 		app:  app,
 		auth: auth,

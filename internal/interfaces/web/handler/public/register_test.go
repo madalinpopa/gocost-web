@@ -35,7 +35,7 @@ func newTestRegisterHandler(session *mocks.MockSessionManager, auth *mocks.MockA
 		auth = new(mocks.MockAuthUseCase)
 	}
 
-	appCtx := app.ApplicationContext{
+	appCtx := app.HandlerContext{
 		Config:   cfg,
 		Logger:   logger,
 		Decoder:  decoder,

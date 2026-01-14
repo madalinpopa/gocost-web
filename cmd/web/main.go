@@ -50,7 +50,7 @@ func newApplication(db *sql.DB, logger *slog.Logger, conf *config.Config) *appli
 
 	uow := sqlite.NewUnitOfWork(db)
 
-	appContext := app.ApplicationContext{
+	appContext := app.HandlerContext{
 		Config:   conf,
 		Logger:   logger,
 		Decoder:  fd,

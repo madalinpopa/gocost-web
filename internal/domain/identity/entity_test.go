@@ -3,7 +3,7 @@ package identity
 import (
 	"testing"
 
-	"github.com/madalinpopa/gocost-web/internal/shared/identifier"
+	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
 	"github.com/stretchr/testify/assert"
 )
 

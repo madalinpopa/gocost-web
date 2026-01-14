@@ -9,17 +9,17 @@ import (
 	"github.com/madalinpopa/gocost-web/internal/domain/expense"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/form"
-	"github.com/madalinpopa/gocost-web/internal/shared/money"
+	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/madalinpopa/gocost-web/ui/templates/components"
 )
 
 type ExpenseHandler struct {
-	app     app.ApplicationContext
+	app     app.HandlerContext
 	expense usecase.ExpenseUseCase
 }
 
-func NewExpenseHandler(app app.ApplicationContext, expense usecase.ExpenseUseCase) ExpenseHandler {
+func NewExpenseHandler(app app.HandlerContext, expense usecase.ExpenseUseCase) ExpenseHandler {
 	return ExpenseHandler{
 		app:     app,
 		expense: expense,

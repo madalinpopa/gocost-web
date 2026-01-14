@@ -26,7 +26,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		mockCategoryUC := new(mocks.MockCategoryUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Response: response.Response{
@@ -75,7 +75,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		mockCategoryUC := new(mocks.MockCategoryUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Response: response.Response{
@@ -110,7 +110,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		mockCategoryUC := new(mocks.MockCategoryUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Response: response.Response{
@@ -149,7 +149,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		mockCategoryUC := new(mocks.MockCategoryUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Response: response.Response{
@@ -190,7 +190,7 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		mockCategoryUC := new(mocks.MockCategoryUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Response: response.Response{
 				Handle: mockErrorHandler,
@@ -220,7 +220,7 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		mockCategoryUC := new(mocks.MockCategoryUseCase)
 		mockErrorHandler := new(mocks.MockErrorHandler)
 
-		appCtx := app.ApplicationContext{
+		appCtx := app.HandlerContext{
 			Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Response: response.Response{
 				Handle: mockErrorHandler,

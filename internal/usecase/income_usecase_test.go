@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/madalinpopa/gocost-web/internal/domain/income"
-	"github.com/madalinpopa/gocost-web/internal/shared/identifier"
-	"github.com/madalinpopa/gocost-web/internal/shared/money"
+	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
+	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -177,7 +177,9 @@ func TestIncomeUseCase_Update(t *testing.T) {
 
 		usecase := newTestIncomeUseCase(repo)
 
-		req := &UpdateIncomeRequest{ID: otherUserIncome.ID.String(), Amount: 100, Source: "Test", ReceivedAt: time.Now()}
+		req := &UpdateIncomeRequest{
+			ID: otherUserIncome.ID.String(), Amount: 100, Source: "Test", ReceivedAt: time.Now(),
+		}
 		resp, err := usecase.Update(context.Background(), validUserID.String(), req) // validUserID != otherUserID
 
 		assert.Nil(t, resp)

@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"github.com/madalinpopa/gocost-web/internal/domain/identity"
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/security"
-	"github.com/madalinpopa/gocost-web/internal/shared/identifier"
+	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
+	"github.com/madalinpopa/gocost-web/internal/platform/security"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

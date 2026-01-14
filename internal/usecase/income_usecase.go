@@ -8,8 +8,8 @@ import (
 
 	"github.com/madalinpopa/gocost-web/internal/domain/income"
 	"github.com/madalinpopa/gocost-web/internal/domain/uow"
-	"github.com/madalinpopa/gocost-web/internal/shared/identifier"
-	"github.com/madalinpopa/gocost-web/internal/shared/money"
+	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
+	"github.com/madalinpopa/gocost-web/internal/platform/money"
 )
 
 type IncomeUseCaseImpl struct {

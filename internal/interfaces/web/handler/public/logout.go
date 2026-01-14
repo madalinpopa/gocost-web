@@ -8,11 +8,11 @@ import (
 )
 
 type LogoutHandler struct {
-	app  app.ApplicationContext
+	app  app.HandlerContext
 	auth usecase.AuthUseCase
 }
 
-func NewLogoutHandler(app app.ApplicationContext, auth usecase.AuthUseCase) LogoutHandler {
+func NewLogoutHandler(app app.HandlerContext, auth usecase.AuthUseCase) LogoutHandler {
 	return LogoutHandler{
 		app:  app,
 		auth: auth,

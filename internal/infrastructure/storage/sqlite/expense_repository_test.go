@@ -7,8 +7,8 @@ import (
 
 	"github.com/madalinpopa/gocost-web/internal/domain/expense"
 	"github.com/madalinpopa/gocost-web/internal/infrastructure/storage/sqlite"
-	"github.com/madalinpopa/gocost-web/internal/shared/identifier"
-	"github.com/madalinpopa/gocost-web/internal/shared/money"
+	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
+	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

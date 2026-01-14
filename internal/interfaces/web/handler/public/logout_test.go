@@ -17,12 +17,12 @@ import (
 
 func newTestLogoutHandler(session *mocks.MockSessionManager) LogoutHandler {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	
+
 	if session == nil {
 		session = new(mocks.MockSessionManager)
 	}
-	
-	appCtx := app.ApplicationContext{
+
+	appCtx := app.HandlerContext{
 		Logger:   logger,
 		Session:  session,
 		Response: response.NewResponse(logger),
@@ -37,7 +37,7 @@ func TestLogoutHandler_SubmitLogout(t *testing.T) {
 		handler := newTestLogoutHandler(session)
 		req := httptest.NewRequest(http.MethodPost, "/logout", nil)
 		rec := httptest.NewRecorder()
-		
+
 		session.On("GetUserID", req.Context()).Return("user-1")
 		session.On("RenewToken", req.Context()).Return(nil)
 		session.On("Destroy", req.Context()).Return(nil)
@@ -49,7 +49,7 @@ func TestLogoutHandler_SubmitLogout(t *testing.T) {
 
 		assert.Equal(t, http.StatusFound, res.StatusCode)
 		assert.Equal(t, "/login", res.Header.Get("Location"))
-		
+
 		session.AssertExpectations(t)
 	})
 

@@ -1,7 +1,7 @@
 package identity
 
 import (
-	"github.com/madalinpopa/gocost-web/internal/shared/identifier"
+	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
 )
 
 type ID = identifier.ID

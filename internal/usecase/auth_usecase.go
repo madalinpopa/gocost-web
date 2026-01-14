@@ -7,8 +7,8 @@ import (
 
 	"github.com/madalinpopa/gocost-web/internal/domain/identity"
 	"github.com/madalinpopa/gocost-web/internal/domain/uow"
-	"github.com/madalinpopa/gocost-web/internal/infrastructure/security"
-	"github.com/madalinpopa/gocost-web/internal/shared/identifier"
+	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
+	"github.com/madalinpopa/gocost-web/internal/platform/security"
 )
 
 var ErrInvalidCredentials = errors.New("invalid credentials")

@@ -16,7 +16,7 @@ import (
 func newTestIndexHandler() IndexHandler {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	templater := response.NewTemplate(logger, config.New())
-	appCtx := app.ApplicationContext{Template: templater}
+	appCtx := app.HandlerContext{Template: templater}
 
 	return NewIndexHandler(appCtx)
 }

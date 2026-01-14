@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/madalinpopa/gocost-web/internal/shared/identifier"
-	"github.com/madalinpopa/gocost-web/internal/shared/money"
+	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
+	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -214,7 +214,7 @@ func TestGroup_UpdateCategory(t *testing.T) {
 
 	catID, _ := identifier.NewID()
 	startMonth, _ := NewMonth(2024, time.January)
-	
+
 	// Add initial category
 	_, err := group.CreateCategory(catID, mustName(t, "Old Name"), mustDesc(t, "Old Desc"), false, startMonth, Month{}, money.Money{})
 	require.NoError(t, err)
@@ -223,13 +223,13 @@ func TestGroup_UpdateCategory(t *testing.T) {
 		newName := mustName(t, "New Name")
 		newDesc := mustDesc(t, "New Desc")
 		newStart, _ := NewMonth(2024, time.February)
-		
+
 		updated, err := group.UpdateCategory(catID, newName, newDesc, false, newStart, Month{}, money.Money{})
 		require.NoError(t, err)
 		assert.Equal(t, newName, updated.Name)
 		assert.Equal(t, newDesc, updated.Description)
 		assert.Equal(t, newStart, updated.StartMonth)
-		
+
 		// Verify changes persisted in group
 		found := false
 		for _, c := range group.Categories {
@@ -347,7 +347,7 @@ func TestGroup_RemoveCategory(t *testing.T) {
 
 	catID, _ := identifier.NewID()
 	startMonth, _ := NewMonth(2024, time.January)
-	
+
 	_, err := group.CreateCategory(catID, mustName(t, "To Delete"), mustDesc(t, "Desc"), false, startMonth, Month{}, money.Money{})
 	require.NoError(t, err)
 

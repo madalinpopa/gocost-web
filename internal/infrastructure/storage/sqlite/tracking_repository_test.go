@@ -7,7 +7,7 @@ import (
 
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
 	"github.com/madalinpopa/gocost-web/internal/infrastructure/storage/sqlite"
-	"github.com/madalinpopa/gocost-web/internal/shared/identifier"
+	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

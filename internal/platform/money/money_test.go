@@ -3,7 +3,7 @@ package money_test
 import (
 	"testing"
 
-	"github.com/madalinpopa/gocost-web/internal/shared/money"
+	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/stretchr/testify/assert"
 )
 

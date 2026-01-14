@@ -12,12 +12,12 @@ import (
 )
 
 type IncomeHandler struct {
-	app     app.ApplicationContext
+	app     app.HandlerContext
 	income  usecase.IncomeUseCase
 	expense usecase.ExpenseUseCase
 }
 
-func NewIncomeHandler(app app.ApplicationContext, income usecase.IncomeUseCase, expense usecase.ExpenseUseCase) IncomeHandler {
+func NewIncomeHandler(app app.HandlerContext, income usecase.IncomeUseCase, expense usecase.ExpenseUseCase) IncomeHandler {
 	return IncomeHandler{
 		app:     app,
 		income:  income,
