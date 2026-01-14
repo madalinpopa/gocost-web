@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler/health"
 )
 
 func (r *Router) RegisterRoutes(h handler.Handlers) {
@@ -13,7 +12,7 @@ func (r *Router) RegisterRoutes(h handler.Handlers) {
 	r.RegisterStaticFiles("/static/", http.StripPrefix("/static", fileServer))
 
 	// Healthcheck
-	r.RegisterUnprotectedHandler(http.MethodGet, "/health", health.CheckHealthHandler)
+	r.RegisterUnprotectedHandler(http.MethodGet, "/health", handler.CheckHealthHandler)
 
 	// Public pages
 	r.RegisterPublicHandler(http.MethodGet, "/{$}", http.HandlerFunc(h.Public.IndexHandler.ShowIndexPage))
