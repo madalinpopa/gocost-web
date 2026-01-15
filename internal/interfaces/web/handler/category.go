@@ -52,7 +52,8 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 		Budget:      categoryForm.Budget,
 	}
 
-	_, err := h.category.Create(r.Context(), categoryForm.GroupID, req)
+	userID := h.app.Session.GetUserID(r.Context())
+	_, err := h.category.Create(r.Context(), userID, categoryForm.GroupID, req)
 	if err != nil {
 		errMessage, isUserFacing := translateCategoryError(err)
 		categoryForm.AddNonFieldError(errMessage)
@@ -101,7 +102,8 @@ func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request)
 		Budget:      categoryForm.Budget,
 	}
 
-	_, err := h.category.Update(r.Context(), categoryForm.GroupID, req)
+	userID := h.app.Session.GetUserID(r.Context())
+	_, err := h.category.Update(r.Context(), userID, categoryForm.GroupID, req)
 	if err != nil {
 		errMessage, isUserFacing := translateCategoryError(err)
 		categoryForm.AddNonFieldError(errMessage)
@@ -122,8 +124,9 @@ func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request)
 func (h *CategoryHandler) DeleteCategory(w http.ResponseWriter, r *http.Request) {
 	groupID := r.PathValue("groupID")
 	categoryID := r.PathValue("id")
+	userID := h.app.Session.GetUserID(r.Context())
 
-	if err := h.category.Delete(r.Context(), groupID, categoryID); err != nil {
+	if err := h.category.Delete(r.Context(), userID, groupID, categoryID); err != nil {
 		h.app.Response.Handle.Error(w, r, http.StatusInternalServerError, err)
 		return
 	}
