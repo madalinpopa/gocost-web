@@ -114,7 +114,7 @@ check: vet staticcheck
 
 .PHONY: vuln
 vuln:
-	govulncheck ./...
+	go tool govulncheck ./...
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   Run docker commands
