@@ -94,8 +94,10 @@ require (
 	golang.org/x/net v0.44.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.37.0 // indirect
+	golang.org/x/telemetry v0.0.0-20250908211612-aef8a434d053 // indirect
 	golang.org/x/text v0.30.0 // indirect
 	golang.org/x/tools v0.37.0 // indirect
+	golang.org/x/vuln v1.1.4 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250818200422-3122310a409c // indirect
 	google.golang.org/grpc v1.74.2 // indirect
 	google.golang.org/protobuf v1.36.8 // indirect
@@ -111,4 +113,5 @@ tool (
 	github.com/a-h/templ/cmd/templ
 	github.com/air-verse/air
 	github.com/pressly/goose/v3/cmd/goose
+	golang.org/x/vuln/cmd/govulncheck
 )
