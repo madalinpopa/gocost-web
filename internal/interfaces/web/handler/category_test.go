@@ -23,10 +23,12 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		// Arrange
 		mockCategoryUC := new(MockCategoryUseCase)
 		mockErrorHandler := new(MockErrorHandler)
+		mockSession := new(MockSessionManager)
 
 		appCtx := HandlerContext{
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Session: mockSession,
 			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
@@ -52,7 +54,9 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 			StartMonth:  "2023-01",
 		}
 
-		mockCategoryUC.On("Create", req.Context(), "group-123", mock.MatchedBy(func(r *usecase.CreateCategoryRequest) bool {
+		mockSession.On("GetUserID", req.Context()).Return("user-123")
+
+		mockCategoryUC.On("Create", req.Context(), "user-123", "group-123", mock.MatchedBy(func(r *usecase.CreateCategoryRequest) bool {
 			return r.Name == expectedReq.Name &&
 				r.Description == expectedReq.Description &&
 				r.IsRecurrent == expectedReq.IsRecurrent &&
@@ -66,6 +70,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		assert.Equal(t, "true", rec.Header().Get("HX-Refresh"))
 		mockCategoryUC.AssertExpectations(t)
+		mockSession.AssertExpectations(t)
 	})
 
 	t.Run("invalid form data", func(t *testing.T) {
@@ -107,10 +112,12 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		// Arrange
 		mockCategoryUC := new(MockCategoryUseCase)
 		mockErrorHandler := new(MockErrorHandler)
+		mockSession := new(MockSessionManager)
 
 		appCtx := HandlerContext{
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Session: mockSession,
 			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
@@ -130,7 +137,8 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		rec := httptest.NewRecorder()
 
 		expectedErr := tracking.ErrCategoryNameExists
-		mockCategoryUC.On("Create", req.Context(), "group-123", mock.Anything).Return(nil, expectedErr)
+		mockSession.On("GetUserID", req.Context()).Return("user-123")
+		mockCategoryUC.On("Create", req.Context(), "user-123", "group-123", mock.Anything).Return(nil, expectedErr)
 
 		// Act
 		handler.CreateCategory(rec, req)
@@ -140,16 +148,19 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		assert.Contains(t, rec.Body.String(), "Category name already exists") // Translated error
 
 		mockCategoryUC.AssertExpectations(t)
+		mockSession.AssertExpectations(t)
 	})
 
 	t.Run("usecase error - internal", func(t *testing.T) {
 		// Arrange
 		mockCategoryUC := new(MockCategoryUseCase)
 		mockErrorHandler := new(MockErrorHandler)
+		mockSession := new(MockSessionManager)
 
 		appCtx := HandlerContext{
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Session: mockSession,
 			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
@@ -169,7 +180,8 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		rec := httptest.NewRecorder()
 
 		expectedErr := errors.New("database failure")
-		mockCategoryUC.On("Create", req.Context(), "group-123", mock.Anything).Return(nil, expectedErr)
+		mockSession.On("GetUserID", req.Context()).Return("user-123")
+		mockCategoryUC.On("Create", req.Context(), "user-123", "group-123", mock.Anything).Return(nil, expectedErr)
 
 		// Act
 		handler.CreateCategory(rec, req)
@@ -179,6 +191,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		assert.Contains(t, rec.Body.String(), "An unexpected error occurred") // Default translated error
 
 		mockCategoryUC.AssertExpectations(t)
+		mockSession.AssertExpectations(t)
 	})
 }
 
@@ -187,9 +200,11 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		// Arrange
 		mockCategoryUC := new(MockCategoryUseCase)
 		mockErrorHandler := new(MockErrorHandler)
+		mockSession := new(MockSessionManager)
 
 		appCtx := HandlerContext{
-			Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Session: mockSession,
 			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
@@ -202,7 +217,8 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		req.SetPathValue("id", "cat-1")
 		rec := httptest.NewRecorder()
 
-		mockCategoryUC.On("Delete", req.Context(), "group-1", "cat-1").Return(nil)
+		mockSession.On("GetUserID", req.Context()).Return("user-123")
+		mockCategoryUC.On("Delete", req.Context(), "user-123", "group-1", "cat-1").Return(nil)
 
 		// Act
 		handler.DeleteCategory(rec, req)
@@ -211,15 +227,18 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		assert.Equal(t, "true", rec.Header().Get("HX-Refresh"))
 		mockCategoryUC.AssertExpectations(t)
+		mockSession.AssertExpectations(t)
 	})
 
 	t.Run("usecase error", func(t *testing.T) {
 		// Arrange
 		mockCategoryUC := new(MockCategoryUseCase)
 		mockErrorHandler := new(MockErrorHandler)
+		mockSession := new(MockSessionManager)
 
 		appCtx := HandlerContext{
-			Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Session: mockSession,
 			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
@@ -233,7 +252,8 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		rec := httptest.NewRecorder()
 
 		expectedErr := errors.New("delete failed")
-		mockCategoryUC.On("Delete", req.Context(), "group-1", "cat-1").Return(expectedErr)
+		mockSession.On("GetUserID", req.Context()).Return("user-123")
+		mockCategoryUC.On("Delete", req.Context(), "user-123", "group-1", "cat-1").Return(expectedErr)
 
 		mockErrorHandler.On("Error", rec, req, http.StatusInternalServerError, expectedErr).Return()
 
@@ -243,5 +263,6 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		// Assert
 		mockCategoryUC.AssertExpectations(t)
 		mockErrorHandler.AssertExpectations(t)
+		mockSession.AssertExpectations(t)
 	})
 }
