@@ -186,37 +186,37 @@ type MockCategoryUseCase struct {
 	mock.Mock
 }
 
-func (m *MockCategoryUseCase) Create(ctx context.Context, groupID string, req *usecase.CreateCategoryRequest) (*usecase.CategoryResponse, error) {
-	args := m.Called(ctx, groupID, req)
+func (m *MockCategoryUseCase) Create(ctx context.Context, userID string, groupID string, req *usecase.CreateCategoryRequest) (*usecase.CategoryResponse, error) {
+	args := m.Called(ctx, userID, groupID, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*usecase.CategoryResponse), args.Error(1)
 }
 
-func (m *MockCategoryUseCase) Update(ctx context.Context, groupID string, req *usecase.UpdateCategoryRequest) (*usecase.CategoryResponse, error) {
-	args := m.Called(ctx, groupID, req)
+func (m *MockCategoryUseCase) Update(ctx context.Context, userID string, groupID string, req *usecase.UpdateCategoryRequest) (*usecase.CategoryResponse, error) {
+	args := m.Called(ctx, userID, groupID, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*usecase.CategoryResponse), args.Error(1)
 }
 
-func (m *MockCategoryUseCase) Delete(ctx context.Context, groupID string, id string) error {
-	args := m.Called(ctx, groupID, id)
+func (m *MockCategoryUseCase) Delete(ctx context.Context, userID string, groupID string, id string) error {
+	args := m.Called(ctx, userID, groupID, id)
 	return args.Error(0)
 }
 
-func (m *MockCategoryUseCase) Get(ctx context.Context, groupID string, id string) (*usecase.CategoryResponse, error) {
-	args := m.Called(ctx, groupID, id)
+func (m *MockCategoryUseCase) Get(ctx context.Context, userID string, groupID string, id string) (*usecase.CategoryResponse, error) {
+	args := m.Called(ctx, userID, groupID, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*usecase.CategoryResponse), args.Error(1)
 }
 
-func (m *MockCategoryUseCase) List(ctx context.Context, groupID string) ([]usecase.CategoryResponse, error) {
-	args := m.Called(ctx, groupID)
+func (m *MockCategoryUseCase) List(ctx context.Context, userID string, groupID string) ([]usecase.CategoryResponse, error) {
+	args := m.Called(ctx, userID, groupID)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
