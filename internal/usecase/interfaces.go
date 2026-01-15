@@ -26,11 +26,11 @@ type GroupUseCase interface {
 }
 
 type CategoryUseCase interface {
-	Create(ctx context.Context, groupID string, req *CreateCategoryRequest) (*CategoryResponse, error)
-	Update(ctx context.Context, groupID string, req *UpdateCategoryRequest) (*CategoryResponse, error)
-	Delete(ctx context.Context, groupID string, id string) error
-	Get(ctx context.Context, groupID string, id string) (*CategoryResponse, error)
-	List(ctx context.Context, groupID string) ([]CategoryResponse, error)
+	Create(ctx context.Context, userID string, groupID string, req *CreateCategoryRequest) (*CategoryResponse, error)
+	Update(ctx context.Context, userID string, groupID string, req *UpdateCategoryRequest) (*CategoryResponse, error)
+	Delete(ctx context.Context, userID string, groupID string, id string) error
+	Get(ctx context.Context, userID string, groupID string, id string) (*CategoryResponse, error)
+	List(ctx context.Context, userID string, groupID string) ([]CategoryResponse, error)
 }
 
 type ExpenseUseCase interface {
