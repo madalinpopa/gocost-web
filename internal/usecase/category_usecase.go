@@ -23,18 +23,12 @@ func NewCategoryUseCase(uow domain.UnitOfWork, logger *slog.Logger) CategoryUseC
 	}
 }
 
-func (u CategoryUseCaseImpl) Create(ctx context.Context, groupID string, req *CreateCategoryRequest) (*CategoryResponse, error) {
+func (u CategoryUseCaseImpl) Create(ctx context.Context, userID string, groupID string, req *CreateCategoryRequest) (*CategoryResponse, error) {
 	if req == nil {
 		return nil, errors.New("request cannot be nil")
 	}
 
-	gID, err := identifier.ParseID(groupID)
-	if err != nil {
-		return nil, err
-	}
-
-	repo := u.uow.TrackingRepository()
-	group, err := repo.FindByID(ctx, gID)
+	group, err := u.verifyGroupOwnership(ctx, userID, groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -77,30 +71,25 @@ func (u CategoryUseCaseImpl) Create(ctx context.Context, groupID string, req *Cr
 		return nil, err
 	}
 
-	if err := repo.Save(ctx, group); err != nil {
+	repo := u.uow.TrackingRepository()
+	if err := repo.Save(ctx, *group); err != nil {
 		return nil, err
 	}
 
 	return u.mapToResponse(category), nil
 }
 
-func (u CategoryUseCaseImpl) Update(ctx context.Context, groupID string, req *UpdateCategoryRequest) (*CategoryResponse, error) {
+func (u CategoryUseCaseImpl) Update(ctx context.Context, userID string, groupID string, req *UpdateCategoryRequest) (*CategoryResponse, error) {
 	if req == nil {
 		return nil, errors.New("request cannot be nil")
 	}
 
-	gID, err := identifier.ParseID(groupID)
+	group, err := u.verifyGroupOwnership(ctx, userID, groupID)
 	if err != nil {
 		return nil, err
 	}
 
 	cID, err := identifier.ParseID(req.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	repo := u.uow.TrackingRepository()
-	group, err := repo.FindByID(ctx, gID)
 	if err != nil {
 		return nil, err
 	}
@@ -138,15 +127,16 @@ func (u CategoryUseCaseImpl) Update(ctx context.Context, groupID string, req *Up
 		return nil, err
 	}
 
-	if err := repo.Save(ctx, group); err != nil {
+	repo := u.uow.TrackingRepository()
+	if err := repo.Save(ctx, *group); err != nil {
 		return nil, err
 	}
 
 	return u.mapToResponse(category), nil
 }
 
-func (u CategoryUseCaseImpl) Delete(ctx context.Context, groupID string, id string) error {
-	gID, err := identifier.ParseID(groupID)
+func (u CategoryUseCaseImpl) Delete(ctx context.Context, userID string, groupID string, id string) error {
+	group, err := u.verifyGroupOwnership(ctx, userID, groupID)
 	if err != nil {
 		return err
 	}
@@ -157,11 +147,6 @@ func (u CategoryUseCaseImpl) Delete(ctx context.Context, groupID string, id stri
 	}
 
 	repo := u.uow.TrackingRepository()
-	group, err := repo.FindByID(ctx, gID)
-	if err != nil {
-		return err
-	}
-
 	if err := group.RemoveCategory(cID); err != nil {
 		return err
 	}
@@ -169,19 +154,13 @@ func (u CategoryUseCaseImpl) Delete(ctx context.Context, groupID string, id stri
 	return repo.DeleteCategory(ctx, cID)
 }
 
-func (u CategoryUseCaseImpl) Get(ctx context.Context, groupID string, id string) (*CategoryResponse, error) {
-	gID, err := identifier.ParseID(groupID)
+func (u CategoryUseCaseImpl) Get(ctx context.Context, userID string, groupID string, id string) (*CategoryResponse, error) {
+	group, err := u.verifyGroupOwnership(ctx, userID, groupID)
 	if err != nil {
 		return nil, err
 	}
 
 	cID, err := identifier.ParseID(id)
-	if err != nil {
-		return nil, err
-	}
-
-	repo := u.uow.TrackingRepository()
-	group, err := repo.FindByID(ctx, gID)
 	if err != nil {
 		return nil, err
 	}
@@ -195,14 +174,8 @@ func (u CategoryUseCaseImpl) Get(ctx context.Context, groupID string, id string)
 	return nil, tracking.ErrCategoryNotFound
 }
 
-func (u CategoryUseCaseImpl) List(ctx context.Context, groupID string) ([]CategoryResponse, error) {
-	gID, err := identifier.ParseID(groupID)
-	if err != nil {
-		return nil, err
-	}
-
-	repo := u.uow.TrackingRepository()
-	group, err := repo.FindByID(ctx, gID)
+func (u CategoryUseCaseImpl) List(ctx context.Context, userID string, groupID string) ([]CategoryResponse, error) {
+	group, err := u.verifyGroupOwnership(ctx, userID, groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -213,6 +186,30 @@ func (u CategoryUseCaseImpl) List(ctx context.Context, groupID string) ([]Catego
 	}
 
 	return responses, nil
+}
+
+func (u CategoryUseCaseImpl) verifyGroupOwnership(ctx context.Context, userID string, groupID string) (*tracking.Group, error) {
+	gID, err := identifier.ParseID(groupID)
+	if err != nil {
+		return nil, err
+	}
+
+	uID, err := identifier.ParseID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	repo := u.uow.TrackingRepository()
+	group, err := repo.FindByID(ctx, gID)
+	if err != nil {
+		return nil, err
+	}
+
+	if group.UserID != uID {
+		return nil, tracking.ErrGroupNotFound // Return NotFound to prevent ID enumeration/probing
+	}
+
+	return &group, nil
 }
 
 func (u CategoryUseCaseImpl) mapToResponse(c *tracking.Category) *CategoryResponse {
