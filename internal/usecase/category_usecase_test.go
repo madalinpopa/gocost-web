@@ -36,14 +36,14 @@ func TestCategoryUseCase_Create(t *testing.T) {
 
 	t.Run("returns error for nil request", func(t *testing.T) {
 		usecase := newTestCategoryUseCase(nil)
-		resp, err := usecase.Create(context.Background(), group.ID.String(), nil)
+		resp, err := usecase.Create(context.Background(), validUserID.String(), group.ID.String(), nil)
 		assert.Nil(t, resp)
 		assert.EqualError(t, err, "request cannot be nil")
 	})
 
 	t.Run("returns error for invalid group ID", func(t *testing.T) {
 		usecase := newTestCategoryUseCase(nil)
-		resp, err := usecase.Create(context.Background(), "invalid-id", validReq)
+		resp, err := usecase.Create(context.Background(), validUserID.String(), "invalid-id", validReq)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, identifier.ErrInvalidID)
 	})
@@ -53,7 +53,19 @@ func TestCategoryUseCase_Create(t *testing.T) {
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(tracking.Group{}, tracking.ErrGroupNotFound)
 
 		usecase := newTestCategoryUseCase(repo)
-		resp, err := usecase.Create(context.Background(), group.ID.String(), validReq)
+		resp, err := usecase.Create(context.Background(), validUserID.String(), group.ID.String(), validReq)
+		assert.Nil(t, resp)
+		assert.ErrorIs(t, err, tracking.ErrGroupNotFound)
+	})
+
+	t.Run("returns error when user does not own group", func(t *testing.T) {
+		repo := &MockGroupRepository{}
+		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
+
+		usecase := newTestCategoryUseCase(repo)
+		otherUserID, _ := identifier.NewID()
+
+		resp, err := usecase.Create(context.Background(), otherUserID.String(), group.ID.String(), validReq)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, tracking.ErrGroupNotFound)
 	})
@@ -68,7 +80,7 @@ func TestCategoryUseCase_Create(t *testing.T) {
 
 		usecase := newTestCategoryUseCase(repo)
 
-		resp, err := usecase.Create(context.Background(), group.ID.String(), validReq)
+		resp, err := usecase.Create(context.Background(), validUserID.String(), group.ID.String(), validReq)
 
 		require.NoError(t, err)
 		require.NotNil(t, resp)
@@ -103,7 +115,19 @@ func TestCategoryUseCase_Update(t *testing.T) {
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(tracking.Group{}, tracking.ErrGroupNotFound)
 
 		usecase := newTestCategoryUseCase(repo)
-		resp, err := usecase.Update(context.Background(), group.ID.String(), validReq)
+		resp, err := usecase.Update(context.Background(), validUserID.String(), group.ID.String(), validReq)
+		assert.Nil(t, resp)
+		assert.ErrorIs(t, err, tracking.ErrGroupNotFound)
+	})
+
+	t.Run("returns error when user does not own group", func(t *testing.T) {
+		repo := &MockGroupRepository{}
+		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
+
+		usecase := newTestCategoryUseCase(repo)
+		otherUserID, _ := identifier.NewID()
+
+		resp, err := usecase.Update(context.Background(), otherUserID.String(), group.ID.String(), validReq)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, tracking.ErrGroupNotFound)
 	})
@@ -118,7 +142,7 @@ func TestCategoryUseCase_Update(t *testing.T) {
 		newID, _ := identifier.NewID()
 		req.ID = newID.String() // Different ID
 
-		resp, err := usecase.Update(context.Background(), group.ID.String(), &req)
+		resp, err := usecase.Update(context.Background(), validUserID.String(), group.ID.String(), &req)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, tracking.ErrCategoryNotFound)
 	})
@@ -133,7 +157,7 @@ func TestCategoryUseCase_Update(t *testing.T) {
 
 		usecase := newTestCategoryUseCase(repo)
 
-		resp, err := usecase.Update(context.Background(), group.ID.String(), validReq)
+		resp, err := usecase.Update(context.Background(), validUserID.String(), group.ID.String(), validReq)
 
 		require.NoError(t, err)
 		assert.Equal(t, "New Name", resp.Name)
@@ -162,8 +186,19 @@ func TestCategoryUseCase_Delete(t *testing.T) {
 		usecase := newTestCategoryUseCase(repo)
 
 		newID, _ := identifier.NewID()
-		err := usecase.Delete(context.Background(), group.ID.String(), newID.String())
+		err := usecase.Delete(context.Background(), validUserID.String(), group.ID.String(), newID.String())
 		assert.ErrorIs(t, err, tracking.ErrCategoryNotFound)
+	})
+
+	t.Run("returns error when user does not own group", func(t *testing.T) {
+		repo := &MockGroupRepository{}
+		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
+
+		usecase := newTestCategoryUseCase(repo)
+		otherUserID, _ := identifier.NewID()
+
+		err := usecase.Delete(context.Background(), otherUserID.String(), group.ID.String(), catID.String())
+		assert.ErrorIs(t, err, tracking.ErrGroupNotFound)
 	})
 
 	t.Run("deletes category and saves group", func(t *testing.T) {
@@ -173,7 +208,7 @@ func TestCategoryUseCase_Delete(t *testing.T) {
 
 		usecase := newTestCategoryUseCase(repo)
 
-		err := usecase.Delete(context.Background(), group.ID.String(), catID.String())
+		err := usecase.Delete(context.Background(), validUserID.String(), group.ID.String(), catID.String())
 		require.NoError(t, err)
 		repo.AssertExpectations(t)
 	})
@@ -195,10 +230,22 @@ func TestCategoryUseCase_Get(t *testing.T) {
 
 		usecase := newTestCategoryUseCase(repo)
 
-		resp, err := usecase.Get(context.Background(), group.ID.String(), catID.String())
+		resp, err := usecase.Get(context.Background(), validUserID.String(), group.ID.String(), catID.String())
 		require.NoError(t, err)
 		assert.Equal(t, catID.String(), resp.ID)
 		assert.Equal(t, "Category", resp.Name)
+	})
+
+	t.Run("returns error when user does not own group", func(t *testing.T) {
+		repo := &MockGroupRepository{}
+		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
+
+		usecase := newTestCategoryUseCase(repo)
+		otherUserID, _ := identifier.NewID()
+
+		resp, err := usecase.Get(context.Background(), otherUserID.String(), group.ID.String(), catID.String())
+		assert.Nil(t, resp)
+		assert.ErrorIs(t, err, tracking.ErrGroupNotFound)
 	})
 
 	t.Run("returns error when category not found", func(t *testing.T) {
@@ -208,7 +255,7 @@ func TestCategoryUseCase_Get(t *testing.T) {
 		usecase := newTestCategoryUseCase(repo)
 
 		newID, _ := identifier.NewID()
-		resp, err := usecase.Get(context.Background(), group.ID.String(), newID.String())
+		resp, err := usecase.Get(context.Background(), validUserID.String(), group.ID.String(), newID.String())
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, tracking.ErrCategoryNotFound)
 	})
@@ -235,10 +282,22 @@ func TestCategoryUseCase_List(t *testing.T) {
 
 		usecase := newTestCategoryUseCase(repo)
 
-		resps, err := usecase.List(context.Background(), group.ID.String())
+		resps, err := usecase.List(context.Background(), validUserID.String(), group.ID.String())
 		require.NoError(t, err)
 		assert.Len(t, resps, 2)
 		assert.Equal(t, catID1.String(), resps[0].ID)
 		assert.Equal(t, catID2.String(), resps[1].ID)
+	})
+
+	t.Run("returns error when user does not own group", func(t *testing.T) {
+		repo := &MockGroupRepository{}
+		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
+
+		usecase := newTestCategoryUseCase(repo)
+		otherUserID, _ := identifier.NewID()
+
+		resps, err := usecase.List(context.Background(), otherUserID.String(), group.ID.String())
+		assert.Nil(t, resps)
+		assert.ErrorIs(t, err, tracking.ErrGroupNotFound)
 	})
 }
