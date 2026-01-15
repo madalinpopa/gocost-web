@@ -112,6 +112,10 @@ staticcheck:
 .PHONY: check
 check: vet staticcheck
 
+.PHONY: vuln
+vuln:
+	govulncheck ./...
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   Run docker commands
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
