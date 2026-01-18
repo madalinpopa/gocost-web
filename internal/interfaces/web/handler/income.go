@@ -33,7 +33,7 @@ func (h *IncomeHandler) CreateIncome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !incomeForm.IsValid() {
-		component := components.AddIncomeForm(&incomeForm)
+		component := components.AddIncomeForm(&incomeForm, h.app.Config.Currency)
 		if err := component.Render(r.Context(), w); err != nil {
 			h.app.Response.Handle.LogServerError(r, err)
 		}
