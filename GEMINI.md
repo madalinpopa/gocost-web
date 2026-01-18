@@ -47,10 +47,11 @@ The project uses a `Makefile` to manage common tasks.
 
 ## Development Conventions
 
-### Code Structure
+### Code Structure and development tips
 *   **Dependency Injection:** The `main.go` file wires up the application. `ApplicationContext` (config, logger, decoder) and `UseCases` are injected into Handlers.
 *   **Configuration:** Environment variables are loaded via `viper`. Local development uses `.envrc` (generated from `envrc.template`).
 *   **Database:** All database changes must be done via migration files in `migrations/`.
+*   **Tests:** Run tests after any code changes to ensure functionality.
 
 ### Frontend Workflow
 1.  **Templ:** UI components are written in `.templ` files. The `make dev` command watches these files and regenerates the corresponding Go code automatically.
