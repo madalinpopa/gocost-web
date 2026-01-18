@@ -36,6 +36,7 @@ type Data struct {
 	Toast       *ToastMessage
 	User        AuthenticatedUser
 	Version     string
+	Currency    string
 }
 
 func (d *Data) SetToast(toastType ToastType, message string) {
@@ -101,5 +102,6 @@ func (t *Template) GetData(r *http.Request) Data {
 		CSRFToken:   nosurf.Token(r),
 		User:        user,
 		Version:     t.config.Version,
+		Currency:    t.config.Currency,
 	}
 }
