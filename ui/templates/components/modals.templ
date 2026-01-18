@@ -229,8 +229,8 @@ templ EditGroupModal() {
 
 templ AddCategoryForm(f *form.CreateCategoryForm, currency string) {
 	{{
-		var nameVal, descVal, typeVal, startVal, endVal, groupIDVal, budgetVal string
-		var nameErr, descErr, typeErr, startErr, endErr, budgetErr string
+		var nameVal, descVal, typeVal, endVal, groupIDVal, budgetVal string
+		var nameErr, descErr, typeErr, endErr, budgetErr string
 		typeVal = "monthly" // Default
 
 		if f != nil {
@@ -239,7 +239,6 @@ templ AddCategoryForm(f *form.CreateCategoryForm, currency string) {
 			if f.Type != "" {
 				typeVal = f.Type
 			}
-			startVal = f.StartMonth
 			endVal = f.EndMonth
 			groupIDVal = f.GroupID
 			if f.Budget > 0 {
@@ -249,7 +248,6 @@ templ AddCategoryForm(f *form.CreateCategoryForm, currency string) {
 			nameErr = f.FieldErrors["category-name"]
 			descErr = f.FieldErrors["category-desc"]
 			typeErr = f.FieldErrors["type"]
-			startErr = f.FieldErrors["category-start"]
 			endErr = f.FieldErrors["category-end"]
 			budgetErr = f.FieldErrors["category-budget"]
 		}
@@ -304,7 +302,6 @@ templ AddCategoryForm(f *form.CreateCategoryForm, currency string) {
 				<p class="mt-2 text-sm text-red-500">{ typeErr }</p>
 			}
 		</div>
-		@InputField("category-start", "Start Month", "YYYY-MM", "month", startVal, startErr)
 		<div x-show="categoryType === 'recurrent'">
 			@InputField("category-end", "End Month", "YYYY-MM", "month", endVal, endErr)
 		</div>
