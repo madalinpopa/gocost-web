@@ -5,56 +5,10 @@ import "github.com/madalinpopa/gocost-web/internal/interfaces/web"
 
 templ Index(data web.Data) {
 	@layouts.Main(data) {
-		<div class="h-full selection:bg-primary-500 selection:text-white flex flex-col relative overflow-hidden">
-			<!-- Main Content Area -->
-			<div class="grow flex flex-col justify-center px-6 py-24 relative z-10">
-				<div class="max-w-md mx-auto w-full space-y-12">
-					<!-- Hero Typography -->
-					<header class="space-y-6">
-						<h1 class="text-6xl sm:text-8xl font-black tracking-tighter leading-[0.85]">
-							OWN
-							<br/>
-							YOUR
-							<br/>
-							<span class="text-primary-500">COST.</span>
-						</h1>
-						<p class="text-xl text-gray-400 font-medium max-w-xs leading-relaxed">
-							The anti-subscription expense tracker. Self-hosted. Open source. brutally simple.
-						</p>
-					</header>
-					<!-- Manifesto / Features List -->
-					<ul class="space-y-6 border-l-2 border-primary-900 pl-6 py-2">
-						<li class="space-y-1">
-							<h3 class="font-bold text-primary-500 uppercase tracking-wider text-xs">01. Privacy First</h3>
-							<p class="text-lg font-bold">Your data, your server.</p>
-						</li>
-						<li class="space-y-1">
-							<h3 class="font-bold text-primary-500 uppercase tracking-wider text-xs">02. Clarity</h3>
-							<p class="text-lg font-bold">Monthly-based tracking.</p>
-						</li>
-						<li class="space-y-1">
-							<h3 class="font-bold text-primary-500 uppercase tracking-wider text-xs">03. Control</h3>
-							<p class="text-lg font-bold">Recurring expenses on autopilot.</p>
-						</li>
-					</ul>
-					<!-- Primary CTA -->
-					<div class="pt-8 space-y-4">
-						<a href="/register" class="group block w-full bg-primary-600 text-slate-950 text-center font-black text-xl py-5 hover:bg-primary-500 transition-all hover:-translate-y-1 shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] hover:shadow-[12px_12px_0px_0px_rgba(255,255,255,0.1)]">
-							START TRACKING
-							<span class="inline-block transition-transform group-hover:translate-x-2 ml-2">&rarr;</span>
-						</a>
-						<a href="/login" class="group block w-full border-2 border-slate-800 text-slate-300 text-center font-bold text-lg py-4 hover:border-primary-500 hover:text-primary-500 transition-colors">
-							ALREADY HAVE AN ACCOUNT? LOGIN
-						</a>
-						<p class="mt-4 text-center text-xs text-gray-600 uppercase tracking-widest">
-							{ data.Version } • Open Source
-						</p>
-					</div>
-				</div>
-			</div>
-			<!-- Background Decoration (Abstract) -->
-			<div class="absolute -right-20 -bottom-40 w-96 h-96 bg-primary-900/20 rounded-full blur-3xl pointer-events-none"></div>
-			<div class="absolute -left-20 top-20 w-72 h-72 bg-primary-900/10 rounded-full blur-3xl pointer-events-none"></div>
+		<div class="h-full selection:bg-primary-500 selection:text-white flex flex-col relative">
+			@Hero(data)
+			@Features()
+			@Workflow()
 		</div>
 	}
 }
