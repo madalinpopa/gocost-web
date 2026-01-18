@@ -14,7 +14,7 @@ templ InputField(id string, label string, placeholder string, inputType string, 
 				name={ id }
 				id={ id }
 				value={ value }
-				class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 text-white ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", err != "") }
+				class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 px-3 text-white ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert", templ.KV("ring-red-500", err != "") }
 				placeholder={ placeholder }
 			/>
 		</div>
@@ -36,7 +36,7 @@ templ AmountField(id string, label string, currency string, value string, err st
 				name={ id }
 				id={ id }
 				value={ value }
-				class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 pl-7 pr-12 text-white ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", err != "") }
+				class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 pl-12 pr-3 text-white ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", err != "") }
 				placeholder="0.00"
 			/>
 		</div>
@@ -50,7 +50,7 @@ templ ModalButtons(cancelText string, confirmText string) {
 	<div class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
 		<button
 			type="submit"
-			class="inline w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2"
+			class="inline w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2"
 		>
 			{ confirmText }
 		</button>
@@ -294,7 +294,7 @@ templ AddCategoryForm(f *form.CreateCategoryForm, currency string) {
 					id="category-type"
 					name="type"
 					x-model="categoryType"
-					class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 text-white ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", typeErr != "") }
+					class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 px-3 text-white ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", typeErr != "") }
 				>
 					<option value="monthly">This month only</option>
 					<option value="recurrent">Recurrent</option>
@@ -393,7 +393,7 @@ templ EditCategoryForm(f *form.UpdateCategoryForm, currency string) {
 					id="edit-category-type"
 					name="type"
 					x-model="categoryType"
-					class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 text-white ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", typeErr != "") }
+					class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 px-3 text-white ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", typeErr != "") }
 				>
 					<option value="monthly">This month only</option>
 					<option value="recurrent">Recurrent</option>
@@ -488,7 +488,7 @@ templ AddExpenseForm(f *form.CreateExpenseForm, currency string) {
 					id="expense-status"
 					name="payment-status"
 					x-model="status"
-					class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 text-white ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", statusErr != "") }
+					class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 px-3 text-white ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", statusErr != "") }
 				>
 					<option value="paid">Paid</option>
 					<option value="unpaid">Unpaid</option>
@@ -573,7 +573,7 @@ templ EditExpenseForm(f *form.UpdateExpenseForm, currency string) {
 					id="edit-status"
 					name="payment-status"
 					x-model="status"
-					class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 text-white ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", statusErr != "") }
+					class={ "block w-full rounded-md border-0 bg-slate-800 py-1.5 px-3 text-white ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", statusErr != "") }
 				>
 					<option value="paid">Paid</option>
 					<option value="unpaid">Unpaid</option>
