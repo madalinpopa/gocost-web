@@ -24,12 +24,12 @@ templ InputField(id string, label string, placeholder string, inputType string, 
 	</div>
 }
 
-templ AmountField(id string, label string, value string, err string) {
+templ AmountField(id string, label string, currency string, value string, err string) {
 	<div>
 		<label for={ id } class="block text-sm font-medium leading-6 text-white">{ label }</label>
 		<div class="relative mt-2 rounded-md shadow-sm">
 			<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-				<span class="text-slate-400 sm:text-sm">$</span>
+				<span class="text-slate-400 sm:text-sm">{ currency }</span>
 			</div>
 			<input
 				type="text"
@@ -50,7 +50,7 @@ templ ModalButtons(cancelText string, confirmText string) {
 	<div class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
 		<button
 			type="submit"
-			class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2"
+			class="inline w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2"
 		>
 			{ confirmText }
 		</button>
@@ -66,7 +66,7 @@ templ ModalButtons(cancelText string, confirmText string) {
 
 // AddIncomeForm is the form content for adding income.
 // It is separated to allow HTMX replacement on validation error without closing the modal.
-templ AddIncomeForm(f *form.CreateIncomeForm) {
+templ AddIncomeForm(f *form.CreateIncomeForm, currency string) {
 	{{
 		var amountVal, descVal, dateVal string
 		var amountErr, descErr, dateErr string
@@ -103,16 +103,16 @@ templ AddIncomeForm(f *form.CreateIncomeForm) {
 				</div>
 			</div>
 		}
-		@AmountField("income-amount", "Amount", amountVal, amountErr)
+		@AmountField("income-amount", "Amount", currency, amountVal, amountErr)
 		@InputField("income-desc", "Description", "Salary, Freelance...", "text", descVal, descErr)
 		@InputField("income-date", "Received At", "", "date", dateVal, dateErr)
 		@ModalButtons("Cancel", "Add Income")
 	</form>
 }
 
-templ AddIncomeModal() {
+templ AddIncomeModal(currency string) {
 	@Modal("add-income-modal", "Add Income") {
-		@AddIncomeForm(nil)
+		@AddIncomeForm(nil, currency)
 	}
 }
 
@@ -227,7 +227,7 @@ templ EditGroupModal() {
 	}
 }
 
-templ AddCategoryForm(f *form.CreateCategoryForm) {
+templ AddCategoryForm(f *form.CreateCategoryForm, currency string) {
 	{{
 		var nameVal, descVal, typeVal, startVal, endVal, groupIDVal, budgetVal string
 		var nameErr, descErr, typeErr, startErr, endErr, budgetErr string
@@ -286,7 +286,7 @@ templ AddCategoryForm(f *form.CreateCategoryForm) {
 		}
 		@InputField("category-name", "Category Name", "Rent, Groceries...", "text", nameVal, nameErr)
 		@InputField("category-desc", "Description", "Details...", "text", descVal, descErr)
-		@AmountField("category-budget", "Budget", budgetVal, budgetErr)
+		@AmountField("category-budget", "Budget", currency, budgetVal, budgetErr)
 		<div>
 			<label for="category-type" class="block text-sm font-medium leading-6 text-white">Type</label>
 			<div class="mt-2">
@@ -312,13 +312,13 @@ templ AddCategoryForm(f *form.CreateCategoryForm) {
 	</form>
 }
 
-templ AddCategoryModal() {
+templ AddCategoryModal(currency string) {
 	@Modal("add-category-modal", "New Category") {
-		@AddCategoryForm(nil)
+		@AddCategoryForm(nil, currency)
 	}
 }
 
-templ EditCategoryForm(f *form.UpdateCategoryForm) {
+templ EditCategoryForm(f *form.UpdateCategoryForm, currency string) {
 	{{
 		var idVal, nameVal, descVal, typeVal, startVal, endVal, groupIDVal, budgetVal string
 		var nameErr, descErr, typeErr, startErr, endErr, budgetErr string
@@ -385,7 +385,7 @@ templ EditCategoryForm(f *form.UpdateCategoryForm) {
 		<input type="hidden" name="group-id" x-model="groupId"/>
 		@InputField("edit-name", "Category Name", "Rent, Groceries...", "text", nameVal, nameErr)
 		@InputField("edit-desc", "Description", "Details...", "text", descVal, descErr)
-		@AmountField("edit-budget", "Budget", budgetVal, budgetErr)
+		@AmountField("edit-budget", "Budget", currency, budgetVal, budgetErr)
 		<div>
 			<label for="edit-category-type" class="block text-sm font-medium leading-6 text-white">Type</label>
 			<div class="mt-2">
@@ -411,13 +411,13 @@ templ EditCategoryForm(f *form.UpdateCategoryForm) {
 	</form>
 }
 
-templ EditCategoryModal() {
+templ EditCategoryModal(currency string) {
 	@Modal("edit-category-modal", "Edit Category") {
-		@EditCategoryForm(nil)
+		@EditCategoryForm(nil, currency)
 	}
 }
 
-templ AddExpenseForm(f *form.CreateExpenseForm) {
+templ AddExpenseForm(f *form.CreateExpenseForm, currency string) {
 	{{
 		var amountVal, descVal, statusVal, categoryIDVal, monthVal string
 		var amountErr, descErr, statusErr, monthErr string
@@ -479,7 +479,7 @@ templ AddExpenseForm(f *form.CreateExpenseForm) {
 				<p class="text-sm text-red-700">{ monthErr }</p>
 			</div>
 		}
-		@AmountField("expense-amount", "Amount", amountVal, amountErr)
+		@AmountField("expense-amount", "Amount", currency, amountVal, amountErr)
 		@InputField("expense-desc", "Description", "Details...", "text", descVal, descErr)
 		<div>
 			<label for="expense-status" class="block text-sm font-medium leading-6 text-white">Payment Status</label>
@@ -502,13 +502,13 @@ templ AddExpenseForm(f *form.CreateExpenseForm) {
 	</form>
 }
 
-templ AddExpenseModal() {
+templ AddExpenseModal(currency string) {
 	@Modal("add-expense-modal", "Add Expense") {
-		@AddExpenseForm(nil)
+		@AddExpenseForm(nil, currency)
 	}
 }
 
-templ EditExpenseForm(f *form.UpdateExpenseForm) {
+templ EditExpenseForm(f *form.UpdateExpenseForm, currency string) {
 	{{
 		var idVal, amountVal, descVal, statusVal, categoryIDVal string
 		var amountErr, descErr, statusErr string
@@ -564,7 +564,7 @@ templ EditExpenseForm(f *form.UpdateExpenseForm) {
 		}
 		<input type="hidden" name="expense-id" x-model="expenseId"/>
 		<input type="hidden" name="category-id" x-model="categoryId"/>
-		@AmountField("edit-amount", "Amount", amountVal, amountErr)
+		@AmountField("edit-amount", "Amount", currency, amountVal, amountErr)
 		@InputField("edit-desc", "Description", "Details...", "text", descVal, descErr)
 		<div>
 			<label for="edit-status" class="block text-sm font-medium leading-6 text-white">Payment Status</label>
@@ -587,9 +587,9 @@ templ EditExpenseForm(f *form.UpdateExpenseForm) {
 	</form>
 }
 
-templ EditExpenseModal() {
+templ EditExpenseModal(currency string) {
 	@Modal("edit-expense-modal", "Edit Expense") {
-		@EditExpenseForm(nil)
+		@EditExpenseForm(nil, currency)
 	}
 }
 
