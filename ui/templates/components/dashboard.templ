@@ -245,7 +245,7 @@ templ CategoryCard(category views.CategoryView, groupId string, month string) {
 }
 
 templ GroupCard(group views.GroupView, month string) {
-	<div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50">
+	<div x-data="{ expanded: true }" class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50">
 		<!-- Group Header -->
 		<div class="border-b border-slate-800 bg-slate-900 px-6 py-4 flex justify-between items-center">
 			<div class="flex items-center gap-3">
@@ -270,15 +270,26 @@ templ GroupCard(group views.GroupView, month string) {
 					</svg>
 				</button>
 			</div>
-			<button
-				@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'add-category-modal', context: { groupId: '%s' } })", group.ID) }
-				class="text-sm text-slate-400 hover:text-indigo-400"
-			>
-				+ Add Category
-			</button>
+			<div class="flex items-center gap-4">
+				<button
+					@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'add-category-modal', context: { groupId: '%s' } })", group.ID) }
+					class="text-sm text-slate-400 hover:text-indigo-400"
+				>
+					+ Add Category
+				</button>
+				<button
+					@click="expanded = !expanded"
+					class="text-slate-500 hover:text-white transition-colors"
+					:title="expanded ? 'Collapse Group' : 'Expand Group'"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 transition-transform duration-200" :class="expanded ? '' : '-rotate-180'">
+						<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5"></path>
+					</svg>
+				</button>
+			</div>
 		</div>
 		<!-- Categories Grid -->
-		<div class="grid grid-cols-1 divide-y divide-slate-800 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
+		<div x-show="expanded" class="grid grid-cols-1 divide-y divide-slate-800 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
 			for _, category := range group.Categories {
 				@CategoryCard(category, group.ID, month)
 			}
