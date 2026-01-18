@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/go-playground/form/v4"
+	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
@@ -26,6 +27,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		mockSession := new(MockSessionManager)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
@@ -79,6 +81,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Response: web.Response{
@@ -115,6 +118,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		mockSession := new(MockSessionManager)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
@@ -158,6 +162,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		mockSession := new(MockSessionManager)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
@@ -203,6 +208,7 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		mockSession := new(MockSessionManager)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
 			Response: web.Response{
@@ -237,6 +243,7 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		mockSession := new(MockSessionManager)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
 			Response: web.Response{
