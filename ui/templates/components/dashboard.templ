@@ -77,13 +77,13 @@ templ DashboardActions() {
 	<div class="flex items-center gap-2">
 		<button
 			@click="$dispatch('open-modal', { id: 'add-income-modal' })"
-			class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+			class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
 		>
 			+ Income
 		</button>
 		<button
 			@click="$dispatch('open-modal', { id: 'add-group-modal' })"
-			class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+			class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
 		>
 			+ New Group
 		</button>
@@ -164,13 +164,13 @@ templ CategoryProgressBar(category views.CategoryView) {
 			}}
 			<div class="flex items-center justify-between text-xs mb-1.5">
 				<span class="text-slate-400">
-					{ category.Currency }{ fmt.Sprintf("%.2f", category.Spent) }
-					<span class="text-slate-600">/ { category.Currency }{ fmt.Sprintf("%.0f", category.Budget) }</span>
+					{ category.Currency } { fmt.Sprintf("%.2f", category.Spent) }
+					<span class="text-slate-600">/ { category.Currency } { fmt.Sprintf("%.0f", category.Budget) }</span>
 				</span>
 				if category.Spent > category.Budget {
-					<span class="text-rose-500 font-medium">-{ category.Currency }{ fmt.Sprintf("%.2f", category.Spent - category.Budget) }</span>
+					<span class="text-rose-500 font-medium">- { category.Currency } { fmt.Sprintf("%.2f", category.Spent - category.Budget) }</span>
 				} else {
-					<span class="text-emerald-500 font-medium">{ category.Currency }{ fmt.Sprintf("%.2f", category.Budget - category.Spent) } left</span>
+					<span class="text-emerald-500 font-medium">{ category.Currency } { fmt.Sprintf("%.2f", category.Budget - category.Spent) } left</span>
 				}
 			</div>
 			<div class="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden">
