@@ -2,6 +2,8 @@
 
 Golang-based web application for personal expense management, focused on a clean monthly workflow and intuitive tracking of recurring and non-recurring costs.
 
+Live demo: [cost.coderustle.ro](https://cost.coderustle.ro)
+
 ## Screenshots
 
 ![Dashboard](./docs/images/dashboard.jpeg)
