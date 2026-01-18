@@ -34,7 +34,7 @@ templ HomePage(data web.Data, dashboard views.DashboardView) {
 			@components.AddIncomeModal(data.Currency)
 			@components.AddGroupModal()
 			@components.EditGroupModal()
-			@components.AddCategoryModal(data.Currency)
+			@components.AddCategoryModal(data.Currency, dashboard.CurrentMonthParam)
 			@components.AddExpenseModal(data.Currency)
 			@components.EditExpenseModal(data.Currency)
 			@components.EditCategoryModal(data.Currency)

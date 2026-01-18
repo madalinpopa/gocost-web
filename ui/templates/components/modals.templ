@@ -227,17 +227,21 @@ templ EditGroupModal() {
 	}
 }
 
-templ AddCategoryForm(f *form.CreateCategoryForm, currency string) {
+templ AddCategoryForm(f *form.CreateCategoryForm, currency string, currentMonth string) {
 	{{
-		var nameVal, descVal, typeVal, endVal, groupIDVal, budgetVal string
+		var nameVal, descVal, typeVal, startVal, endVal, groupIDVal, budgetVal string
 		var nameErr, descErr, typeErr, endErr, budgetErr string
 		typeVal = "monthly" // Default
+		startVal = currentMonth
 
 		if f != nil {
 			nameVal = f.Name
 			descVal = f.Description
 			if f.Type != "" {
 				typeVal = f.Type
+			}
+			if f.StartMonth != "" {
+				startVal = f.StartMonth
 			}
 			endVal = f.EndMonth
 			groupIDVal = f.GroupID
@@ -277,6 +281,7 @@ templ AddCategoryForm(f *form.CreateCategoryForm, currency string) {
 			</div>
 		}
 		<input type="hidden" name="group-id" x-model="groupId"/>
+		<input type="hidden" name="category-start" value={ startVal }/>
 		if f != nil && f.FieldErrors["group-id"] != "" {
 			<div class="rounded-md bg-red-50 p-4 mb-4">
 				<p class="text-sm text-red-700">{ f.FieldErrors["group-id"] }</p>
@@ -309,9 +314,9 @@ templ AddCategoryForm(f *form.CreateCategoryForm, currency string) {
 	</form>
 }
 
-templ AddCategoryModal(currency string) {
+templ AddCategoryModal(currency string, currentMonth string) {
 	@Modal("add-category-modal", "New Category") {
-		@AddCategoryForm(nil, currency)
+		@AddCategoryForm(nil, currency, currentMonth)
 	}
 }
 
