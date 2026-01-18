@@ -48,6 +48,38 @@ func TestConfig_LoadEnvironments(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "Space separated ALLOWED_HOSTS",
+			envVars: map[string]string{
+				"ALLOWED_HOSTS": "localhost example.com",
+				"DOMAIN":        "gocost.ro",
+			},
+			want: &config.Config{
+				Addr:         "0.0.0.0",
+				Port:         4000,
+				Dsn:          "data.sqlite",
+				AllowedHosts: []string{"localhost", "example.com"},
+				Domain:       "gocost.ro",
+				Currency:     "$",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Comma separated ALLOWED_HOSTS",
+			envVars: map[string]string{
+				"ALLOWED_HOSTS": "localhost,example.com",
+				"DOMAIN":        "gocost.ro",
+			},
+			want: &config.Config{
+				Addr:         "0.0.0.0",
+				Port:         4000,
+				Dsn:          "data.sqlite",
+				AllowedHosts: []string{"localhost", "example.com"},
+				Domain:       "gocost.ro",
+				Currency:     "$",
+			},
+			wantErr: false,
+		},
+		{
 			name: "Missing ALLOWED_HOSTS",
 			envVars: map[string]string{
 				"ADMIN_EMAIL":    "admin@example.com",
