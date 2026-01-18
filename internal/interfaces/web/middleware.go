@@ -48,11 +48,11 @@ func (m *Middleware) Headers(next http.Handler) http.Handler {
 		// Set Content-Security-Policy to restrict the sources of content such as scripts, styles, and images
 		w.Header().Set("Content-Security-Policy", strings.TrimSpace(`
 			default-src 'self';
-			script-src 'self' 'unsafe-eval' 'unsafe-inline' cdn.jsdelivr.net;
+			script-src 'self' 'unsafe-eval' 'unsafe-inline' cdn.jsdelivr.net umami.coderustle.dev;
 			style-src 'self' 'unsafe-inline' cdn.jsdelivr.net;
 			img-src 'self' data: cdn.jsdelivr.net api.iconify.design;
 			font-src 'self' cdn.jsdelivr.net;
-			connect-src 'self' api.iconify.design;
+			connect-src 'self' api.iconify.design umami.coderustle.dev;
 			object-src 'none';
 			base-uri 'self';
 			form-action 'self';
