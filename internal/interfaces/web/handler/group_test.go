@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/go-playground/form/v4"
+	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
@@ -26,6 +27,7 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
@@ -72,6 +74,7 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
@@ -109,6 +112,7 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
@@ -150,6 +154,7 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
@@ -193,6 +198,7 @@ func TestGroupHandler_DeleteGroup(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Session: mockSession,
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Response: web.Response{
@@ -226,6 +232,7 @@ func TestGroupHandler_DeleteGroup(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Session: mockSession,
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Response: web.Response{

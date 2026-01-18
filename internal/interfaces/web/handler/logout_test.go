@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -21,6 +22,7 @@ func newTestLogoutHandler(session *MockSessionManager) LogoutHandler {
 	}
 
 	appCtx := HandlerContext{
+		Config:   &config.Config{Currency: "$"},
 		Logger:   logger,
 		Session:  session,
 		Response: web.NewResponse(logger),

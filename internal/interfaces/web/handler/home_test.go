@@ -24,14 +24,15 @@ func TestHomeHandler_ShowHomePage(t *testing.T) {
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
 
+		cfg := &config.Config{Currency: "$"}
 		appCtx := HandlerContext{
+			Config:  cfg,
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
 			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
-			Template: web.NewTemplate(slog.New(slog.NewTextHandler(io.Discard, nil)), nil), // Minimal setup
-			Config:   &config.Config{Currency: "$"},
+			Template: web.NewTemplate(slog.New(slog.NewTextHandler(io.Discard, nil)), cfg),
 		}
 
 		handler := NewHomeHandler(appCtx, mockIncomeUC, mockExpenseUC, mockGroupUC, mockCategoryUC)
@@ -88,12 +89,12 @@ func TestHomeHandler_GetDashboardGroups(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Config: &config.Config{Currency: "$"},
+			Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
 			Response: web.Response{
 				Handle: mockErrorHandler,
 			},
-			Config: &config.Config{Currency: "$"},
 		}
 
 		handler := NewHomeHandler(appCtx, mockIncomeUC, mockExpenseUC, mockGroupUC, mockCategoryUC)

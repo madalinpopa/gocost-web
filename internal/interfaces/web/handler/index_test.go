@@ -15,7 +15,10 @@ import (
 func newTestIndexHandler() IndexHandler {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	templater := web.NewTemplate(logger, config.New())
-	appCtx := HandlerContext{Template: templater}
+	appCtx := HandlerContext{
+		Config:   &config.Config{Currency: "$"},
+		Template: templater,
+	}
 
 	return NewIndexHandler(appCtx)
 }
