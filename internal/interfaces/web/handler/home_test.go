@@ -89,8 +89,8 @@ func TestHomeHandler_GetDashboardGroups(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
-			Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Config:  &config.Config{Currency: "$"},
+			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
 			Response: web.Response{
 				Handle: mockErrorHandler,
