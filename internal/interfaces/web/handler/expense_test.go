@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/go-playground/form/v4"
+	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/domain/expense"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
@@ -29,6 +30,7 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
@@ -81,6 +83,7 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
@@ -129,6 +132,7 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
@@ -164,6 +168,7 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
@@ -207,6 +212,7 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
@@ -252,6 +258,7 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
@@ -307,6 +314,7 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
@@ -339,6 +347,7 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
@@ -387,6 +396,7 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
@@ -432,6 +442,7 @@ func TestExpenseHandler_DeleteExpense(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
 			Response: web.Response{
@@ -465,6 +476,7 @@ func TestExpenseHandler_DeleteExpense(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		appCtx := HandlerContext{
+			Config: &config.Config{Currency: "$"},
 			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
 			Session: mockSession,
 			Response: web.Response{

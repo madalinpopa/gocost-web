@@ -39,7 +39,7 @@ func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 
 	expenseForm.Validate()
 	if !expenseForm.IsValid() {
-		component := components.AddExpenseForm(&expenseForm)
+		component := components.AddExpenseForm(&expenseForm, h.app.Config.Currency)
 		h.app.Template.Render(w, r, component, http.StatusUnprocessableEntity)
 		return
 	}
@@ -72,7 +72,7 @@ func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		errMessage, isUserFacing := translateExpenseError(err)
 		expenseForm.AddNonFieldError(errMessage)
-		component := components.AddExpenseForm(&expenseForm)
+		component := components.AddExpenseForm(&expenseForm, h.app.Config.Currency)
 		h.app.Template.Render(w, r, component, http.StatusUnprocessableEntity)
 
 		if !isUserFacing {
@@ -100,7 +100,7 @@ func (h *ExpenseHandler) EditExpense(w http.ResponseWriter, r *http.Request) {
 
 	expenseForm.Validate()
 	if !expenseForm.IsValid() {
-		component := components.EditExpenseForm(&expenseForm)
+		component := components.EditExpenseForm(&expenseForm, h.app.Config.Currency)
 		h.app.Template.Render(w, r, component, http.StatusUnprocessableEntity)
 		return
 	}
@@ -112,7 +112,7 @@ func (h *ExpenseHandler) EditExpense(w http.ResponseWriter, r *http.Request) {
 		errMessage, isUserFacing := translateExpenseError(err)
 		if isUserFacing {
 			expenseForm.AddNonFieldError(errMessage)
-			component := components.EditExpenseForm(&expenseForm)
+			component := components.EditExpenseForm(&expenseForm, h.app.Config.Currency)
 			h.app.Template.Render(w, r, component, http.StatusUnprocessableEntity)
 			return
 		}
@@ -146,7 +146,7 @@ func (h *ExpenseHandler) EditExpense(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		errMessage, isUserFacing := translateExpenseError(err)
 		expenseForm.AddNonFieldError(errMessage)
-		component := components.EditExpenseForm(&expenseForm)
+		component := components.EditExpenseForm(&expenseForm, h.app.Config.Currency)
 		h.app.Template.Render(w, r, component, http.StatusUnprocessableEntity)
 
 		if !isUserFacing {
