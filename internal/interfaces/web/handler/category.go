@@ -36,7 +36,7 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 
 	categoryForm.Validate()
 	if !categoryForm.IsValid() {
-		component := components.AddCategoryForm(&categoryForm, h.app.Config.Currency)
+		component := components.AddCategoryForm(&categoryForm, h.app.Config.Currency, categoryForm.StartMonth)
 		h.app.Template.Render(w, r, component, http.StatusUnprocessableEntity)
 		return
 	}
@@ -57,7 +57,7 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		errMessage, isUserFacing := translateCategoryError(err)
 		categoryForm.AddNonFieldError(errMessage)
-		component := components.AddCategoryForm(&categoryForm, h.app.Config.Currency)
+		component := components.AddCategoryForm(&categoryForm, h.app.Config.Currency, categoryForm.StartMonth)
 		h.app.Template.Render(w, r, component, http.StatusUnprocessableEntity)
 
 		if !isUserFacing {
