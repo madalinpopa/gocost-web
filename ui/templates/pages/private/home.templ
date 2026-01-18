@@ -31,13 +31,13 @@ templ HomePage(data web.Data, dashboard views.DashboardView) {
 				@components.Spinner()
 			</div>
 			<!-- Modals -->
-			@components.AddIncomeModal()
+			@components.AddIncomeModal(data.Currency)
 			@components.AddGroupModal()
 			@components.EditGroupModal()
-			@components.AddCategoryModal()
-			@components.AddExpenseModal()
-			@components.EditExpenseModal()
-			@components.EditCategoryModal()
+			@components.AddCategoryModal(data.Currency)
+			@components.AddExpenseModal(data.Currency)
+			@components.EditExpenseModal(data.Currency)
+			@components.EditCategoryModal(data.Currency)
 			@components.IncomeListModal()
 		</div>
 	}
