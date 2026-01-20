@@ -147,6 +147,70 @@ func TestCategoryUseCase_Update(t *testing.T) {
 		assert.ErrorIs(t, err, tracking.ErrCategoryNotFound)
 	})
 
+	t.Run("forks recurrent category when updating in future month", func(t *testing.T) {
+		var savedGroup tracking.Group
+		repo := &MockGroupRepository{}
+
+		// Setup clean group and category
+		forkGroup := newTestGroup(t, validUserID)
+		fCatID, _ := identifier.NewID()
+		fName, _ := tracking.NewNameVO("Recurrent Cat")
+		fDesc, _ := tracking.NewDescriptionVO("Desc")
+		fStart, _ := tracking.ParseMonth("2023-01")
+		fBudget, _ := money.NewFromFloat(100.0)
+		_, _ = forkGroup.CreateCategory(fCatID, fName, fDesc, true, fStart, tracking.Month{}, fBudget)
+
+		repo.On("FindByID", mock.Anything, mock.Anything).Return(*forkGroup, nil)
+		repo.On("Save", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+			savedGroup = args.Get(1).(tracking.Group)
+		})
+
+		usecase := newTestCategoryUseCase(repo)
+
+		req := &UpdateCategoryRequest{
+			ID:           fCatID.String(),
+			Name:         "Forked Cat",
+			Description:  "New Desc",
+			StartMonth:   "2023-01", // Original Start
+			CurrentMonth: "2023-03", // Future View
+			IsRecurrent:  true,
+			Budget:       200.0,
+		}
+
+		resp, err := usecase.Update(context.Background(), validUserID.String(), forkGroup.ID.String(), req)
+
+		require.NoError(t, err)
+		assert.NotEqual(t, fCatID.String(), resp.ID) // Response should be the NEW category
+		assert.Equal(t, "Forked Cat", resp.Name)
+		assert.Equal(t, "2023-03", resp.StartMonth)
+		assert.Equal(t, 200.0, resp.Budget)
+
+		// Check saved group state
+		require.Len(t, savedGroup.Categories, 2)
+
+		// Find original category
+		var original, forked *tracking.Category
+		for _, c := range savedGroup.Categories {
+			if c.ID == fCatID {
+				original = c
+			} else {
+				forked = c
+			}
+		}
+
+		require.NotNil(t, original)
+		require.NotNil(t, forked)
+
+		// Original should end in Feb
+		assert.Equal(t, "2023-02", original.EndMonth.Value())
+		assert.Equal(t, "Recurrent Cat", original.Name.Value()) // Should preserve old name
+
+		// Forked should start in March
+		assert.Equal(t, "2023-03", forked.StartMonth.Value())
+		assert.Equal(t, "Forked Cat", forked.Name.Value())
+		assert.Equal(t, 200.0, forked.Budget.Amount())
+	})
+
 	t.Run("updates category and saves group", func(t *testing.T) {
 		var savedGroup tracking.Group
 		repo := &MockGroupRepository{}
