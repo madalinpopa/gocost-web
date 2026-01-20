@@ -94,6 +94,18 @@ func (u CategoryUseCaseImpl) Update(ctx context.Context, userID string, groupID 
 		return nil, err
 	}
 
+	// Find existing category to check properties
+	var existingCategory *tracking.Category
+	for _, c := range group.Categories {
+		if c.ID == cID {
+			existingCategory = c
+			break
+		}
+	}
+	if existingCategory == nil {
+		return nil, tracking.ErrCategoryNotFound
+	}
+
 	name, err := tracking.NewNameVO(req.Name)
 	if err != nil {
 		return nil, err
@@ -122,9 +134,46 @@ func (u CategoryUseCaseImpl) Update(ctx context.Context, userID string, groupID 
 		return nil, err
 	}
 
-	category, err := group.UpdateCategory(cID, name, description, req.IsRecurrent, startMonth, endMonth, budget)
-	if err != nil {
-		return nil, err
+	// Fork Logic
+	shouldFork := false
+	var viewMonth tracking.Month
+	if req.CurrentMonth != "" {
+		viewMonth, err = tracking.ParseMonth(req.CurrentMonth)
+		if err == nil && !viewMonth.IsZero() {
+			// If viewMonth > StartMonth AND user didn't manually change StartMonth
+			if existingCategory.StartMonth.Before(viewMonth) && req.StartMonth == existingCategory.StartMonth.Value() {
+				shouldFork = true
+			}
+		}
+	}
+
+	var category *tracking.Category
+
+	if shouldFork && existingCategory.IsRecurrent {
+		// 1. Terminate old category
+		cutoff := viewMonth.Previous()
+		_, err = group.UpdateCategory(existingCategory.ID, existingCategory.Name, existingCategory.Description, existingCategory.IsRecurrent, existingCategory.StartMonth, cutoff, existingCategory.Budget)
+		if err != nil {
+			return nil, err
+		}
+
+		// 2. Create new category
+		newID, err := identifier.NewID()
+		if err != nil {
+			return nil, err
+		}
+
+		// New category starts at viewMonth (where the user is)
+		category, err = group.CreateCategory(newID, name, description, req.IsRecurrent, viewMonth, endMonth, budget)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// Standard Update
+		category, err = group.UpdateCategory(cID, name, description, req.IsRecurrent, startMonth, endMonth, budget)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	repo := u.uow.TrackingRepository()
