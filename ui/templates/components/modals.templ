@@ -322,7 +322,7 @@ templ AddCategoryModal(currency string, currentMonth string) {
 
 templ EditCategoryForm(f *form.UpdateCategoryForm, currency string) {
 	{{
-		var idVal, nameVal, descVal, typeVal, startVal, endVal, groupIDVal, budgetVal string
+		var idVal, nameVal, descVal, typeVal, startVal, endVal, groupIDVal, budgetVal, currentMonthVal string
 		var nameErr, descErr, typeErr, startErr, endErr, budgetErr string
 		typeVal = "monthly" // Default
 
@@ -336,6 +336,7 @@ templ EditCategoryForm(f *form.UpdateCategoryForm, currency string) {
 			startVal = f.StartMonth
 			endVal = f.EndMonth
 			groupIDVal = f.GroupID
+			currentMonthVal = f.CurrentMonth
 			if f.Budget > 0 {
 				budgetVal = fmt.Sprintf("%.2f", f.Budget)
 			}
@@ -351,11 +352,12 @@ templ EditCategoryForm(f *form.UpdateCategoryForm, currency string) {
 	<form
 		id="edit-category-form"
 		class="space-y-4"
-		x-data={ fmt.Sprintf("{ categoryType: '%s', groupId: '%s', categoryId: '%s' }", typeVal, groupIDVal, idVal) }
+		x-data={ fmt.Sprintf("{ categoryType: '%s', groupId: '%s', categoryId: '%s', viewMonth: '%s' }", typeVal, groupIDVal, idVal, currentMonthVal) }
 		@open-modal.window="if ($event.detail.id === 'edit-category-modal' && $event.detail.context) { 
             categoryId = $event.detail.context.categoryId; 
             groupId = $event.detail.context.groupId; 
             categoryType = $event.detail.context.type ? $event.detail.context.type.toLowerCase() : 'monthly';
+            viewMonth = $event.detail.context.viewMonth || '';
             $nextTick(() => {
                 if ($el.querySelector('#edit-name')) $el.querySelector('#edit-name').value = $event.detail.context.name;
                 if ($el.querySelector('#edit-desc')) $el.querySelector('#edit-desc').value = $event.detail.context.description;
@@ -385,6 +387,7 @@ templ EditCategoryForm(f *form.UpdateCategoryForm, currency string) {
 		}
 		<input type="hidden" name="category-id" x-model="categoryId"/>
 		<input type="hidden" name="group-id" x-model="groupId"/>
+		<input type="hidden" name="current-month" x-model="viewMonth"/>
 		@InputField("edit-name", "Category Name", "Rent, Groceries...", "text", nameVal, nameErr)
 		@InputField("edit-desc", "Description", "Details...", "text", descVal, descErr)
 		@AmountField("edit-budget", "Budget", currency, budgetVal, budgetErr)
