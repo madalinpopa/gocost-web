@@ -31,7 +31,7 @@ func (g *Group) AddCategory(category *Category) error {
 	if category.GroupID != g.ID {
 		return ErrCategoryGroupMismatch
 	}
-	if g.hasCategoryName(category.Name) {
+	if g.hasConflictingCategory(category.Name, category.ID, category.IsRecurrent, category.StartMonth, category.EndMonth) {
 		return ErrCategoryNameExists
 	}
 	g.Categories = append(g.Categories, category)
@@ -61,10 +61,9 @@ func (g *Group) UpdateCategory(id ID, name NameVO, description DescriptionVO, is
 		return nil, ErrCategoryNotFound
 	}
 
-	if !category.Name.Equals(name) {
-		if g.hasCategoryName(name) {
-			return nil, ErrCategoryNameExists
-		}
+	// Check for conflicts with other categories (excluding self)
+	if g.hasConflictingCategory(name, id, isRecurrent, startMonth, endMonth) {
+		return nil, ErrCategoryNameExists
 	}
 
 	// Validate new values
@@ -112,10 +111,24 @@ func (g *Group) CategoriesForMonth(month Month) ([]*Category, error) {
 	return categories, nil
 }
 
-func (g *Group) hasCategoryName(name NameVO) bool {
+func (g *Group) hasConflictingCategory(name NameVO, excludeID ID, isRecurrent bool, start Month, end Month) bool {
+	// Create a temporary category object to check overlap
+	// We don't care about ID/Group/Desc/Budget for overlap check
+	candidate := &Category{
+		Name:        name,
+		IsRecurrent: isRecurrent,
+		StartMonth:  start,
+		EndMonth:    end,
+	}
+
 	for _, category := range g.Categories {
+		if category.ID == excludeID {
+			continue
+		}
 		if category.Name.Equals(name) {
-			return true
+			if category.Overlaps(candidate) {
+				return true
+			}
 		}
 	}
 	return false
@@ -169,4 +182,38 @@ func (c *Category) IsActiveFor(month Month) bool {
 		return true
 	}
 	return !c.EndMonth.Before(month)
+}
+
+func (c *Category) Overlaps(other *Category) bool {
+	// Define intervals [StartA, EndA] and [StartB, EndB]
+	startA := c.StartMonth
+	endA := c.EndMonth
+	if !c.IsRecurrent {
+		endA = c.StartMonth
+	}
+
+	startB := other.StartMonth
+	endB := other.EndMonth
+	if !other.IsRecurrent {
+		endB = other.StartMonth
+	}
+
+	// Check 1: StartA <= EndB
+	// If EndB is infinity (zero), then StartA <= Infinity is always true.
+	// We only check if EndB is NOT zero.
+	if !endB.IsZero() {
+		if endB.Before(startA) {
+			return false // EndB < StartA, so no overlap
+		}
+	}
+
+	// Check 2: StartB <= EndA
+	// If EndA is infinity (zero), then StartB <= Infinity is always true.
+	if !endA.IsZero() {
+		if endA.Before(startB) {
+			return false // EndA < StartB, so no overlap
+		}
+	}
+
+	return true
 }
