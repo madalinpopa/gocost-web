@@ -100,13 +100,14 @@ type CreateCategoryRequest struct {
 }
 
 type UpdateCategoryRequest struct {
-	ID          string  `json:"-"`
-	Name        string  `json:"name" validate:"required,max=100"`
-	Description string  `json:"description" validate:"max=1000"`
-	IsRecurrent bool    `json:"is_recurrent"`
-	StartMonth  string  `json:"start_month" validate:"required"`
-	EndMonth    string  `json:"end_month,omitempty"`
-	Budget      float64 `json:"budget" validate:"min=0"`
+	ID           string  `json:"-"`
+	Name         string  `json:"name" validate:"required,max=100"`
+	Description  string  `json:"description" validate:"max=1000"`
+	IsRecurrent  bool    `json:"is_recurrent"`
+	StartMonth   string  `json:"start_month" validate:"required"`
+	EndMonth     string  `json:"end_month,omitempty"`
+	CurrentMonth string  `json:"current_month,omitempty"`
+	Budget       float64 `json:"budget" validate:"min=0"`
 }
 
 type CreateExpenseRequest struct {
