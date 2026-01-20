@@ -103,6 +103,16 @@ func (m Month) Before(other Month) bool {
 	return m.value < other.value
 }
 
+func (m Month) Previous() Month {
+	t, _ := time.Parse(monthLayout, m.value)
+	return NewMonthFromTime(t.AddDate(0, -1, 0))
+}
+
+func (m Month) Next() Month {
+	t, _ := time.Parse(monthLayout, m.value)
+	return NewMonthFromTime(t.AddDate(0, 1, 0))
+}
+
 type OrderVO struct {
 	value int
 }
