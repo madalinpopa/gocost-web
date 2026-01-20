@@ -240,7 +240,7 @@ templ CategoryHeader(category views.CategoryView, groupId string, month string) 
 				</svg>
 			</button>
 			<button
-				@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'edit-category-modal', context: { categoryId: '%s', groupId: '%s', name: '%s', description: '%s', type: '%s', startMonth: '%s', endMonth: '%s', budget: '%g' } })", category.ID, groupId, category.Name, category.Description, category.Type, category.StartMonth, category.EndMonth, category.Budget) }
+				@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'edit-category-modal', context: { categoryId: '%s', groupId: '%s', name: '%s', description: '%s', type: '%s', startMonth: '%s', endMonth: '%s', budget: '%g', viewMonth: '%s' } })", category.ID, groupId, category.Name, category.Description, category.Type, category.StartMonth, category.EndMonth, category.Budget, month) }
 				class="text-slate-500 hover:text-white"
 				title="Edit Category"
 			>
