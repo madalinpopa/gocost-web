@@ -93,13 +93,14 @@ func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request)
 	isRecurrent := categoryForm.Type == "recurrent"
 
 	req := &usecase.UpdateCategoryRequest{
-		ID:          categoryForm.ID,
-		Name:        categoryForm.Name,
-		Description: categoryForm.Description,
-		IsRecurrent: isRecurrent,
-		StartMonth:  categoryForm.StartMonth,
-		EndMonth:    categoryForm.EndMonth,
-		Budget:      categoryForm.Budget,
+		ID:           categoryForm.ID,
+		Name:         categoryForm.Name,
+		Description:  categoryForm.Description,
+		IsRecurrent:  isRecurrent,
+		StartMonth:   categoryForm.StartMonth,
+		EndMonth:     categoryForm.EndMonth,
+		CurrentMonth: categoryForm.CurrentMonth,
+		Budget:       categoryForm.Budget,
 	}
 
 	userID := h.app.Session.GetUserID(r.Context())
