@@ -60,15 +60,16 @@ func (f *CreateCategoryForm) Validate() {
 }
 
 type UpdateCategoryForm struct {
-	ID          string  `form:"category-id"`
-	GroupID     string  `form:"group-id"`
-	Name        string  `form:"edit-name"`
-	Description string  `form:"edit-desc"`
-	Type        string  `form:"type"`
-	StartMonth  string  `form:"edit-start"`
-	EndMonth    string  `form:"edit-end"`
-	Budget      float64 `form:"edit-budget"`
-	Base        `form:"-"`
+	ID           string  `form:"category-id"`
+	GroupID      string  `form:"group-id"`
+	Name         string  `form:"edit-name"`
+	Description  string  `form:"edit-desc"`
+	Type         string  `form:"type"`
+	StartMonth   string  `form:"edit-start"`
+	EndMonth     string  `form:"edit-end"`
+	CurrentMonth string  `form:"current-month"`
+	Budget       float64 `form:"edit-budget"`
+	Base         `form:"-"`
 }
 
 func (f *UpdateCategoryForm) Validate() {
