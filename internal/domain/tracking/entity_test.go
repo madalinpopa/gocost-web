@@ -467,3 +467,43 @@ func TestCategory_IsActiveFor(t *testing.T) {
 		assert.False(t, category.IsActiveFor(queryMonth))
 	})
 }
+
+func TestGroup_AddCategory_Overlap(t *testing.T) {
+	groupID, _ := identifier.NewID()
+	userID, _ := identifier.NewID()
+	name, _ := NewNameVO("Group")
+	desc, _ := NewDescriptionVO("Desc")
+	order, _ := NewOrderVO(1)
+	group := NewGroup(groupID, userID, name, desc, order)
+
+	catName, _ := NewNameVO("Food")
+	catDesc, _ := NewDescriptionVO("Desc")
+	budget, _ := money.New(100)
+	jan := NewMonthFromTime(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC))
+	feb := NewMonthFromTime(time.Date(2023, 2, 1, 0, 0, 0, 0, time.UTC))
+	mar := NewMonthFromTime(time.Date(2023, 3, 1, 0, 0, 0, 0, time.UTC))
+
+	// 1. Add Jan-Feb
+	id1, _ := identifier.NewID()
+	cat1, _ := NewCategory(id1, groupID, catName, catDesc, true, jan, feb, budget)
+	err := group.AddCategory(cat1)
+	require.NoError(t, err)
+
+	// 2. Add Mar-Inf (Should Succeed)
+	id2, _ := identifier.NewID()
+	cat2, _ := NewCategory(id2, groupID, catName, catDesc, true, mar, Month{}, budget)
+	err = group.AddCategory(cat2)
+	assert.NoError(t, err, "Should allow non-overlapping category with same name")
+
+	// 3. Add Jan-Inf (Should Fail - Overlaps with both)
+	id3, _ := identifier.NewID()
+	cat3, _ := NewCategory(id3, groupID, catName, catDesc, true, jan, Month{}, budget)
+	err = group.AddCategory(cat3)
+	assert.ErrorIs(t, err, ErrCategoryNameExists)
+
+	// 4. Add Feb-Mar (Should Fail - Overlaps with both)
+	id4, _ := identifier.NewID()
+	cat4, _ := NewCategory(id4, groupID, catName, catDesc, true, feb, mar, budget)
+	err = group.AddCategory(cat4)
+	assert.ErrorIs(t, err, ErrCategoryNameExists)
+}
