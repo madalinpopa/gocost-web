@@ -5,7 +5,11 @@ Some features I would like to implement in the coming months.
 ## Phase 1: Core User Experience (High Priority)
 *Focus: Completing the essential user loop and personalization.*
 
-### 1. User Profile & Settings
+### 1. Money Handling Refactor
+- [ ] **Multi-currency Support:** Replace current money implementation with a robust external library (e.g., `rhymond/go-money` or `govalues/decimal`) to handle multiple currencies and exchange rates correctly.
+- [ ] **Migration:** Update existing monetary values in the database to be compatible with the new library structure if necessary.
+
+### 2. User Profile & Settings
 - [ ] **Global Configuration:** Add `DISABLE_REGISTRATION` env var to toggle public sign-ups.
 - [ ] **User Entity Update:** Add `Currency` and `Locale` fields to the `User` entity (Database Migration required).
 - [ ] **Profile Page:** Create a settings page where users can:
