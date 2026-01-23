@@ -28,7 +28,7 @@ func (f *RegisterForm) Validate() {
 		"username",
 		"username must be at most 30 characters long",
 	)
-	f.CheckField(Username(f.Username),
+	f.CheckField(UsernameCharsOnly(f.Username),
 		"username",
 		"username can only contain letters, numbers and underscores",
 	)
