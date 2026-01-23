@@ -63,20 +63,20 @@ templ ToastComponent(toast web.ToastMessage) {
 	>
 		<!-- Icon -->
 		if toast.Type == web.Success {
-			<iconify-icon icon="heroicons:check-circle" class="w-5 h-5 text-accent-600 mr-3 flex-shrink-0"></iconify-icon>
+			<iconify-icon icon="heroicons:check-circle" class="w-5 h-5 text-accent-600 mr-3 shrink-0"></iconify-icon>
 		} else if toast.Type == web.ErrorMsg {
-			<iconify-icon icon="heroicons:x-circle" class="w-5 h-5 text-secondary-600 mr-3 flex-shrink-0"></iconify-icon>
+			<iconify-icon icon="heroicons:x-circle" class="w-5 h-5 text-secondary-600 mr-3 shrink-0"></iconify-icon>
 		} else if toast.Type == web.Warning {
-			<iconify-icon icon="heroicons:exclamation-triangle" class="w-5 h-5 text-amber-600 mr-3 flex-shrink-0"></iconify-icon>
+			<iconify-icon icon="heroicons:exclamation-triangle" class="w-5 h-5 text-amber-600 mr-3 shrink-0"></iconify-icon>
 		} else {
-			<iconify-icon icon="heroicons:information-circle" class="w-5 h-5 text-blue-600 mr-3 flex-shrink-0"></iconify-icon>
+			<iconify-icon icon="heroicons:information-circle" class="w-5 h-5 text-blue-600 mr-3 shrink-0"></iconify-icon>
 		}
 		<!-- Message -->
-		<p class="text-sm font-medium flex-grow">{ toast.Message }</p>
+		<p class="text-sm font-medium grow">{ toast.Message }</p>
 		<!-- Close Button -->
 		<button
 			type="button"
-			class="ml-4 text-primary-400 hover:text-primary-600 focus:outline-none flex-shrink-0"
+			class="ml-4 text-primary-400 hover:text-primary-600 focus:outline-none shrink-0"
 			@click="close()"
 		>
 			<iconify-icon icon="heroicons:x-mark" class="w-5 h-5"></iconify-icon>
@@ -167,7 +167,7 @@ templ ToastEvent() {
 			role="alert"
 		>
 			<!-- Icon -->
-			<div class="mr-3 flex-shrink-0">
+			<div class="mr-3 shrink-0">
 				<iconify-icon
 					:icon="toast ? toast.icon : ''"
 					class="w-5 h-5"
@@ -180,11 +180,11 @@ templ ToastEvent() {
 				></iconify-icon>
 			</div>
 			<!-- Message -->
-			<p class="text-sm font-medium flex-grow" x-text="toast ? toast.message : ''"></p>
+			<p class="text-sm font-medium grow" x-text="toast ? toast.message : ''"></p>
 			<!-- Close Button -->
 			<button
 				type="button"
-				class="ml-4 text-primary-400 hover:text-primary-600 focus:outline-none flex-shrink-0"
+				class="ml-4 text-primary-400 hover:text-primary-600 focus:outline-none shrink-0"
 				@click="hideToast()"
 			>
 				<iconify-icon icon="heroicons:x-mark" class="w-5 h-5"></iconify-icon>
