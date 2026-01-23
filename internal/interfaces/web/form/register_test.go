@@ -60,6 +60,18 @@ func TestRegisterForm_Validate(t *testing.T) {
 			},
 		},
 		{
+			name: "username with spaces",
+			form: RegisterForm{
+				Email:    "user@example.com",
+				Username: "test user",
+				Password: "supersecret",
+			},
+			wantValid: false,
+			wantErrors: map[string]string{
+				"username": "username can only contain letters, numbers and underscores",
+			},
+		},
+		{
 			name: "password too short",
 			form: RegisterForm{
 				Email:    "user@example.com",
@@ -80,9 +92,9 @@ func TestRegisterForm_Validate(t *testing.T) {
 			},
 			wantValid: false,
 			wantErrors: map[string]string{
-				"email":    "please enter a valid e-mail address",
-				"username": "username must be at least 3 characters long",
-				"password": "password must be at least 8 characters long",
+				"email":    "this field is required",
+				"username": "this field is required",
+				"password": "this field is required",
 			},
 		},
 	}
