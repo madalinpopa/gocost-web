@@ -52,7 +52,7 @@ func TestLoginForm_Validate(t *testing.T) {
 			},
 			wantValid: false,
 			wantErrors: map[string]string{
-				"email":    "please enter a valid e-mail address",
+				"email":    "this field is required",
 				"password": "this field is required",
 			},
 		},
