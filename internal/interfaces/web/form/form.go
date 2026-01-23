@@ -28,7 +28,9 @@ func (b *Base) AddFieldError(key, message string) {
 	if b.FieldErrors == nil {
 		b.FieldErrors = make(map[string]string)
 	}
-	b.FieldErrors[key] = message
+	if _, exists := b.FieldErrors[key]; !exists {
+		b.FieldErrors[key] = message
+	}
 }
 
 func (b *Base) AddNonFieldError(message string) {
