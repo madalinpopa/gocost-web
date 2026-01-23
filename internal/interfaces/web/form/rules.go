@@ -13,6 +13,8 @@ import (
 // MailRX is a regular expression used to validate the format of email addresses.
 var MailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
+var usernameCharsRX = regexp.MustCompile(`^[a-zA-Z0-9_]*$`)
+
 // NotBlank checks if the provided string is not empty or whitespace-only and returns true if valid, false otherwise.
 func NotBlank(value string) bool {
 	return strings.TrimSpace(value) != ""
@@ -54,10 +56,9 @@ func Number(value string) bool {
 	return err == nil
 }
 
-// Username checks if the given username is 3-30 characters long and contains only alphanumeric characters or underscores.
-func Username(username string) bool {
-	usernameRegex := regexp.MustCompile(`^[a-zA-Z0-9_]{3,30}$`)
-	return usernameRegex.MatchString(username)
+// UsernameCharsOnly checks if a string contains only allowed username characters.
+func UsernameCharsOnly(value string) bool {
+	return usernameCharsRX.MatchString(value)
 }
 
 // MaxNumber checks if the given value is less than or equal to the specified maximum limit.

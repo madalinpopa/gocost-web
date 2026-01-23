@@ -147,7 +147,7 @@ func TestRegisterHandler_SubmitRegisterForm(t *testing.T) {
 		assert.Equal(t, http.StatusUnprocessableEntity, res.StatusCode)
 		body := rec.Body.String()
 		assert.Contains(t, body, "please enter a valid e-mail address")
-		assert.Contains(t, body, "username must be at least 3 characters long")
+		assert.Contains(t, body, "this field is required")
 		assert.Contains(t, body, "password must be at least 8 characters long")
 
 		auth.AssertNotCalled(t, "Register", mock.Anything, mock.Anything)
