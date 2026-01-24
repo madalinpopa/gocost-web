@@ -15,6 +15,7 @@ import (
 	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/domain/identity"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/respond"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -25,6 +26,7 @@ func newTestRegisterHandler(session *MockSessionManager, auth *MockAuthUseCase) 
 	cfg := config.New()
 	templater := web.NewTemplate(logger, cfg)
 	decoder := form.NewDecoder()
+	errHandler := respond.NewErrorHandler(logger)
 
 	if session == nil {
 		session = new(MockSessionManager)
@@ -39,7 +41,9 @@ func newTestRegisterHandler(session *MockSessionManager, auth *MockAuthUseCase) 
 		Decoder:  decoder,
 		Session:  session,
 		Template: templater,
-		Response: web.NewResponse(logger),
+		Errors:   errHandler,
+		Htmx:     respond.NewHtmx(errHandler),
+		Notify:   respond.NewNotify(logger),
 	}
 
 	return NewRegisterHandler(appCtx, auth)
