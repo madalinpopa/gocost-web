@@ -64,7 +64,7 @@ func (h *GroupHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Success - trigger dashboard refresh and toast.
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Group created.", "add-group-modal")
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Group created successfully.", "add-group-modal")
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -110,7 +110,7 @@ func (h *GroupHandler) UpdateGroup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Success - trigger dashboard refresh and toast.
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Group updated.", "edit-group-modal")
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Group updated successfully.", "edit-group-modal")
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -123,7 +123,7 @@ func (h *GroupHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Group deleted.", "")
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Group deleted successfully.", "")
 	w.WriteHeader(http.StatusNoContent)
 }
 

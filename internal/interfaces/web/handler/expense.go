@@ -83,7 +83,7 @@ func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Success
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Expense created.", "add-expense-modal")
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Expense created successfully.", "add-expense-modal")
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -157,7 +157,7 @@ func (h *ExpenseHandler) EditExpense(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Success
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Expense updated.", "edit-expense-modal")
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Expense updated successfully.", "edit-expense-modal")
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -170,7 +170,7 @@ func (h *ExpenseHandler) DeleteExpense(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Expense deleted.", "")
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Expense deleted successfully.", "")
 	w.WriteHeader(http.StatusNoContent)
 }
 

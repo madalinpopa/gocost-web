@@ -60,7 +60,7 @@ func (h *IncomeHandler) CreateIncome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Income created.", "add-income-modal")
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Income created successfully.", "add-income-modal")
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -94,6 +94,6 @@ func (h *IncomeHandler) DeleteIncome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Income deleted.", "")
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Income deleted successfully.", "")
 	w.WriteHeader(http.StatusOK)
 }

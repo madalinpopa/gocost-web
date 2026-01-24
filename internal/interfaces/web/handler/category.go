@@ -68,7 +68,7 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Success - trigger dashboard refresh and toast.
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Category created.", "add-category-modal")
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Category created successfully.", "add-category-modal")
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -119,7 +119,7 @@ func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Success - trigger dashboard refresh and toast.
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Category updated.", "edit-category-modal")
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Category updated successfully.", "edit-category-modal")
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -133,7 +133,7 @@ func (h *CategoryHandler) DeleteCategory(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Category deleted.", "")
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Category deleted successfully.", "")
 	w.WriteHeader(http.StatusNoContent)
 }
 
