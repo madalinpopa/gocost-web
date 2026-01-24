@@ -46,7 +46,7 @@ func (hh HomeHandler) ShowHomePage(w http.ResponseWriter, r *http.Request) {
 
 	dashboardData, err := hh.fetchDashboardData(r.Context(), data.User.ID, currentDate)
 	if err != nil {
-		hh.app.Response.Handle.LogServerError(r, err)
+		hh.app.Errors.LogServerError(r, err)
 		return
 	}
 
@@ -66,7 +66,7 @@ func (hh HomeHandler) GetDashboardGroups(w http.ResponseWriter, r *http.Request)
 
 	dashboardData, err := hh.fetchDashboardData(r.Context(), userID, currentDate)
 	if err != nil {
-		hh.app.Response.Handle.LogServerError(r, err)
+		hh.app.Errors.LogServerError(r, err)
 		return
 	}
 
@@ -86,13 +86,13 @@ func (hh HomeHandler) GetDashboardGroups(w http.ResponseWriter, r *http.Request)
 	// Month Navigation
 	err = components.MonthNavigation(dashboardData, true).Render(r.Context(), w)
 	if err != nil {
-		hh.app.Response.Handle.LogServerError(r, err)
+		hh.app.Errors.LogServerError(r, err)
 	}
 
 	// Balance Display
 	err = components.BalanceDisplay(dashboardData, true).Render(r.Context(), w)
 	if err != nil {
-		hh.app.Response.Handle.LogServerError(r, err)
+		hh.app.Errors.LogServerError(r, err)
 	}
 }
 

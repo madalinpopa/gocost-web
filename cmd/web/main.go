@@ -15,6 +15,7 @@ import (
 	"github.com/madalinpopa/gocost-web/internal/infrastructure/storage/sqlite"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/handler"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/respond"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/router"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 )
@@ -37,8 +38,10 @@ type application struct {
 func newApplication(db *sql.DB, logger *slog.Logger, conf *config.Config) *application {
 	tt := web.NewTemplate(logger, conf)
 	ss := web.NewSession(db, conf)
-	mm := web.NewMiddleware(logger, conf, ss)
-	r := web.NewResponse(logger)
+	errHandler := respond.NewErrorHandler(logger)
+	notify := respond.NewNotify(logger)
+	htmx := respond.NewHtmx(errHandler)
+	mm := web.NewMiddleware(logger, conf, ss, errHandler)
 	fd := form.NewDecoder()
 
 	fd.RegisterCustomTypeFunc(func(vals []string) (any, error) {
@@ -52,7 +55,9 @@ func newApplication(db *sql.DB, logger *slog.Logger, conf *config.Config) *appli
 		Logger:   logger,
 		Decoder:  fd,
 		Template: tt,
-		Response: r,
+		Errors:   errHandler,
+		Htmx:     htmx,
+		Notify:   notify,
 		Session:  ss,
 	}
 

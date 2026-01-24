@@ -3,13 +3,12 @@ package handler
 import (
 	"log/slog"
 
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/respond"
 )
 
-func newTestResponse(logger *slog.Logger, errHandler web.ErrorHandler) web.Response {
-	resp := web.NewResponse(logger)
+func newTestErrors(logger *slog.Logger, errHandler respond.ErrorHandler) respond.ErrorHandler {
 	if errHandler != nil {
-		resp.Handle = errHandler
+		return errHandler
 	}
-	return resp
+	return respond.NewErrorHandler(logger)
 }

@@ -28,13 +28,13 @@ func NewExpenseHandler(app HandlerContext, expense usecase.ExpenseUseCase) Expen
 
 func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		h.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	var expenseForm form.CreateExpenseForm
 	if err := h.app.Decoder.Decode(&expenseForm, r.PostForm); err != nil {
-		h.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
@@ -47,7 +47,7 @@ func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 
 	spentAt, err := time.Parse("2006-01", expenseForm.Month)
 	if err != nil {
-		h.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
@@ -83,19 +83,19 @@ func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Success
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Expense created successfully.", "add-expense-modal")
+	triggerDashboardRefresh(w, h.app.Notify, web.Success, "Expense created successfully.", "add-expense-modal")
 	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *ExpenseHandler) EditExpense(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		h.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	var expenseForm form.UpdateExpenseForm
 	if err := h.app.Decoder.Decode(&expenseForm, r.PostForm); err != nil {
-		h.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
@@ -118,7 +118,7 @@ func (h *ExpenseHandler) EditExpense(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		h.app.Logger.Error("failed to fetch expense for edit", "error", err)
-		h.app.Response.Handle.Error(w, r, http.StatusInternalServerError, err)
+		h.app.Errors.Error(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -157,7 +157,7 @@ func (h *ExpenseHandler) EditExpense(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Success
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Expense updated successfully.", "edit-expense-modal")
+	triggerDashboardRefresh(w, h.app.Notify, web.Success, "Expense updated successfully.", "edit-expense-modal")
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -166,11 +166,11 @@ func (h *ExpenseHandler) DeleteExpense(w http.ResponseWriter, r *http.Request) {
 	expenseID := r.PathValue("id")
 
 	if err := h.expense.Delete(r.Context(), userID, expenseID); err != nil {
-		h.app.Response.Handle.Error(w, r, http.StatusInternalServerError, err)
+		h.app.Errors.Error(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Expense deleted successfully.", "")
+	triggerDashboardRefresh(w, h.app.Notify, web.Success, "Expense deleted successfully.", "")
 	w.WriteHeader(http.StatusNoContent)
 }
 

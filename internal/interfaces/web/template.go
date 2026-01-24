@@ -13,22 +13,6 @@ import (
 	"github.com/madalinpopa/gocost-web/internal/config"
 )
 
-type ToastType string
-
-const (
-	Success  ToastType = "success"
-	ErrorMsg ToastType = "error"
-	Warning  ToastType = "warning"
-	Info     ToastType = "info"
-)
-
-type ToastMessage struct {
-	Type    ToastType
-	Message string
-	Style   string
-	ID      string
-}
-
 type Data struct {
 	Title       string
 	CurrentYear int
@@ -58,7 +42,6 @@ func (d *Data) SetToast(toastType ToastType, message string) {
 type Template struct {
 	logger *slog.Logger
 	config *config.Config
-	data   Data
 }
 
 func NewTemplate(l *slog.Logger, c *config.Config) *Template {
@@ -86,7 +69,6 @@ func (t *Template) Render(w http.ResponseWriter, r *http.Request, c templ.Compon
 	_, err := buff.WriteTo(w)
 	if err != nil {
 		t.logger.Error(err.Error(), "method", method, "url", url, "trace", trace)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 }
 

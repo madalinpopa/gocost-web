@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/madalinpopa/gocost-web/internal/config"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/respond"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -21,11 +21,15 @@ func newTestLogoutHandler(session *MockSessionManager) LogoutHandler {
 		session = new(MockSessionManager)
 	}
 
+	errHandler := respond.NewErrorHandler(logger)
+
 	appCtx := HandlerContext{
-		Config:   &config.Config{Currency: "$"},
-		Logger:   logger,
-		Session:  session,
-		Response: web.NewResponse(logger),
+		Config:  &config.Config{Currency: "$"},
+		Logger:  logger,
+		Session: session,
+		Errors:  errHandler,
+		Htmx:    respond.NewHtmx(errHandler),
+		Notify:  respond.NewNotify(logger),
 	}
 
 	return NewLogoutHandler(appCtx, new(MockAuthUseCase))

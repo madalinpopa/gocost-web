@@ -23,12 +23,12 @@ func (h *LogoutHandler) SubmitLogout(w http.ResponseWriter, r *http.Request) {
 	h.app.Logger.Info("user logout", "user_id", userID)
 
 	if err := h.app.Session.RenewToken(r.Context()); err != nil {
-		h.app.Response.Handle.ServerError(w, r, err)
+		h.app.Errors.ServerError(w, r, err)
 		return
 	}
 
 	if err := h.app.Session.Destroy(r.Context()); err != nil {
-		h.app.Response.Handle.ServerError(w, r, err)
+		h.app.Errors.ServerError(w, r, err)
 		return
 	}
 

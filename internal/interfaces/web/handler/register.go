@@ -37,13 +37,13 @@ func (rh RegisterHandler) ShowRegisterForm(w http.ResponseWriter, r *http.Reques
 
 func (rh RegisterHandler) SubmitRegisterForm(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		rh.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		rh.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	var registerForm form.RegisterForm
 	if err := rh.app.Decoder.Decode(&registerForm, r.PostForm); err != nil {
-		rh.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		rh.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
@@ -68,7 +68,7 @@ func (rh RegisterHandler) SubmitRegisterForm(w http.ResponseWriter, r *http.Requ
 		component := public.RegisterForm(registerForm)
 		rh.app.Template.Render(w, r, component, http.StatusUnprocessableEntity)
 		if !isUserFacing {
-			rh.app.Response.Handle.Error(w, r, http.StatusInternalServerError, err)
+			rh.app.Errors.Error(w, r, http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -76,7 +76,7 @@ func (rh RegisterHandler) SubmitRegisterForm(w http.ResponseWriter, r *http.Requ
 	// Renew session token
 	err = rh.app.Session.RenewToken(r.Context())
 	if err != nil {
-		rh.app.Response.Handle.Error(
+		rh.app.Errors.Error(
 			w, r,
 			http.StatusInternalServerError,
 			fmt.Errorf("failed to renew session token: %w", err),
@@ -89,7 +89,7 @@ func (rh RegisterHandler) SubmitRegisterForm(w http.ResponseWriter, r *http.Requ
 	rh.app.Session.SetUsername(r.Context(), userResponse.Username)
 
 	// Redirect to admin home
-	rh.app.Response.Htmx.Redirect(w, "/home")
+	rh.app.Htmx.Redirect(w, "/home")
 }
 
 func translateError(err error) (string, bool) {

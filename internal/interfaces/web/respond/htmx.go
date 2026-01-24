@@ -1,19 +1,16 @@
-package web
+package respond
 
 import (
 	"encoding/json"
-	"log/slog"
 	"net/http"
 )
 
 type htmx struct {
-	logger     *slog.Logger
 	errHandler ErrorHandler
 }
 
-func newHtmx(l *slog.Logger, h ErrorHandler) htmx {
+func NewHtmx(h ErrorHandler) HtmxHandler {
 	return htmx{
-		logger:     l,
 		errHandler: h,
 	}
 }

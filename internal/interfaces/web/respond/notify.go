@@ -1,4 +1,4 @@
-package web
+package respond
 
 import (
 	"encoding/json"
@@ -10,18 +10,9 @@ type notify struct {
 	logger *slog.Logger
 }
 
-func newNotify(l *slog.Logger) notify {
+func NewNotify(l *slog.Logger) NotifyHandler {
 	return notify{
 		logger: l,
-	}
-}
-
-func ToastEvent(t ToastType, message string) map[string]any {
-	return map[string]any{
-		"showToast": map[string]string{
-			"level":   string(t),
-			"message": message,
-		},
 	}
 }
 
@@ -30,14 +21,12 @@ func (n notify) Trigger(w http.ResponseWriter, events map[string]any) {
 		return
 	}
 
-	// Create a notification payload matching the required structure
 	notificationJSON, err := json.Marshal(events)
 	if err != nil {
 		n.logger.Error("failed to marshal notification", "error", err.Error())
 		return
 	}
 
-	// Set the HX-Trigger header with the JSON content
 	w.Header().Set("HX-Trigger", string(notificationJSON))
 }
 

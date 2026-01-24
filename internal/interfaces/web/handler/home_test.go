@@ -10,6 +10,7 @@ import (
 
 	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/respond"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
 )
@@ -25,14 +26,14 @@ func TestHomeHandler_ShowHomePage(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 
 		cfg := &config.Config{Currency: "$"}
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 		appCtx := HandlerContext{
-			Config:  cfg,
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
-			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
-			Template: web.NewTemplate(slog.New(slog.NewTextHandler(io.Discard, nil)), cfg),
+			Config:   cfg,
+			Logger:   logger,
+			Session:  mockSession,
+			Errors:   mockErrorHandler,
+			Notify:   respond.NewNotify(logger),
+			Template: web.NewTemplate(logger, cfg),
 		}
 
 		handler := NewHomeHandler(appCtx, mockIncomeUC, mockExpenseUC, mockGroupUC, mockCategoryUC)
@@ -87,14 +88,14 @@ func TestHomeHandler_GetDashboardGroups(t *testing.T) {
 		mockCategoryUC := new(MockCategoryUseCase)
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config:  &config.Config{Currency: "$"},
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Errors:  mockErrorHandler,
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewHomeHandler(appCtx, mockIncomeUC, mockExpenseUC, mockGroupUC, mockCategoryUC)

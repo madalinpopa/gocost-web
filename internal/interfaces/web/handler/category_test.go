@@ -13,6 +13,7 @@ import (
 	"github.com/go-playground/form/v4"
 	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/respond"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -27,11 +28,12 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewCategoryHandler(appCtx, mockCategoryUC)
@@ -80,10 +82,11 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewCategoryHandler(appCtx, mockCategoryUC)
@@ -116,11 +119,12 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewCategoryHandler(appCtx, mockCategoryUC)
@@ -159,11 +163,12 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewCategoryHandler(appCtx, mockCategoryUC)
@@ -204,10 +209,11 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Logger:  logger,
 			Session: mockSession,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewCategoryHandler(appCtx, mockCategoryUC)
@@ -238,10 +244,11 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Logger:  logger,
 			Session: mockSession,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewCategoryHandler(appCtx, mockCategoryUC)

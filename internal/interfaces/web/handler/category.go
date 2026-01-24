@@ -25,13 +25,13 @@ func NewCategoryHandler(app HandlerContext, category usecase.CategoryUseCase) Ca
 
 func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		h.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	var categoryForm form.CreateCategoryForm
 	if err := h.app.Decoder.Decode(&categoryForm, r.PostForm); err != nil {
-		h.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
@@ -68,19 +68,19 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Success - trigger dashboard refresh and toast.
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Category created successfully.", "add-category-modal")
+	triggerDashboardRefresh(w, h.app.Notify, web.Success, "Category created successfully.", "add-category-modal")
 	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		h.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	var categoryForm form.UpdateCategoryForm
 	if err := h.app.Decoder.Decode(&categoryForm, r.PostForm); err != nil {
-		h.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
@@ -119,7 +119,7 @@ func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Success - trigger dashboard refresh and toast.
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Category updated successfully.", "edit-category-modal")
+	triggerDashboardRefresh(w, h.app.Notify, web.Success, "Category updated successfully.", "edit-category-modal")
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -129,11 +129,11 @@ func (h *CategoryHandler) DeleteCategory(w http.ResponseWriter, r *http.Request)
 	userID := h.app.Session.GetUserID(r.Context())
 
 	if err := h.category.Delete(r.Context(), userID, groupID, categoryID); err != nil {
-		h.app.Response.Handle.Error(w, r, http.StatusInternalServerError, err)
+		h.app.Errors.Error(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Category deleted successfully.", "")
+	triggerDashboardRefresh(w, h.app.Notify, web.Success, "Category deleted successfully.", "")
 	w.WriteHeader(http.StatusNoContent)
 }
 

@@ -25,13 +25,13 @@ func NewGroupHandler(app HandlerContext, group usecase.GroupUseCase) GroupHandle
 
 func (h *GroupHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		h.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	var groupForm form.CreateGroupForm
 	if err := h.app.Decoder.Decode(&groupForm, r.PostForm); err != nil {
-		h.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
@@ -64,19 +64,19 @@ func (h *GroupHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Success - trigger dashboard refresh and toast.
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Group created successfully.", "add-group-modal")
+	triggerDashboardRefresh(w, h.app.Notify, web.Success, "Group created successfully.", "add-group-modal")
 	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *GroupHandler) UpdateGroup(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		h.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	var groupForm form.UpdateGroupForm
 	if err := h.app.Decoder.Decode(&groupForm, r.PostForm); err != nil {
-		h.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
@@ -110,7 +110,7 @@ func (h *GroupHandler) UpdateGroup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Success - trigger dashboard refresh and toast.
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Group updated successfully.", "edit-group-modal")
+	triggerDashboardRefresh(w, h.app.Notify, web.Success, "Group updated successfully.", "edit-group-modal")
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -119,11 +119,11 @@ func (h *GroupHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
 	groupID := r.PathValue("id")
 
 	if err := h.group.Delete(r.Context(), userID, groupID); err != nil {
-		h.app.Response.Handle.Error(w, r, http.StatusInternalServerError, err)
+		h.app.Errors.Error(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Group deleted successfully.", "")
+	triggerDashboardRefresh(w, h.app.Notify, web.Success, "Group deleted successfully.", "")
 	w.WriteHeader(http.StatusNoContent)
 }
 
