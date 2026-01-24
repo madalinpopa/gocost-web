@@ -11,6 +11,7 @@ import (
 
 	"github.com/justinas/nosurf"
 	"github.com/madalinpopa/gocost-web/internal/config"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/respond"
 )
 
 // responseWriter is a wrapper around responseWriter that captures the status code of the response.
@@ -29,16 +30,19 @@ type Middleware struct {
 	logger  *slog.Logger
 	config  *config.Config
 	session AuthSessionManager
-	res     Response
+	errors  respond.ErrorHandler
 }
 
-func NewMiddleware(l *slog.Logger, c *config.Config, s AuthSessionManager) *Middleware {
-	res := NewResponse(l)
+func NewMiddleware(l *slog.Logger, c *config.Config, s AuthSessionManager, errors respond.ErrorHandler) *Middleware {
+	if errors == nil {
+		errors = respond.NewErrorHandler(l)
+	}
+
 	return &Middleware{
 		logger:  l,
 		config:  c,
 		session: s,
-		res:     res,
+		errors:  errors,
 	}
 }
 
@@ -110,12 +114,10 @@ func (m *Middleware) Logging(next http.Handler) http.Handler {
 // Recover handles panics during HTTP request processing, logs the error, and sends a 500 response with connection closed.
 func (m *Middleware) Recover(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		res := NewResponse(m.logger)
-
 		defer func() {
 			if err := recover(); err != nil {
 				w.Header().Set("Connection", "close")
-				res.Handle.ServerError(w, r, fmt.Errorf("%s", err))
+				m.errors.ServerError(w, r, fmt.Errorf("%s", err))
 			}
 		}()
 
@@ -233,7 +235,7 @@ func (m *Middleware) LoginRequired(next http.Handler) http.Handler {
 			// Session exists, but user data is missing - possible tampering
 			if err := m.session.Destroy(r.Context()); err != nil {
 				m.logger.Error(err.Error(), "method", r.Method, "url", r.URL.RequestURI())
-				m.res.Handle.LogServerError(r, fmt.Errorf("failed to destroy session: %w", err))
+				m.errors.LogServerError(r, fmt.Errorf("failed to destroy session: %w", err))
 			}
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
