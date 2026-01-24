@@ -13,7 +13,6 @@ import (
 	"github.com/go-playground/form/v4"
 	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -25,15 +24,14 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		mockCategoryUC := new(MockCategoryUseCase)
 		mockErrorHandler := new(MockErrorHandler)
 		mockSession := new(MockSessionManager)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewCategoryHandler(appCtx, mockCategoryUC)
@@ -69,8 +67,8 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		handler.CreateCategory(rec, req)
 
 		// Assert
-		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, "true", rec.Header().Get("HX-Refresh"))
+		assert.Equal(t, http.StatusNoContent, rec.Code)
+		assert.Contains(t, rec.Header().Get("HX-Trigger"), "dashboard:refresh")
 		mockCategoryUC.AssertExpectations(t)
 		mockSession.AssertExpectations(t)
 	})
@@ -79,14 +77,13 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		// Arrange
 		mockCategoryUC := new(MockCategoryUseCase)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Logger:  logger,
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewCategoryHandler(appCtx, mockCategoryUC)
@@ -116,15 +113,14 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		mockCategoryUC := new(MockCategoryUseCase)
 		mockErrorHandler := new(MockErrorHandler)
 		mockSession := new(MockSessionManager)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewCategoryHandler(appCtx, mockCategoryUC)
@@ -160,15 +156,14 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		mockCategoryUC := new(MockCategoryUseCase)
 		mockErrorHandler := new(MockErrorHandler)
 		mockSession := new(MockSessionManager)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewCategoryHandler(appCtx, mockCategoryUC)
@@ -206,14 +201,13 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		mockCategoryUC := new(MockCategoryUseCase)
 		mockErrorHandler := new(MockErrorHandler)
 		mockSession := new(MockSessionManager)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewCategoryHandler(appCtx, mockCategoryUC)
@@ -230,8 +224,8 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		handler.DeleteCategory(rec, req)
 
 		// Assert
-		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, "true", rec.Header().Get("HX-Refresh"))
+		assert.Equal(t, http.StatusNoContent, rec.Code)
+		assert.Contains(t, rec.Header().Get("HX-Trigger"), "dashboard:refresh")
 		mockCategoryUC.AssertExpectations(t)
 		mockSession.AssertExpectations(t)
 	})
@@ -241,14 +235,13 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		mockCategoryUC := new(MockCategoryUseCase)
 		mockErrorHandler := new(MockErrorHandler)
 		mockSession := new(MockSessionManager)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewCategoryHandler(appCtx, mockCategoryUC)
