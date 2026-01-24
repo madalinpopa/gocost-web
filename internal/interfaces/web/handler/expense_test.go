@@ -15,7 +15,6 @@ import (
 	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/domain/expense"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
@@ -28,15 +27,14 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -70,8 +68,8 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		handler.CreateExpense(rec, req)
 
 		// Assert
-		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, "true", rec.Header().Get("HX-Refresh"))
+		assert.Equal(t, http.StatusNoContent, rec.Code)
+		assert.Contains(t, rec.Header().Get("HX-Trigger"), "dashboard:refresh")
 		mockSession.AssertExpectations(t)
 		mockExpenseUC.AssertExpectations(t)
 	})
@@ -81,15 +79,14 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -120,7 +117,8 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		handler.CreateExpense(rec, req)
 
 		// Assert
-		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, http.StatusNoContent, rec.Code)
+		assert.Contains(t, rec.Header().Get("HX-Trigger"), "dashboard:refresh")
 		mockSession.AssertExpectations(t)
 		mockExpenseUC.AssertExpectations(t)
 	})
@@ -130,15 +128,14 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -166,15 +163,14 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -210,15 +206,14 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -256,15 +251,14 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -301,8 +295,8 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		handler.EditExpense(rec, req)
 
 		// Assert
-		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, "true", rec.Header().Get("HX-Refresh"))
+		assert.Equal(t, http.StatusNoContent, rec.Code)
+		assert.Contains(t, rec.Header().Get("HX-Trigger"), "dashboard:refresh")
 		mockSession.AssertExpectations(t)
 		mockExpenseUC.AssertExpectations(t)
 	})
@@ -312,15 +306,14 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -345,15 +338,14 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -394,15 +386,14 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -440,14 +431,13 @@ func TestExpenseHandler_DeleteExpense(t *testing.T) {
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -463,8 +453,8 @@ func TestExpenseHandler_DeleteExpense(t *testing.T) {
 		handler.DeleteExpense(rec, req)
 
 		// Assert
-		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, "true", rec.Header().Get("HX-Refresh"))
+		assert.Equal(t, http.StatusNoContent, rec.Code)
+		assert.Contains(t, rec.Header().Get("HX-Trigger"), "dashboard:refresh")
 		mockSession.AssertExpectations(t)
 		mockExpenseUC.AssertExpectations(t)
 	})
@@ -474,14 +464,13 @@ func TestExpenseHandler_DeleteExpense(t *testing.T) {
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config: &config.Config{Currency: "$"},
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Logger:  logger,
 			Session: mockSession,
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
