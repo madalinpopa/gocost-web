@@ -19,8 +19,8 @@ Some features I would like to implement in the coming months.
 
 ### 2. Feedback System (Toast Notifications)
 - [x] **Scaffolding:** Basic Templ component and Handler logic exist.
-- [ ] **Integration:** Ensure seamless bridge between Server-Side `HX-Trigger` events and Client-Side Alpine.js toast manager.
-- [ ] **Standardization:** Replace all ad-hoc alerts/redirects with standardized Toast feedback for:
+- [x] **Integration:** Ensure seamless bridge between Server-Side `HX-Trigger` events and Client-Side Alpine.js toast manager.
+- [x] **Standardization:** Replace all ad-hoc alerts/redirects with standardized Toast feedback for:
     - Successful saves/updates.
     - Form validation errors.
     - System errors.
@@ -62,6 +62,8 @@ Some features I would like to implement in the coming months.
 - [ ] **Rate Limiting:** Implement middleware to prevent abuse of Auth endpoints.
 - [ ] **HSTS:** Enable Strict-Transport-Security for production builds.
 - [ ] **Audit Logs:** Track sensitive actions (login, password change, data export). Maybe event sourcing?
+- [ ] **Monitoring:** Integrate basic application monitoring (e.g., Prometheus metrics endpoint).
+- [ ] **Form captcha:** Add CAPTCHA to registration and password reset forms to prevent bot abuse.
 
 ### 9. Developer Experience
 - [ ] **API:** Add a versioned REST API for core functionalities (CRUD for Expenses/Incomes).
