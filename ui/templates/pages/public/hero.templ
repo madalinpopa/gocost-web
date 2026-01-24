@@ -31,15 +31,16 @@ templ Hero(data web.Data) {
 					</p>
 				</div>
 				<div class="flex-1 w-full max-w-lg lg:max-w-full relative hidden lg:block">
-					<div class="relative w-full max-w-[320px] mx-auto group">
+					<div class="relative w-full max-w-[450px] mx-auto group">
 						<!-- Decorative Glow -->
 						<div class="absolute -inset-1 bg-linear from-primary-500 to-purple-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
 						<!-- Mobile Frame / Image -->
-						<div class="relative bg-slate-900 rounded-[2.5rem] p-2 border-[6px] border-slate-800 shadow-2xl overflow-hidden">
+						<div class="relative bg-white dark:bg-slate-900 rounded-[2.5rem] p-2 border-[6px] border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
 							<img
-								src="/static/img/mobile.png"
+								:src="darkMode ? '/static/img/mobile-dark.png' : '/static/img/mobile-light.png'"
+								src="/static/img/mobile-light.png"
 								alt="GoCost Mobile App"
-								class="w-full h-auto rounded-[1.8rem] block"
+								class="w-full h-auto rounded-[1.8rem] block transition-opacity duration-300"
 							/>
 						</div>
 						<!-- Floating Elements (Optional/Decorative) -->
