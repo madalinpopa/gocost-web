@@ -13,6 +13,7 @@ import (
 	"github.com/go-playground/form/v4"
 	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/respond"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -27,11 +28,12 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
-			Logger:   logger,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Logger:  logger,
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewGroupHandler(appCtx, mockGroupUC)
@@ -73,11 +75,12 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
-			Logger:   logger,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Logger:  logger,
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewGroupHandler(appCtx, mockGroupUC)
@@ -110,11 +113,12 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
-			Logger:   logger,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Logger:  logger,
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewGroupHandler(appCtx, mockGroupUC)
@@ -151,11 +155,12 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
-			Logger:   logger,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Logger:  logger,
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewGroupHandler(appCtx, mockGroupUC)
@@ -194,10 +199,11 @@ func TestGroupHandler_DeleteGroup(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Session: mockSession,
-			Logger:   logger,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Logger:  logger,
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewGroupHandler(appCtx, mockGroupUC)
@@ -227,10 +233,11 @@ func TestGroupHandler_DeleteGroup(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Session: mockSession,
-			Logger:   logger,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Logger:  logger,
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewGroupHandler(appCtx, mockGroupUC)
