@@ -16,18 +16,22 @@ func newNotify(l *slog.Logger) notify {
 	}
 }
 
-func (n notify) Toast(w http.ResponseWriter, t ToastType, message string) {
-
-	// Create a notification payload matching the required structure
-	notification := map[string]any{
+func ToastEvent(t ToastType, message string) map[string]any {
+	return map[string]any{
 		"showToast": map[string]string{
 			"level":   string(t),
 			"message": message,
 		},
 	}
+}
 
-	// Convert the notification to JSON
-	notificationJSON, err := json.Marshal(notification)
+func (n notify) Trigger(w http.ResponseWriter, events map[string]any) {
+	if len(events) == 0 {
+		return
+	}
+
+	// Create a notification payload matching the required structure
+	notificationJSON, err := json.Marshal(events)
 	if err != nil {
 		n.logger.Error("failed to marshal notification", "error", err.Error())
 		return
@@ -35,4 +39,8 @@ func (n notify) Toast(w http.ResponseWriter, t ToastType, message string) {
 
 	// Set the HX-Trigger header with the JSON content
 	w.Header().Set("HX-Trigger", string(notificationJSON))
+}
+
+func (n notify) Toast(w http.ResponseWriter, t ToastType, message string) {
+	n.Trigger(w, ToastEvent(t, message))
 }
