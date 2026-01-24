@@ -4,9 +4,10 @@ import (
 	"net/http"
 
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/respond"
 )
 
-func triggerDashboardRefresh(w http.ResponseWriter, notify web.NotifyHandler, toastType web.ToastType, message string, closeModalID string) {
+func triggerDashboardRefresh(w http.ResponseWriter, notify respond.NotifyHandler, toastType web.ToastType, message string, closeModalID string) {
 	if notify == nil {
 		return
 	}
