@@ -31,7 +31,7 @@ templ HomePage(data web.Data, dashboard views.DashboardView) {
 				@components.Spinner()
 			</div>
 			<!-- Modals -->
-			@components.AddIncomeModal(data.Currency)
+			@components.AddIncomeModal(data.Currency, dashboard.CurrentMonthParam)
 			@components.AddGroupModal()
 			@components.EditGroupModal()
 			@components.AddCategoryModal(data.Currency, dashboard.CurrentMonthParam)
