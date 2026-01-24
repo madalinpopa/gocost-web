@@ -25,7 +25,7 @@ templ HomePage(data web.Data, dashboard views.DashboardView) {
 				id="dashboard-groups"
 				class="relative min-h-[200px]"
 				hx-get={ "/home/groups?month=" + dashboard.CurrentMonthParam }
-				hx-trigger="load"
+				hx-trigger="load, dashboard:refresh from:body"
 				hx-swap="innerHTML"
 			>
 				@components.Spinner()
