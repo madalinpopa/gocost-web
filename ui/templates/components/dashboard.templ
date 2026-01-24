@@ -9,7 +9,7 @@ import (
 templ MonthNavigation(dashboard views.DashboardView, oob bool) {
 	<div
 		id="dashboard-month-nav"
-		class="flex items-center gap-4 rounded-lg bg-slate-900 p-1"
+		class="flex items-center gap-4 rounded-lg bg-slate-100 dark:bg-slate-900 p-1"
 		if oob {
 			hx-swap-oob="true"
 		}
@@ -18,18 +18,18 @@ templ MonthNavigation(dashboard views.DashboardView, oob bool) {
 			hx-get={ "/home/groups?month=" + dashboard.PrevMonth }
 			hx-target="#dashboard-groups"
 			hx-replace-url={ "/home?month=" + dashboard.PrevMonth }
-			class="rounded-md p-2 text-slate-400 hover:bg-slate-800 hover:text-white"
+			class="rounded-md p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
 		>
 			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
 			</svg>
 		</button>
-		<span class="min-w-[150px] text-center text-lg font-semibold text-white">{ dashboard.CurrentMonth }</span>
+		<span class="min-w-[150px] text-center text-lg font-semibold text-slate-900 dark:text-white">{ dashboard.CurrentMonth }</span>
 		<button
 			hx-get={ "/home/groups?month=" + dashboard.NextMonth }
 			hx-target="#dashboard-groups"
 			hx-replace-url={ "/home?month=" + dashboard.NextMonth }
-			class="rounded-md p-2 text-slate-400 hover:bg-slate-800 hover:text-white"
+			class="rounded-md p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
 		>
 			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
 				<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
@@ -46,11 +46,11 @@ templ BalanceDisplay(dashboard views.DashboardView, oob bool) {
 			hx-swap-oob="true"
 		}
 	>
-		<span class="text-sm font-medium text-slate-400">Balance</span>
+		<span class="text-sm font-medium text-slate-500 dark:text-slate-400">Balance</span>
 		<div
 			class={ "text-xl font-mono font-bold",
-              templ.KV("text-white", dashboard.Balance >= 0),
-              templ.KV("text-rose-500", dashboard.Balance < 0) }
+              templ.KV("text-slate-900 dark:text-white", dashboard.Balance >= 0),
+              templ.KV("text-rose-600 dark:text-rose-500", dashboard.Balance < 0) }
 		>
 			if dashboard.Balance >= 0 {
 				{ dashboard.Currency } { fmt.Sprintf("%.2f", dashboard.Balance) }
@@ -63,7 +63,7 @@ templ BalanceDisplay(dashboard views.DashboardView, oob bool) {
 			hx-get={ "/incomes?month=" + dashboard.CurrentMonthParam }
 			hx-target="#income-list-container"
 			hx-trigger="click, dashboard:refresh from:body"
-			class="ml-2 rounded-full p-1 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+			class="ml-2 rounded-full p-1 text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
 			title="View Monthly Incomes"
 		>
 			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
@@ -99,14 +99,14 @@ templ DashboardActions() {
 templ ExpenseItem(expense views.ExpenseView, categoryId string) {
 	<div class="flex items-center justify-between text-sm group/expense">
 		<div class="flex items-center gap-2 min-w-0">
-			<span class="font-mono text-slate-300">{ expense.Currency } { fmt.Sprintf("%.2f", expense.Amount) }</span>
-			<span class="truncate text-slate-500 group-hover/expense:text-slate-300 transition-colors" title={ expense.Description }>{ expense.Description }</span>
+			<span class="font-mono text-slate-700 dark:text-slate-300">{ expense.Currency } { fmt.Sprintf("%.2f", expense.Amount) }</span>
+			<span class="truncate text-slate-500 dark:text-slate-500 group-hover/expense:text-slate-900 dark:group-hover/expense:text-slate-300 transition-colors" title={ expense.Description }>{ expense.Description }</span>
 		</div>
 		<div class="flex items-center gap-2">
 			<!-- Edit Button -->
 			<button
 				type="button"
-				class="lg:opacity-0 lg:group-hover/expense:opacity-100 transition-opacity text-slate-500 hover:text-white"
+				class="lg:opacity-0 lg:group-hover/expense:opacity-100 transition-opacity text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-white"
 				@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'edit-expense-modal', context: { expenseId: '%s', categoryId: '%s', amount: '%g', description: '%s', spentAt: '%s', status: '%s', paidAt: '%s' } })",
                     expense.ID, categoryId, expense.Amount, expense.Description, expense.SpentAt, expense.Status, expense.PaidAt) }
 				title="Edit Expense"
@@ -120,7 +120,7 @@ templ ExpenseItem(expense views.ExpenseView, categoryId string) {
 				type="button"
 				hx-delete={ "/expenses/" + expense.ID }
 				hx-confirm="Are you sure you want to delete this expense?"
-				class="lg:opacity-0 lg:group-hover/expense:opacity-100 transition-opacity text-slate-500 hover:text-rose-500"
+				class="lg:opacity-0 lg:group-hover/expense:opacity-100 transition-opacity text-slate-400 hover:text-rose-600 dark:text-slate-500 dark:hover:text-rose-500"
 				title="Delete Expense"
 			>
 				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -137,7 +137,7 @@ templ ExpenseItem(expense views.ExpenseView, categoryId string) {
 					<input type="hidden" name="payment-status" value="unpaid"/>
 					<button
 						type="submit"
-						class="cursor-pointer rounded bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-500 shrink-0 hover:bg-emerald-500/20 transition-colors"
+						class="cursor-pointer rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 shrink-0 hover:bg-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-500 dark:hover:bg-emerald-500/20 transition-colors"
 					>
 						Paid
 					</button>
@@ -145,7 +145,7 @@ templ ExpenseItem(expense views.ExpenseView, categoryId string) {
 					<input type="hidden" name="payment-status" value="paid"/>
 					<button
 						type="submit"
-						class="cursor-pointer rounded bg-slate-500/10 px-2 py-0.5 text-xs font-medium text-slate-400 shrink-0 hover:bg-slate-500/20 transition-colors"
+						class="cursor-pointer rounded bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600 shrink-0 hover:bg-slate-300 dark:bg-slate-500/10 dark:text-slate-400 dark:hover:bg-slate-500/20 transition-colors"
 					>
 						Unpaid
 					</button>
@@ -190,23 +190,23 @@ templ CategoryProgressBar(category views.CategoryView) {
 				}
 			}}
 			<div class="flex items-center justify-between text-xs mb-1.5">
-				<span class="text-slate-400">
+				<span class="text-slate-500 dark:text-slate-400">
 					{ category.Currency } { fmt.Sprintf("%.2f", category.Spent) }
-					<span class="text-slate-600">/ { category.Currency } { fmt.Sprintf("%.0f", category.Budget) }</span>
+					<span class="text-slate-700 dark:text-slate-600">/ { category.Currency } { fmt.Sprintf("%.0f", category.Budget) }</span>
 				</span>
 				if category.Spent > category.Budget {
-					<span class="text-rose-500 font-medium">- { category.Currency } { fmt.Sprintf("%.2f", category.Spent - category.Budget) }</span>
+					<span class="text-rose-600 dark:text-rose-500 font-medium">- { category.Currency } { fmt.Sprintf("%.2f", category.Spent - category.Budget) }</span>
 				} else {
-					<span class="text-emerald-500 font-medium">{ category.Currency } { fmt.Sprintf("%.2f", category.Budget - category.Spent) } left</span>
+					<span class="text-emerald-600 dark:text-emerald-500 font-medium">{ category.Currency } { fmt.Sprintf("%.2f", category.Budget - category.Spent) } left</span>
 				}
 			</div>
-			<div class="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden flex">
+			<div class="h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex">
 				<div
 					class={ "h-full transition-all duration-500", barColor }
 					style={ fmt.Sprintf("width: %.2f%%", paidPercentage) }
 				></div>
 				<div
-					class="h-full bg-slate-500 transition-all duration-500"
+					class="h-full bg-slate-400 dark:bg-slate-500 transition-all duration-500"
 					style={ fmt.Sprintf("width: %.2f%%", unpaidPercentage) }
 				></div>
 			</div>
@@ -218,9 +218,9 @@ templ CategoryHeader(category views.CategoryView, groupId string, month string) 
 	<div class="mb-4 flex items-start justify-between">
 		<div class="flex-1 pr-4">
 			<div class="flex items-center gap-3">
-				<h3 class="font-medium text-white">{ category.Name }</h3>
+				<h3 class="font-medium text-slate-900 dark:text-white">{ category.Name }</h3>
 				if category.Type == views.TypeRecurrent {
-					<span class="inline-flex items-center gap-1 rounded-full bg-indigo-500/10 px-2 py-0.5 text-xs font-medium text-indigo-400">
+					<span class="inline-flex items-center gap-1 rounded-full bg-indigo-100 dark:bg-indigo-500/10 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:text-indigo-400">
 						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-3 w-3">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"></path>
 						</svg>
@@ -232,7 +232,7 @@ templ CategoryHeader(category views.CategoryView, groupId string, month string) 
 		<div class="flex items-center gap-2">
 			<button
 				@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'add-expense-modal', context: { categoryId: '%s', month: '%s' } })", category.ID, month) }
-				class="text-slate-500 hover:text-white"
+				class="text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-white"
 				title="Add Expense"
 			>
 				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
@@ -241,7 +241,7 @@ templ CategoryHeader(category views.CategoryView, groupId string, month string) 
 			</button>
 			<button
 				@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'edit-category-modal', context: { categoryId: '%s', groupId: '%s', name: '%s', description: '%s', type: '%s', startMonth: '%s', endMonth: '%s', budget: '%g', viewMonth: '%s' } })", category.ID, groupId, category.Name, category.Description, category.Type, category.StartMonth, category.EndMonth, category.Budget, month) }
-				class="text-slate-500 hover:text-white"
+				class="text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-white"
 				title="Edit Category"
 			>
 				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -251,7 +251,7 @@ templ CategoryHeader(category views.CategoryView, groupId string, month string) 
 			<button
 				hx-delete={ fmt.Sprintf("/groups/%s/categories/%s", groupId, category.ID) }
 				hx-confirm="Are you sure you want to delete this category? All expenses will be lost."
-				class="text-slate-500 hover:text-rose-500 transition-colors"
+				class="text-slate-400 hover:text-rose-600 dark:text-slate-500 dark:hover:text-rose-500 transition-colors"
 				title="Delete Category"
 			>
 				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -272,21 +272,21 @@ templ CategoryCard(category views.CategoryView, groupId string, month string) {
 				@ExpenseItem(expense, category.ID)
 			}
 			if len(category.Expenses) == 0 {
-				<div class="text-xs text-slate-600 italic">No expenses recorded</div>
+				<div class="text-xs text-slate-500 dark:text-slate-600 italic">No expenses recorded</div>
 			}
 		</div>
 	</div>
 }
 
 templ GroupCard(group views.GroupView, month string) {
-	<div x-data="{ expanded: true }" class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50">
+	<div x-data="{ expanded: true }" class="overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50">
 		<!-- Group Header -->
-		<div class="border-b border-slate-800 bg-slate-900 px-6 py-4 flex justify-between items-center">
+		<div class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 px-6 py-4 flex justify-between items-center">
 			<div class="flex items-center gap-3">
-				<h2 class="text-lg font-semibold text-white">{ group.Name }</h2>
+				<h2 class="text-lg font-semibold text-slate-900 dark:text-white">{ group.Name }</h2>
 				<button
 					@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'edit-group-modal', context: { groupId: '%s', name: '%s', description: '%s', order: '%d' } })", group.ID, group.Name, group.Description, group.Order) }
-					class="text-slate-500 hover:text-white"
+					class="text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-white"
 					title="Edit Group"
 				>
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -296,7 +296,7 @@ templ GroupCard(group views.GroupView, month string) {
 				<button
 					hx-delete={ "/groups/" + group.ID }
 					hx-confirm="Are you sure you want to delete this group? All categories and expenses will be lost."
-					class="text-slate-500 hover:text-rose-500 transition-colors"
+					class="text-slate-400 hover:text-rose-600 dark:text-slate-500 dark:hover:text-rose-500 transition-colors"
 					title="Delete Group"
 				>
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -307,13 +307,13 @@ templ GroupCard(group views.GroupView, month string) {
 			<div class="flex items-center gap-4">
 				<button
 					@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'add-category-modal', context: { groupId: '%s' } })", group.ID) }
-					class="text-sm text-slate-400 hover:text-indigo-400"
+					class="text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400"
 				>
 					+ Add Category
 				</button>
 				<button
 					@click="expanded = !expanded"
-					class="text-slate-500 hover:text-white transition-colors"
+					class="text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-white transition-colors"
 					:title="expanded ? 'Collapse Group' : 'Expand Group'"
 				>
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 transition-transform duration-200" :class="expanded ? '' : '-rotate-180'">
@@ -323,7 +323,7 @@ templ GroupCard(group views.GroupView, month string) {
 			</div>
 		</div>
 		<!-- Categories Grid -->
-		<div x-show="expanded" class="grid grid-cols-1 divide-y divide-slate-800 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
+		<div x-show="expanded" class="grid grid-cols-1 divide-y divide-slate-200 dark:divide-slate-800 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
 			for _, category := range group.Categories {
 				@CategoryCard(category, group.ID, month)
 			}
@@ -337,7 +337,7 @@ templ GroupsList(groups []views.GroupView, month string) {
 			@GroupCard(group, month)
 		}
 		if len(groups) == 0 {
-			<div class="text-center text-slate-500 py-10">
+			<div class="text-center text-slate-600 dark:text-slate-500 py-10">
 				No groups found.
 			</div>
 		}

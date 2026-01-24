@@ -8,17 +8,17 @@ import (
 templ IncomeList(incomes []*usecase.IncomeResponse, currency string) {
 	<div id="income-list-content">
 		if len(incomes) == 0 {
-			<p class="text-sm text-slate-500 text-center py-4">No incomes found for this month.</p>
+			<p class="text-sm text-slate-600 dark:text-slate-500 text-center py-4">No incomes found for this month.</p>
 		} else {
-			<ul class="divide-y divide-slate-700">
+			<ul class="divide-y divide-slate-200 dark:divide-slate-700">
 				for _, income := range incomes {
 					<li class="flex items-center justify-between py-3">
 						<div>
-							<p class="text-sm font-medium text-white">{ income.Source }</p>
-							<p class="text-xs text-slate-400">{ income.ReceivedAt.Format("2006-01-02") }</p>
+							<p class="text-sm font-medium text-slate-900 dark:text-white">{ income.Source }</p>
+							<p class="text-xs text-slate-500 dark:text-slate-400">{ income.ReceivedAt.Format("2006-01-02") }</p>
 						</div>
 						<div class="flex items-center gap-4">
-							<span class="text-sm font-semibold text-emerald-400">
+							<span class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
 								{ fmt.Sprintf("%s %.2f", currency, income.Amount) }
 							</span>
 							<button
@@ -26,7 +26,7 @@ templ IncomeList(incomes []*usecase.IncomeResponse, currency string) {
 								hx-confirm="Are you sure you want to delete this income?"
 								hx-target="closest li"
 								hx-swap="outerHTML"
-								class="text-slate-400 hover:text-rose-500 transition-colors"
+								class="text-slate-400 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-500 transition-colors"
 								title="Delete Income"
 							>
 								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">

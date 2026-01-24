@@ -8,7 +8,7 @@ User: `admin@gocost.ro`, Password: `secret123`
 
 ## Screenshots
 
-![Dashboard](./docs/images/dashboard.jpeg)
+![Dashboard](./docs/images/desktop-dark.png)
 
 ## Overview
 
