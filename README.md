@@ -1,4 +1,5 @@
 # gocost-web
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/madalinpopa/gocost-web)
 
 Golang-based web application for personal expense management, focused on a clean monthly workflow and intuitive tracking of recurring and non-recurring costs.
 
