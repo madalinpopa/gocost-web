@@ -55,7 +55,7 @@ Some features I would like to implement in the coming months.
 *Focus: Visual appeal, security, and developer experience.*
 
 ### 7. User Interface
-- [ ] **Dark Mode:** System-aware theme toggle using Tailwind's `dark:` modifier.
+- [x] **Dark Mode:** System-aware theme toggle using Tailwind's `dark:` modifier.
 - [ ] **Mobile Optimization:** Polish touch targets and layout for the "Add Expense" flow on mobile devices.
 
 ### 8. Security & Ops
