@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/form"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web/views"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/madalinpopa/gocost-web/ui/templates/components"
 )
@@ -60,8 +60,8 @@ func (h *IncomeHandler) CreateIncome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("HX-Refresh", "true")
-	w.WriteHeader(http.StatusOK)
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Income created.", "add-income-modal")
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *IncomeHandler) ListIncomes(w http.ResponseWriter, r *http.Request) {
@@ -88,44 +88,12 @@ func (h *IncomeHandler) DeleteIncome(w http.ResponseWriter, r *http.Request) {
 	userID := h.app.Session.GetUserID(r.Context())
 	id := r.PathValue("id")
 
-	// Get income to know the month for balance updated
-	inc, err := h.income.Get(r.Context(), userID, id)
-	if err != nil {
-		h.app.Response.Handle.LogServerError(r, err)
-		return
-	}
-	monthStr := inc.ReceivedAt.Format("2006-01")
-
-	err = h.income.Delete(r.Context(), userID, id)
+	err := h.income.Delete(r.Context(), userID, id)
 	if err != nil {
 		h.app.Response.Handle.LogServerError(r, err)
 		return
 	}
 
-	// Calculate new balance for the month
-	totalIncome, err := h.income.Total(r.Context(), userID, monthStr)
-	if err != nil {
-		h.app.Response.Handle.LogServerError(r, err)
-		return
-	}
-
-	totalExpenses, err := h.expense.Total(r.Context(), userID, monthStr)
-	if err != nil {
-		h.app.Response.Handle.LogServerError(r, err)
-		return
-	}
-
-	balance := totalIncome - totalExpenses
-
-	dashboardView := views.DashboardView{
-		Balance:           balance,
-		Currency:          h.app.Config.Currency,
-		CurrentMonthParam: monthStr, // Needed for the link in BalanceDisplay
-	}
-
-	// Render BalanceDisplay OOB
-	err = components.BalanceDisplay(dashboardView, true).Render(r.Context(), w)
-	if err != nil {
-		h.app.Response.Handle.LogServerError(r, err)
-	}
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Income deleted.", "")
+	w.WriteHeader(http.StatusOK)
 }
