@@ -34,9 +34,7 @@ func (h *IncomeHandler) CreateIncome(w http.ResponseWriter, r *http.Request) {
 
 	if !incomeForm.IsValid() {
 		component := components.AddIncomeForm(&incomeForm, h.app.Config.Currency, incomeForm.CurrentMonth)
-		if err := component.Render(r.Context(), w); err != nil {
-			h.app.Errors.LogServerError(r, err)
-		}
+		h.app.Template.Render(w, r, component, http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -78,10 +76,8 @@ func (h *IncomeHandler) ListIncomes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = components.IncomeList(incomes, h.app.Config.Currency).Render(r.Context(), w)
-	if err != nil {
-		h.app.Errors.LogServerError(r, err)
-	}
+	component := components.IncomeList(incomes, h.app.Config.Currency)
+	h.app.Template.Render(w, r, component, http.StatusOK)
 }
 
 func (h *IncomeHandler) DeleteIncome(w http.ResponseWriter, r *http.Request) {
