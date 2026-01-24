@@ -15,6 +15,7 @@ import (
 	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/domain/expense"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/respond"
 	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
@@ -30,11 +31,12 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -82,11 +84,12 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -131,11 +134,12 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -166,11 +170,12 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -209,11 +214,12 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -254,11 +260,12 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -309,11 +316,12 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -341,11 +349,12 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -389,11 +398,12 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -434,10 +444,11 @@ func TestExpenseHandler_DeleteExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Logger:  logger,
 			Session: mockSession,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
@@ -467,10 +478,11 @@ func TestExpenseHandler_DeleteExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config: &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "$"},
 			Logger:  logger,
 			Session: mockSession,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewExpenseHandler(appCtx, mockExpenseUC)
