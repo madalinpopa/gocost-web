@@ -42,7 +42,7 @@ Some features I would like to implement in the coming months.
 
 ### 5. Budgeting Features
 - [ ] **Category Limits:** Allow users to set a maximum budget per category (e.g., "Groceries: $500/month").
-- [ ] **Visual Indicators:** Progress bars on the dashboard showing budget usage (Green/Yellow/Red).
+- [x] **Visual Indicators:** Progress bars on the dashboard showing budget usage (Green/Yellow/Red).
 - [ ] **Balance Display:** Display total amount budgeted vs current balance for the month.
 
 ### 6. Recurring Transactions
