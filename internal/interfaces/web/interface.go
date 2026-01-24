@@ -7,6 +7,7 @@ import (
 )
 
 type NotifyHandler interface {
+	Trigger(w http.ResponseWriter, events map[string]any)
 	Toast(w http.ResponseWriter, t ToastType, message string)
 }
 
