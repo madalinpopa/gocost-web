@@ -33,7 +33,6 @@ document.addEventListener('alpine:init', () => {
                 level,
                 message,
                 visible: true,
-                style: this.getToastStyle(level),
                 icon: this.getIconClass(level)
             };
 
@@ -55,21 +54,6 @@ document.addEventListener('alpine:init', () => {
             }, 300);
         },
 
-        getToastStyle(level) {
-            switch (level) {
-                case 'success':
-                    return "background-color: #f0fdf4; border-color: #86efac;";
-                case 'error':
-                    return "background-color: #fef2f2; border-color: #fecaca;";
-                case 'warning':
-                    return "background-color: #fffbeb; border-color: #fde68a;";
-                case 'info':
-                    return "background-color: #eff6ff; border-color: #bfdbfe;";
-                default:
-                    return "background-color: #ffffff; border-color: #e5e7eb;";
-            }
-        },
-
         getIconClass(level) {
             switch (level) {
                 case 'success':
@@ -88,15 +72,15 @@ document.addEventListener('alpine:init', () => {
         getToastClass(level) {
             switch (level) {
                 case 'success':
-                    return "bg-accent-50 border border-accent-200 text-primary-800";
+                    return "bg-green-50 border border-green-200 text-green-800";
                 case 'error':
-                    return "bg-secondary-50 border border-secondary-200 text-primary-800";
+                    return "bg-red-50 border border-red-200 text-red-800";
                 case 'warning':
-                    return "bg-amber-50 border border-amber-200 text-primary-800";
+                    return "bg-amber-50 border border-amber-200 text-amber-800";
                 case 'info':
-                    return "bg-blue-50 border border-blue-200 text-primary-800";
+                    return "bg-blue-50 border border-blue-200 text-blue-800";
                 default:
-                    return "bg-blue-50 border border-blue-200 text-primary-800";
+                    return "bg-blue-50 border border-blue-200 text-blue-800";
             }
         }
     }));
