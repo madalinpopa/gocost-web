@@ -12,6 +12,7 @@ import (
 	"github.com/go-playground/form/v4"
 	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/respond"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -21,6 +22,7 @@ func newTestLoginHandler(authMock *MockAuthUseCase, sessionMock *MockSessionMana
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	cfg := config.New()
 	templater := web.NewTemplate(logger, cfg)
+	errHandler := respond.NewErrorHandler(logger)
 
 	if sessionMock == nil {
 		sessionMock = new(MockSessionManager)
@@ -30,7 +32,9 @@ func newTestLoginHandler(authMock *MockAuthUseCase, sessionMock *MockSessionMana
 		Config:   cfg,
 		Logger:   logger,
 		Template: templater,
-		Response: web.NewResponse(logger),
+		Errors:   errHandler,
+		Htmx:     respond.NewHtmx(errHandler),
+		Notify:   respond.NewNotify(logger),
 		Decoder:  form.NewDecoder(),
 		Session:  sessionMock,
 	}
