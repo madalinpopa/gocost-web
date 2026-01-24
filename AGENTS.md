@@ -5,25 +5,28 @@
 
 ### Architecture
 The project follows a standard Go project layout with a strong separation of concerns:
-*   **`cmd/web/`**: Application entry point (`main.go`).
-*   **`internal/domain/`**: Contains core business logic and entities (e.g., `Expense`, `User`).
-*   **`internal/usecase/`**: Defines business use cases and repository interfaces (currently scaffolding).
-*   **`internal/interfaces/web/`**: The web layer, including HTTP handlers, routers, middleware, and response helpers.
-*   **`internal/infrastructure/`**: Infrastructure implementations such as Configuration (`viper`) and Storage (`sqlite`).
-*   **`ui/`**: Frontend resources including Templ components, static assets, and Tailwind configuration.
+*   **`cmd/web/`**: Web application entry point.
+*   **`cmd/cli/`**: CLI application entry point (used for migrations and other tasks).
+*   **`internal/domain/`**: Core business logic and entities (Expense, User, Income, Tracking).
+*   **`internal/usecase/`**: Business use cases and repository interfaces.
+*   **`internal/interfaces/web/`**: Web layer (HTTP handlers, routers, middleware, forms, views).
+*   **`internal/infrastructure/`**: Infrastructure implementations (Config via `viper`, Storage via `sqlite`).
+*   **`internal/platform/`**: Cross-cutting concerns (Money, Security/Hasher, Identifiers).
+*   **`ui/`**: Frontend resources (Templ components, static assets, Tailwind configuration).
 *   **`migrations/`**: SQL database migrations managed by `goose`.
 
 ### Tech Stack
-*   **Backend:** Go (1.25+)
+*   **Backend:** Go 1.25+
     *   **Router:** Standard `net/http` mux with `justinas/alice` for middleware chaining.
     *   **Database:** SQLite with `mattn/go-sqlite3`.
+    *   **Migrations:** `goose` (embedded via `internal/infrastructure/storage/sqlite/connection.go`).
     *   **Config:** `spf13/viper` for environment configuration.
     *   **Logging:** `log/slog`.
     *   **Templating:** `a-h/templ`.
 *   **Frontend:**
     *   **Styling:** Tailwind CSS v4.
     *   **Interactivity:** HTMX (server-driven interactions) & Alpine.js (client-side state).
-*   **Tooling:** `Make`, `Air` (live reload), `Docker`.
+*   **Tooling:** `Make`, `Air` (live reload), `Docker`, `direnv`.
 
 ## Building and Running
 
@@ -33,55 +36,42 @@ The project uses a `Makefile` to manage common tasks.
 *   Go 1.25+
 *   Node.js & npm (for Tailwind CSS)
 *   `direnv` (recommended for environment management)
+*   `1Password CLI` (optional, for secret injection via `op inject`)
 
 ### Key Commands
 
 | Command | Description |
 | :--- | :--- |
-| `make init` | Initialize the project: download Go mods, install npm packages, generate templ files, and setup `.envrc`. |
-| `make dev` | **Primary Dev Command:** Runs the server, Templ watcher, and Tailwind watcher in parallel with live reload (Air). |
+| `make init` | Initialize project: download mods, generate templ files, setup `.envrc`, install npm packages. |
+| `make dev` | **Primary Dev Command:** Runs server, Templ, and Tailwind watchers in parallel with live reload. |
 | `make build/web` | Compiles the web server binary to `bin/server`. |
-| `make test` | Runs the Go test suite (`./internal...`). |
-| `make db/migrate` | *Note: Inferred from context, check Makefile.* Applies database migrations. |
+| `make build/cli` | Compiles the CLI binary to `bin/gocost`. |
+| `go run ./cmd/cli migrate` | Applies database migrations. |
+| `make test` | Runs the Go test suite. |
+| `make check` | Runs `go vet` and `staticcheck`. |
+| `make vuln` | Runs `govulncheck`. |
 | `make docker/run` | Runs the application in a Docker container. |
 
 ## Development Conventions
 
-### Code Structure and development tips
-*   **Dependency Injection:** The `main.go` file wires up the application. `ApplicationContext` (config, logger, decoder) and `UseCases` are injected into Handlers.
-*   **Configuration:** Environment variables are loaded via `viper`. Local development uses `.envrc` (generated from `envrc.template`).
-*   **Database:** All database changes must be done via migration files in `migrations/`.
-*   **Tests:** Run tests after any code changes to ensure functionality.
+### Development Tips
+*   **Environment Variables:** Local development uses `.envrc`. If you have 1Password CLI, use `make secrets` to populate it from `envrc.template`.
+*   **Live Reload:** Always use `make dev` for a smooth development experience. It handles Templ regeneration and CSS building automatically.
+*   **Database:** All database changes MUST be done via migration files in `migrations/`. Use `go run ./cmd/cli migrate` to apply them.
+*   **Dependency Injection:** Dependencies are wired in `main.go`. `ApplicationContext` and `UseCases` are injected into Handlers.
 
-### Frontend Workflow
-1.  **Templ:** UI components are written in `.templ` files. The `make dev` command watches these files and regenerates the corresponding Go code automatically.
-2.  **Tailwind:** CSS is defined in `ui/static/css/input.css`. The build process generates `ui/static/css/output.css`.
-3.  **HTMX:** Used for dynamic partial page updates. Check `ui/templates/layouts/base.templ` for global HTMX configuration.
+### Testing Instructions
+*   **Library:** Use `github.com/stretchr/testify/assert` (or `require`) for assertions.
+*   **Patterns:** Follow **Arrange-Act-Assert**. Use `t.Run()` for subtests and table-driven tests.
+*   **Running Tests:** Run `make test` frequently. To run a specific test: `go test ./internal/... -run TestName`.
+*   **Race Conditions:** Use `make test/race` to check for data races.
 
-### Testing
-*   **Library:** Use `github.com/stretchr/testify/assert` (or `require`) for assertions instead of standard `if` checks.
-*   **Structure:** Follow the **Arrange-Act-Assert** pattern within your tests.
-*   **Subtests:** Use `t.Run()` for table-driven tests or distinct scenarios.
+### Code Style & PRs
+*   **Linting:** Run `make check` before committing.
+*   **Vulnerabilities:** Run `make vuln` to ensure no known vulnerabilities are introduced.
+*   **Formatting:** Use `go fmt`.
+*   **Commits:** Prefer clear, concise messages focusing on "why".
 
-**Example:**
-```go
-import (
-    "testing"
-    "github.com/stretchr/testify/assert"
-)
-
-func TestSomething(t *testing.T) {
-    t.Run("successful scenario", func(t *testing.T) {
-        // Arrange
-        input := "valid input"
-        expected := "result"
-
-        // Act
-        result, err := MyFunction(input)
-
-        // Assert
-        assert.NoError(t, err)
-        assert.Equal(t, expected, result)
-    })
-}
-```
+### Security
+*   **Secrets:** NEVER commit secrets or API keys. Use `envrc.template` for placeholders and `.envrc` (ignored by git) for actual values.
+*   **CSRF:** The project uses `justinas/nosurf` for CSRF protection. Ensure forms include the CSRF token.
