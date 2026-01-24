@@ -36,13 +36,13 @@ func (lh LoginHandler) ShowLoginForm(w http.ResponseWriter, r *http.Request) {
 
 func (lh LoginHandler) SubmitLoginForm(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		lh.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		lh.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	var loginForm form.LoginForm
 	if err := lh.app.Decoder.Decode(&loginForm, r.PostForm); err != nil {
-		lh.app.Response.Handle.Error(w, r, http.StatusBadRequest, err)
+		lh.app.Errors.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
@@ -66,13 +66,13 @@ func (lh LoginHandler) SubmitLoginForm(w http.ResponseWriter, r *http.Request) {
 			lh.app.Template.Render(w, r, page, http.StatusUnprocessableEntity)
 			return
 		}
-		lh.app.Response.Handle.Error(w, r, http.StatusInternalServerError, err)
+		lh.app.Errors.Error(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
 	err = lh.app.Session.RenewToken(r.Context())
 	if err != nil {
-		lh.app.Response.Handle.Error(
+		lh.app.Errors.Error(
 			w, r,
 			http.StatusInternalServerError,
 			fmt.Errorf("failed to renew session token: %w", err),
@@ -83,5 +83,5 @@ func (lh LoginHandler) SubmitLoginForm(w http.ResponseWriter, r *http.Request) {
 	lh.app.Session.SetUserID(r.Context(), resp.UserID)
 	lh.app.Session.SetUsername(r.Context(), resp.Username)
 
-	lh.app.Response.Htmx.Redirect(w, "/home")
+	lh.app.Htmx.Redirect(w, "/home")
 }
