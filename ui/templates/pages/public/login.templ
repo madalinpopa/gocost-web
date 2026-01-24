@@ -12,22 +12,22 @@ templ LoginPage(data web.Data) {
 				<div class="w-full max-w-sm space-y-10">
 					<!-- Header -->
 					<div class="text-center space-y-4">
-						<div class="inline-flex w-14 h-14 bg-primary-600 rounded-sm items-center justify-center font-bold text-2xl text-slate-950 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)]">
+						<div class="inline-flex w-14 h-14 bg-primary-600 rounded-sm items-center justify-center font-bold text-2xl text-slate-950 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)]">
 							G
 						</div>
-						<h1 class="text-5xl font-black tracking-tighter text-white">
+						<h1 class="text-5xl font-black tracking-tighter text-slate-900 dark:text-white">
 							LOGIN
 						</h1>
-						<p class="text-gray-400 text-sm font-medium tracking-wide">
+						<p class="text-slate-600 dark:text-gray-400 text-sm font-medium tracking-wide">
 							ACCESS YOUR DASHBOARD
 						</p>
 					</div>
 					<!-- Form Container -->
 					<div hx-get="/login/form" hx-swap="innerHTML" hx-trigger="load"></div>
 					<div class="text-center pt-4">
-						<p class="text-gray-500 text-xs uppercase tracking-widest">
+						<p class="text-slate-500 dark:text-gray-500 text-xs uppercase tracking-widest">
 							New here?
-							<a href="/register" class="text-primary-500 hover:text-white transition-colors ml-1 font-bold">
+							<a href="/register" class="text-primary-600 dark:text-primary-500 hover:text-slate-900 dark:hover:text-white transition-colors ml-1 font-bold">
 								CREATE ACCOUNT
 							</a>
 						</p>
@@ -35,8 +35,8 @@ templ LoginPage(data web.Data) {
 				</div>
 			</main>
 			<!-- Background Decoration -->
-			<div class="absolute -left-20 -bottom-40 w-96 h-96 bg-primary-900/10 rounded-full blur-3xl pointer-events-none"></div>
-			<div class="absolute -right-20 top-0 w-80 h-80 bg-primary-900/5 rounded-full blur-3xl pointer-events-none"></div>
+			<div class="absolute -left-20 -bottom-40 w-96 h-96 bg-primary-100 dark:bg-primary-900/10 rounded-full blur-3xl pointer-events-none"></div>
+			<div class="absolute -right-20 top-0 w-80 h-80 bg-primary-50 dark:bg-primary-900/5 rounded-full blur-3xl pointer-events-none"></div>
 		</div>
 	}
 }
@@ -51,7 +51,7 @@ templ LoginForm(f form.LoginForm) {
 	}
 	<form hx-post="/login" hx-swap="outerHTML" class="space-y-6">
 		<div>
-			<label for="email" class="block text-xs font-bold text-primary-500 uppercase tracking-wider mb-2">
+			<label for="email" class="block text-xs font-bold text-primary-600 dark:text-primary-500 uppercase tracking-wider mb-2">
 				Email
 			</label>
 			<input
@@ -59,13 +59,13 @@ templ LoginForm(f form.LoginForm) {
 				id="email"
 				name="email"
 				required
-				class="block w-full px-4 py-3 bg-slate-900 border-2 border-slate-800 text-white placeholder-slate-700 focus:outline-none focus:border-primary-500 focus:bg-slate-950 transition-colors font-medium rounded-none"
+				class="block w-full px-4 py-3 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-700 focus:outline-none focus:border-primary-500 focus:bg-slate-50 dark:focus:bg-slate-950 transition-colors font-medium rounded-none"
 				placeholder="user@example.com"
 			/>
 		</div>
 		<div>
 			<div class="flex items-center justify-between mb-2">
-				<label for="password" class="block text-xs font-bold text-primary-500 uppercase tracking-wider">
+				<label for="password" class="block text-xs font-bold text-primary-600 dark:text-primary-500 uppercase tracking-wider">
 					Password
 				</label>
 			</div>
@@ -74,13 +74,13 @@ templ LoginForm(f form.LoginForm) {
 				id="password"
 				name="password"
 				required
-				class="block w-full px-4 py-3 bg-slate-900 border-2 border-slate-800 text-white placeholder-slate-700 focus:outline-none focus:border-primary-500 focus:bg-slate-950 transition-colors font-medium rounded-none"
+				class="block w-full px-4 py-3 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-700 focus:outline-none focus:border-primary-500 focus:bg-slate-50 dark:focus:bg-slate-950 transition-colors font-medium rounded-none"
 				placeholder="••••••••"
 			/>
 		</div>
 		<button
 			type="submit"
-			class="group relative w-full flex justify-center py-4 px-4 bg-primary-600 text-slate-950 font-black text-lg uppercase tracking-wider hover:bg-primary-500 transition-all hover:-translate-y-1 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] hover:shadow-[6px_6px_0px_0px_rgba(255,255,255,0.1)] focus:outline-none rounded-none"
+			class="group relative w-full flex justify-center py-4 px-4 bg-primary-600 text-slate-950 font-black text-lg uppercase tracking-wider hover:bg-primary-500 transition-all hover:-translate-y-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.1)] dark:hover:shadow-[6px_6px_0px_0px_rgba(255,255,255,0.1)] focus:outline-none rounded-none"
 		>
 			<span class="htmx-indicator absolute inset-y-0 left-0 flex items-center pl-3">
 				<iconify-icon icon="eos-icons:loading" class="h-5 w-5 text-slate-950 animate-spin"></iconify-icon>
