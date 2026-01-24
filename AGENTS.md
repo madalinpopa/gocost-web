@@ -70,7 +70,7 @@ The project uses a `Makefile` to manage common tasks.
 *   **Linting:** Run `make check` before committing.
 *   **Vulnerabilities:** Run `make vuln` to ensure no known vulnerabilities are introduced.
 *   **Formatting:** Use `go fmt`.
-*   **Commits:** Prefer clear, concise messages focusing on "why".
+*   **Commits:** Prefer clear, concise messages focusing on "why". Format commit messsage as `type(scope): description`.
 
 ### Security
 *   **Secrets:** NEVER commit secrets or API keys. Use `envrc.template` for placeholders and `.envrc` (ignored by git) for actual values.
