@@ -95,5 +95,5 @@ func (h *IncomeHandler) DeleteIncome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Income deleted successfully.", "")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusNoContent)
 }
