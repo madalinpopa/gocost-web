@@ -246,7 +246,7 @@ func TestIncomeHandler_DeleteIncome(t *testing.T) {
 
 		handler.DeleteIncome(rec, req)
 
-		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, http.StatusNoContent, rec.Code)
 		assert.Contains(t, rec.Header().Get("HX-Trigger"), "dashboard:refresh")
 		mockSession.AssertExpectations(t)
 		mockIncomeUC.AssertExpectations(t)
