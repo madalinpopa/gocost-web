@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/form/v4"
 	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/respond"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 )
 
@@ -54,5 +55,7 @@ type HandlerContext struct {
 	Decoder  *form.Decoder
 	Session  web.AuthSessionManager
 	Template *web.Template
-	Response web.Response
+	Errors   respond.ErrorHandler
+	Htmx     respond.HtmxHandler
+	Notify   respond.NotifyHandler
 }
