@@ -57,15 +57,15 @@ document.addEventListener('alpine:init', () => {
         getIconClass(level) {
             switch (level) {
                 case 'success':
-                    return 'heroicons:check-circle';
+                    return 'heroicons:check-circle-solid';
                 case 'error':
-                    return 'heroicons:x-circle';
+                    return 'heroicons:x-circle-solid';
                 case 'warning':
-                    return 'heroicons:exclamation-triangle';
+                    return 'heroicons:exclamation-triangle-solid';
                 case 'info':
-                    return 'heroicons:information-circle';
+                    return 'heroicons:information-circle-solid';
                 default:
-                    return 'heroicons:information-circle';
+                    return 'heroicons:information-circle-solid';
             }
         },
 
