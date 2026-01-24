@@ -7,6 +7,7 @@ import (
 
 	"github.com/madalinpopa/gocost-web/internal/domain/expense"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/form"
 	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
@@ -82,8 +83,8 @@ func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Success
-	w.Header().Set("HX-Refresh", "true")
-	w.WriteHeader(http.StatusOK)
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Expense created.", "add-expense-modal")
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *ExpenseHandler) EditExpense(w http.ResponseWriter, r *http.Request) {
@@ -156,8 +157,8 @@ func (h *ExpenseHandler) EditExpense(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Success
-	w.Header().Set("HX-Refresh", "true")
-	w.WriteHeader(http.StatusOK)
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Expense updated.", "edit-expense-modal")
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *ExpenseHandler) DeleteExpense(w http.ResponseWriter, r *http.Request) {
@@ -169,8 +170,8 @@ func (h *ExpenseHandler) DeleteExpense(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("HX-Refresh", "true")
-	w.WriteHeader(http.StatusOK)
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Expense deleted.", "")
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func translateExpenseError(err error) (string, bool) {
