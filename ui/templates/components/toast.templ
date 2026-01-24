@@ -2,18 +2,33 @@ package components
 
 import "github.com/madalinpopa/gocost-web/internal/interfaces/web"
 
-func getToastStyle(toastType web.ToastType) string {
+func getToastClass(toastType web.ToastType) string {
 	switch toastType {
 	case web.Success:
-		return "background-color: #f0fdf4; border-color: #86efac;" // Light green bg with green border
+		return "bg-green-50 border border-green-200 text-green-800"
 	case web.ErrorMsg:
-		return "background-color: #fef2f2; border-color: #fecaca;" // Light red bg with red border
+		return "bg-red-50 border border-red-200 text-red-800"
 	case web.Warning:
-		return "background-color: #fffbeb; border-color: #fde68a;" // Light amber bg with amber border
+		return "bg-amber-50 border border-amber-200 text-amber-800"
 	case web.Info:
-		return "background-color: #eff6ff; border-color: #bfdbfe;" // Light blue bg with blue border
+		return "bg-blue-50 border border-blue-200 text-blue-800"
 	default:
-		return "background-color: #ffffff; border-color: #e5e7eb;" // White bg with gray border
+		return "bg-blue-50 border border-blue-200 text-blue-800"
+	}
+}
+
+func getIconColorClass(toastType web.ToastType) string {
+	switch toastType {
+	case web.Success:
+		return "text-green-600"
+	case web.ErrorMsg:
+		return "text-red-600"
+	case web.Warning:
+		return "text-amber-600"
+	case web.Info:
+		return "text-blue-600"
+	default:
+		return "text-blue-600"
 	}
 }
 
@@ -21,8 +36,7 @@ func getToastStyle(toastType web.ToastType) string {
 templ ToastComponent(toast web.ToastMessage) {
 	<div
 		id={ "toast-" + toast.ID }
-		class="fixed top-4 right-4 max-w-sm w-full flex items-center p-4 rounded-lg shadow-lg transition-all transform z-50"
-		style={ getToastStyle(toast.Type) }
+		class={ "fixed top-4 right-4 max-w-sm w-full flex items-center p-4 rounded-lg shadow-lg transition-all transform z-50 " + getToastClass(toast.Type) }
 		x-data="{
     			show: true,
     			autoHide: true,
@@ -47,30 +61,22 @@ templ ToastComponent(toast web.ToastMessage) {
 		x-transition:leave-start="opacity-100 transform translate-x-0"
 		x-transition:leave-end="opacity-0 transform translate-x-full"
 		role="alert"
-		if toast.Type == web.Success {
-			class="bg-accent-50 border border-accent-200 text-primary-800"
-		}
-		if toast.Type == web.ErrorMsg {
-			class="bg-secondary-50 border border-secondary-200 text-primary-800"
-		} else {
-			class="bg-secondary-50 border border-secondary-200 text-primary-800"
-		}
-		if toast.Type == web.Warning {
-			class="bg-amber-50 border border-amber-200 text-primary-800"
-		} else {
-			class="bg-blue-50 border border-blue-200 text-primary-800"
-		}
 	>
 		<!-- Icon -->
-		if toast.Type == web.Success {
-			<iconify-icon icon="heroicons:check-circle" class="w-5 h-5 text-accent-600 mr-3 shrink-0"></iconify-icon>
-		} else if toast.Type == web.ErrorMsg {
-			<iconify-icon icon="heroicons:x-circle" class="w-5 h-5 text-secondary-600 mr-3 shrink-0"></iconify-icon>
-		} else if toast.Type == web.Warning {
-			<iconify-icon icon="heroicons:exclamation-triangle" class="w-5 h-5 text-amber-600 mr-3 shrink-0"></iconify-icon>
-		} else {
-			<iconify-icon icon="heroicons:information-circle" class="w-5 h-5 text-blue-600 mr-3 shrink-0"></iconify-icon>
-		}
+		<div class="mr-3 shrink-0">
+			<iconify-icon
+				if toast.Type == web.Success {
+					icon="heroicons:check-circle-solid"
+				} else if toast.Type == web.ErrorMsg {
+					icon="heroicons:x-circle-solid"
+				} else if toast.Type == web.Warning {
+					icon="heroicons:exclamation-triangle-solid"
+				} else {
+					icon="heroicons:information-circle-solid"
+				}
+				class={ "w-5 h-5 block " + getIconColorClass(toast.Type) }
+			></iconify-icon>
+		</div>
 		<!-- Message -->
 		<p class="text-sm font-medium grow">{ toast.Message }</p>
 		<!-- Close Button -->
@@ -79,7 +85,7 @@ templ ToastComponent(toast web.ToastMessage) {
 			class="ml-4 text-primary-400 hover:text-primary-600 focus:outline-none shrink-0"
 			@click="close()"
 		>
-			<iconify-icon icon="heroicons:x-mark" class="w-5 h-5"></iconify-icon>
+			<iconify-icon icon="heroicons:x-mark" class="w-5 h-5 block"></iconify-icon>
 		</button>
 	</div>
 }
@@ -90,7 +96,6 @@ templ SuccessToast(message string, id string) {
 		Type:    web.Success,
 		Message: message,
 		ID:      id,
-		Style:   getToastStyle(web.Success),
 	})
 }
 
@@ -99,7 +104,6 @@ templ ErrorToast(message string, id string) {
 		Type:    web.ErrorMsg,
 		Message: message,
 		ID:      id,
-		Style:   getToastStyle(web.ErrorMsg),
 	})
 }
 
@@ -108,7 +112,6 @@ templ WarningToast(message string, id string) {
 		Type:    web.Warning,
 		Message: message,
 		ID:      id,
-		Style:   getToastStyle(web.Warning),
 	})
 }
 
@@ -117,7 +120,6 @@ templ InfoToast(message string, id string) {
 		Type:    web.Info,
 		Message: message,
 		ID:      id,
-		Style:   getToastStyle(web.Info),
 	})
 }
 
@@ -127,16 +129,7 @@ templ Toast(data web.Data) {
 		<!-- For demo only - you'll typically add toasts dynamically -->
 		<div>
 			if data.Toast != nil {
-				switch data.Toast.Type {
-					case web.Info:
-						@InfoToast(data.Toast.Message, data.Toast.ID)
-					case web.Success:
-						@SuccessToast(data.Toast.Message, data.Toast.ID)
-					case web.ErrorMsg:
-						@ErrorToast(data.Toast.Message, data.Toast.ID)
-					case web.Warning:
-						@WarningToast(data.Toast.Message, data.Toast.ID)
-				}
+				@ToastComponent(*data.Toast)
 			}
 		</div>
 	</div>
@@ -162,7 +155,6 @@ templ ToastEvent() {
 			x-transition:leave-start="opacity-100 transform translate-x-0"
 			x-transition:leave-end="opacity-0 transform translate-x-full"
 			:class="toast ? getToastClass(toast.level) : ''"
-			:style="toast ? toast.style : ''"
 			class="max-w-sm w-full flex items-center p-4 rounded-lg shadow-lg"
 			role="alert"
 		>
@@ -170,10 +162,10 @@ templ ToastEvent() {
 			<div class="mr-3 shrink-0">
 				<iconify-icon
 					:icon="toast ? toast.icon : ''"
-					class="w-5 h-5"
+					class="w-5 h-5 block"
 					:class="{
-              'text-accent-600': toast && toast.level === 'success',
-              'text-secondary-600': toast && toast.level === 'error',
+              'text-green-600': toast && toast.level === 'success',
+              'text-red-600': toast && toast.level === 'error',
               'text-amber-600': toast && toast.level === 'warning',
               'text-blue-600': toast && toast.level === 'info'
             }"
@@ -187,7 +179,7 @@ templ ToastEvent() {
 				class="ml-4 text-primary-400 hover:text-primary-600 focus:outline-none shrink-0"
 				@click="hideToast()"
 			>
-				<iconify-icon icon="heroicons:x-mark" class="w-5 h-5"></iconify-icon>
+				<iconify-icon icon="heroicons:x-mark" class="w-5 h-5 block"></iconify-icon>
 			</button>
 		</div>
 	</div>
