@@ -13,10 +13,33 @@ templ CSRFScript(token string) {
 
 templ Base(data web.Data) {
 	<!DOCTYPE html>
-	<html class="h-full bg-slate-950" lang="ro">
+	<html
+		lang="ro"
+		class="h-full bg-white dark:bg-slate-950"
+		x-data="{
+			theme: localStorage.getItem('theme') || 'system',
+			darkMode: false,
+			updateTheme() {
+				if (this.theme === 'dark') this.darkMode = true;
+				else if (this.theme === 'light') this.darkMode = false;
+				else this.darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+				
+				if (this.darkMode) document.documentElement.classList.add('dark');
+				else document.documentElement.classList.remove('dark');
+			}
+		}"
+		x-init="$watch('theme', val => { localStorage.setItem('theme', val); updateTheme(); }); updateTheme(); window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if(this.theme === 'system') this.updateTheme() });"
+	>
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<script>
+				if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+					document.documentElement.classList.add('dark');
+				} else {
+					document.documentElement.classList.remove('dark');
+				}
+			</script>
 			<meta
 				name="htmx-config"
 				content='{
@@ -36,7 +59,7 @@ templ Base(data web.Data) {
 			<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 			<script defer src="https://umami.coderustle.dev/script.js" data-website-id="8be7a2cf-91eb-4785-978b-7124d91d15c5"></script>
 		</head>
-		<body class="antialiased h-full bg-slate-950 text-white font-sans">
+		<body class="antialiased h-full bg-white text-slate-900 dark:bg-slate-950 dark:text-white font-sans">
 			{ children... }
 			<script src="/static/js/main.js" type="text/javascript"></script>
 			<script src="/static/js/htmx.min.js" type="text/javascript"></script>
