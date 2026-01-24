@@ -28,14 +28,14 @@ func (h *IncomeHandler) CreateIncome(w http.ResponseWriter, r *http.Request) {
 	var incomeForm form.CreateIncomeForm
 	err := form.ParseAndValidateForm(r, h.app.Decoder, &incomeForm)
 	if err != nil {
-		h.app.Response.Handle.LogServerError(r, err)
+		h.app.Errors.LogServerError(r, err)
 		return
 	}
 
 	if !incomeForm.IsValid() {
 		component := components.AddIncomeForm(&incomeForm, h.app.Config.Currency, incomeForm.CurrentMonth)
 		if err := component.Render(r.Context(), w); err != nil {
-			h.app.Response.Handle.LogServerError(r, err)
+			h.app.Errors.LogServerError(r, err)
 		}
 		return
 	}
@@ -56,11 +56,11 @@ func (h *IncomeHandler) CreateIncome(w http.ResponseWriter, r *http.Request) {
 
 	_, err = h.income.Create(r.Context(), userID, req)
 	if err != nil {
-		h.app.Response.Handle.LogServerError(r, err)
+		h.app.Errors.LogServerError(r, err)
 		return
 	}
 
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Income created successfully.", "add-income-modal")
+	triggerDashboardRefresh(w, h.app.Notify, web.Success, "Income created successfully.", "add-income-modal")
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -74,13 +74,13 @@ func (h *IncomeHandler) ListIncomes(w http.ResponseWriter, r *http.Request) {
 
 	incomes, err := h.income.ListByMonth(r.Context(), userID, month)
 	if err != nil {
-		h.app.Response.Handle.LogServerError(r, err)
+		h.app.Errors.LogServerError(r, err)
 		return
 	}
 
 	err = components.IncomeList(incomes, h.app.Config.Currency).Render(r.Context(), w)
 	if err != nil {
-		h.app.Response.Handle.LogServerError(r, err)
+		h.app.Errors.LogServerError(r, err)
 	}
 }
 
@@ -90,10 +90,10 @@ func (h *IncomeHandler) DeleteIncome(w http.ResponseWriter, r *http.Request) {
 
 	err := h.income.Delete(r.Context(), userID, id)
 	if err != nil {
-		h.app.Response.Handle.LogServerError(r, err)
+		h.app.Errors.LogServerError(r, err)
 		return
 	}
 
-	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Income deleted successfully.", "")
+	triggerDashboardRefresh(w, h.app.Notify, web.Success, "Income deleted successfully.", "")
 	w.WriteHeader(http.StatusNoContent)
 }

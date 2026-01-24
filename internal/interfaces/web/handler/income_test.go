@@ -13,6 +13,7 @@ import (
 
 	"github.com/go-playground/form/v4"
 	"github.com/madalinpopa/gocost-web/internal/config"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/respond"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -32,7 +33,8 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
@@ -81,7 +83,8 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
@@ -120,7 +123,8 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
@@ -160,7 +164,8 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 
 		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
@@ -200,10 +205,11 @@ func TestIncomeHandler_ListIncomes(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 		appCtx := HandlerContext{
-			Config:   &config.Config{Currency: "$"},
-			Session:  mockSession,
-			Logger:   logger,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Config:  &config.Config{Currency: "$"},
+			Session: mockSession,
+			Logger:  logger,
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
 
@@ -229,10 +235,11 @@ func TestIncomeHandler_DeleteIncome(t *testing.T) {
 		mockErrorHandler := new(MockErrorHandler)
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 		appCtx := HandlerContext{
-			Config:   &config.Config{Currency: "$"},
-			Session:  mockSession,
-			Logger:   logger,
-			Response: newTestResponse(logger, mockErrorHandler),
+			Config:  &config.Config{Currency: "$"},
+			Session: mockSession,
+			Logger:  logger,
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
 		}
 		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
 
