@@ -300,16 +300,21 @@ templ AddCategoryForm(f *form.CreateCategoryForm, currency string, currentMonth 
 		@AmountField("category-budget", "Budget", currency, budgetVal, budgetErr)
 		<div>
 			<label for="category-type" class="block text-sm font-medium leading-6 text-slate-900 dark:text-white">Type</label>
-			<div class="mt-2">
+			<div class="relative mt-2">
 				<select
 					id="category-type"
 					name="type"
 					x-model="categoryType"
-					class={ "block w-full rounded-md border-0 bg-white dark:bg-slate-800 py-1.5 px-3 text-slate-900 dark:text-white ring-1 ring-inset ring-slate-300 dark:ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", typeErr != "") }
+					class={ "appearance-none block w-full rounded-md border-0 bg-white dark:bg-slate-800 py-1.5 pl-3 pr-10 text-slate-900 dark:text-white ring-1 ring-inset ring-slate-300 dark:ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", typeErr != "") }
 				>
 					<option value="monthly">This month only</option>
 					<option value="recurrent">Recurrent</option>
 				</select>
+				<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+					<svg class="h-5 w-5 text-slate-500 dark:text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+						<path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"></path>
+					</svg>
+				</div>
 			</div>
 			if typeErr != "" {
 				<p class="mt-2 text-sm text-red-500">{ typeErr }</p>
@@ -401,16 +406,21 @@ templ EditCategoryForm(f *form.UpdateCategoryForm, currency string) {
 		@AmountField("edit-budget", "Budget", currency, budgetVal, budgetErr)
 		<div>
 			<label for="edit-category-type" class="block text-sm font-medium leading-6 text-slate-900 dark:text-white">Type</label>
-			<div class="mt-2">
+			<div class="relative mt-2">
 				<select
 					id="edit-category-type"
 					name="type"
 					x-model="categoryType"
-					class={ "block w-full rounded-md border-0 bg-white dark:bg-slate-800 py-1.5 px-3 text-slate-900 dark:text-white ring-1 ring-inset ring-slate-300 dark:ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", typeErr != "") }
+					class={ "appearance-none block w-full rounded-md border-0 bg-white dark:bg-slate-800 py-1.5 pl-3 pr-10 text-slate-900 dark:text-white ring-1 ring-inset ring-slate-300 dark:ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", typeErr != "") }
 				>
 					<option value="monthly">This month only</option>
 					<option value="recurrent">Recurrent</option>
 				</select>
+				<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+					<svg class="h-5 w-5 text-slate-500 dark:text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+						<path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"></path>
+					</svg>
+				</div>
 			</div>
 			if typeErr != "" {
 				<p class="mt-2 text-sm text-red-500">{ typeErr }</p>
@@ -496,16 +506,21 @@ templ AddExpenseForm(f *form.CreateExpenseForm, currency string) {
 		@InputField("expense-desc", "Description", "Details...", "text", descVal, descErr)
 		<div>
 			<label for="expense-status" class="block text-sm font-medium leading-6 text-slate-900 dark:text-white">Payment Status</label>
-			<div class="mt-2">
+			<div class="relative mt-2">
 				<select
 					id="expense-status"
 					name="payment-status"
 					x-model="status"
-					class={ "block w-full rounded-md border-0 bg-white dark:bg-slate-800 py-1.5 px-3 text-slate-900 dark:text-white ring-1 ring-inset ring-slate-300 dark:ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", statusErr != "") }
+					class={ "appearance-none block w-full rounded-md border-0 bg-white dark:bg-slate-800 py-1.5 pl-3 pr-10 text-slate-900 dark:text-white ring-1 ring-inset ring-slate-300 dark:ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", statusErr != "") }
 				>
 					<option value="paid">Paid</option>
 					<option value="unpaid">Unpaid</option>
 				</select>
+				<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+					<svg class="h-5 w-5 text-slate-500 dark:text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+						<path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"></path>
+					</svg>
+				</div>
 			</div>
 			if statusErr != "" {
 				<p class="mt-2 text-sm text-red-500">{ statusErr }</p>
@@ -581,16 +596,21 @@ templ EditExpenseForm(f *form.UpdateExpenseForm, currency string) {
 		@InputField("edit-desc", "Description", "Details...", "text", descVal, descErr)
 		<div>
 			<label for="edit-status" class="block text-sm font-medium leading-6 text-slate-900 dark:text-white">Payment Status</label>
-			<div class="mt-2">
+			<div class="relative mt-2">
 				<select
 					id="edit-status"
 					name="payment-status"
 					x-model="status"
-					class={ "block w-full rounded-md border-0 bg-white dark:bg-slate-800 py-1.5 px-3 text-slate-900 dark:text-white ring-1 ring-inset ring-slate-300 dark:ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", statusErr != "") }
+					class={ "appearance-none block w-full rounded-md border-0 bg-white dark:bg-slate-800 py-1.5 pl-3 pr-10 text-slate-900 dark:text-white ring-1 ring-inset ring-slate-300 dark:ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", statusErr != "") }
 				>
 					<option value="paid">Paid</option>
 					<option value="unpaid">Unpaid</option>
 				</select>
+				<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+					<svg class="h-5 w-5 text-slate-500 dark:text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+						<path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"></path>
+					</svg>
+				</div>
 			</div>
 			if statusErr != "" {
 				<p class="mt-2 text-sm text-red-500">{ statusErr }</p>
