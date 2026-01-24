@@ -13,7 +13,6 @@ import (
 
 	"github.com/go-playground/form/v4"
 	"github.com/madalinpopa/gocost-web/internal/config"
-	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -26,15 +25,14 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 		mockIncomeUC := new(MockIncomeUseCase)
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config:  &config.Config{Currency: "$"},
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Logger:  logger,
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
@@ -64,8 +62,8 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 		handler.CreateIncome(rec, req)
 
 		// Assert
-		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, "true", rec.Header().Get("HX-Refresh"))
+		assert.Equal(t, http.StatusNoContent, rec.Code)
+		assert.Contains(t, rec.Header().Get("HX-Trigger"), "dashboard:refresh")
 		mockSession.AssertExpectations(t)
 		mockIncomeUC.AssertExpectations(t)
 	})
@@ -76,15 +74,14 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 		mockIncomeUC := new(MockIncomeUseCase)
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config:  &config.Config{Currency: "$"},
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Logger:  logger,
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
@@ -116,15 +113,14 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 		mockIncomeUC := new(MockIncomeUseCase)
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config:  &config.Config{Currency: "$"},
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Logger:  logger,
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
@@ -157,15 +153,14 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 		mockIncomeUC := new(MockIncomeUseCase)
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
 			Config:  &config.Config{Currency: "$"},
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
-			Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
-			Response: web.Response{
-				Handle: mockErrorHandler,
-			},
+			Logger:  logger,
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 
 		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
@@ -203,10 +198,12 @@ func TestIncomeHandler_ListIncomes(t *testing.T) {
 		mockIncomeUC := new(MockIncomeUseCase)
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 		appCtx := HandlerContext{
 			Config:   &config.Config{Currency: "$"},
 			Session:  mockSession,
-			Response: web.Response{Handle: mockErrorHandler},
+			Logger:   logger,
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
 
@@ -230,10 +227,12 @@ func TestIncomeHandler_DeleteIncome(t *testing.T) {
 		mockIncomeUC := new(MockIncomeUseCase)
 		mockExpenseUC := new(MockExpenseUseCase)
 		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 		appCtx := HandlerContext{
 			Config:   &config.Config{Currency: "$"},
 			Session:  mockSession,
-			Response: web.Response{Handle: mockErrorHandler},
+			Logger:   logger,
+			Response: newTestResponse(logger, mockErrorHandler),
 		}
 		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
 
@@ -243,21 +242,13 @@ func TestIncomeHandler_DeleteIncome(t *testing.T) {
 
 		mockSession.On("GetUserID", req.Context()).Return("user-123")
 
-		receivedAt, _ := time.Parse("2006-01-02", "2023-10-15")
-		mockIncomeUC.On("Get", req.Context(), "user-123", "inc-1").Return(&usecase.IncomeResponse{
-			ID:         "inc-1",
-			ReceivedAt: receivedAt,
-		}, nil)
-
 		mockIncomeUC.On("Delete", req.Context(), "user-123", "inc-1").Return(nil)
-		mockIncomeUC.On("Total", req.Context(), "user-123", "2023-10").Return(200.0, nil)
-		mockExpenseUC.On("Total", req.Context(), "user-123", "2023-10").Return(50.0, nil)
 
 		handler.DeleteIncome(rec, req)
 
-		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, http.StatusNoContent, rec.Code)
+		assert.Contains(t, rec.Header().Get("HX-Trigger"), "dashboard:refresh")
 		mockSession.AssertExpectations(t)
 		mockIncomeUC.AssertExpectations(t)
-		mockExpenseUC.AssertExpectations(t)
 	})
 }

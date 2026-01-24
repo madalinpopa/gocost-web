@@ -62,7 +62,7 @@ templ BalanceDisplay(dashboard views.DashboardView, oob bool) {
 			@click="$dispatch('open-modal', { id: 'income-list-modal' })"
 			hx-get={ "/incomes?month=" + dashboard.CurrentMonthParam }
 			hx-target="#income-list-container"
-			hx-trigger="click"
+			hx-trigger="click, dashboard:refresh from:body"
 			class="ml-2 rounded-full p-1 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
 			title="View Monthly Incomes"
 		>

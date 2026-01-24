@@ -1,10 +1,11 @@
 package form
 
 type CreateIncomeForm struct {
-	Amount      float64 `form:"income-amount"`
-	Description string  `form:"income-desc"`
-	Date        string  `form:"income-date"`
-	Base        `form:"-"`
+	Amount       float64 `form:"income-amount"`
+	Description  string  `form:"income-desc"`
+	Date         string  `form:"income-date"`
+	CurrentMonth string  `form:"current-month"`
+	Base         `form:"-"`
 }
 
 func (f *CreateIncomeForm) Validate() {

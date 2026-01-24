@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/form"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/madalinpopa/gocost-web/ui/templates/components"
@@ -66,9 +67,9 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Success - trigger UI update
-	w.Header().Set("HX-Refresh", "true")
-	w.WriteHeader(http.StatusOK)
+	// Success - trigger dashboard refresh and toast.
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Category created successfully.", "add-category-modal")
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request) {
@@ -117,9 +118,9 @@ func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Success - trigger UI update
-	w.Header().Set("HX-Refresh", "true")
-	w.WriteHeader(http.StatusOK)
+	// Success - trigger dashboard refresh and toast.
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Category updated successfully.", "edit-category-modal")
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *CategoryHandler) DeleteCategory(w http.ResponseWriter, r *http.Request) {
@@ -132,8 +133,8 @@ func (h *CategoryHandler) DeleteCategory(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	w.Header().Set("HX-Refresh", "true")
-	w.WriteHeader(http.StatusOK)
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Category deleted successfully.", "")
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func translateCategoryError(err error) (string, bool) {

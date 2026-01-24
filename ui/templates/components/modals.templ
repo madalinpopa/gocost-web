@@ -66,16 +66,23 @@ templ ModalButtons(cancelText string, confirmText string) {
 
 // AddIncomeForm is the form content for adding income.
 // It is separated to allow HTMX replacement on validation error without closing the modal.
-templ AddIncomeForm(f *form.CreateIncomeForm, currency string) {
+templ AddIncomeForm(f *form.CreateIncomeForm, currency string, currentMonth string) {
 	{{
 		var amountVal, descVal, dateVal string
 		var amountErr, descErr, dateErr string
+
+		if currentMonth != "" {
+			dateVal = currentMonth + "-01"
+		}
+
 		if f != nil {
 			if f.Amount > 0 {
 				amountVal = fmt.Sprintf("%g", f.Amount)
 			}
 			descVal = f.Description
-			dateVal = f.Date
+			if f.Date != "" {
+				dateVal = f.Date
+			}
 			amountErr = f.FieldErrors["income-amount"]
 			descErr = f.FieldErrors["income-desc"]
 			dateErr = f.FieldErrors["income-date"]
@@ -103,6 +110,7 @@ templ AddIncomeForm(f *form.CreateIncomeForm, currency string) {
 				</div>
 			</div>
 		}
+		<input type="hidden" name="current-month" value={ currentMonth }/>
 		@AmountField("income-amount", "Amount", currency, amountVal, amountErr)
 		@InputField("income-desc", "Description", "Salary, Freelance...", "text", descVal, descErr)
 		@InputField("income-date", "Received At", "", "date", dateVal, dateErr)
@@ -110,9 +118,9 @@ templ AddIncomeForm(f *form.CreateIncomeForm, currency string) {
 	</form>
 }
 
-templ AddIncomeModal(currency string) {
+templ AddIncomeModal(currency string, currentMonth string) {
 	@Modal("add-income-modal", "Add Income") {
-		@AddIncomeForm(nil, currency)
+		@AddIncomeForm(nil, currency, currentMonth)
 	}
 }
 

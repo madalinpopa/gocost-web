@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/form"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/madalinpopa/gocost-web/ui/templates/components"
@@ -62,9 +63,9 @@ func (h *GroupHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Success - trigger page refresh
-	w.Header().Set("HX-Refresh", "true")
-	w.WriteHeader(http.StatusOK)
+	// Success - trigger dashboard refresh and toast.
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Group created successfully.", "add-group-modal")
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *GroupHandler) UpdateGroup(w http.ResponseWriter, r *http.Request) {
@@ -108,9 +109,9 @@ func (h *GroupHandler) UpdateGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Success - trigger page refresh
-	w.Header().Set("HX-Refresh", "true")
-	w.WriteHeader(http.StatusOK)
+	// Success - trigger dashboard refresh and toast.
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Group updated successfully.", "edit-group-modal")
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *GroupHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
@@ -122,8 +123,8 @@ func (h *GroupHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("HX-Refresh", "true")
-	w.WriteHeader(http.StatusOK)
+	triggerDashboardRefresh(w, h.app.Response.Notify, web.Success, "Group deleted successfully.", "")
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func translateGroupError(err error) (string, bool) {
