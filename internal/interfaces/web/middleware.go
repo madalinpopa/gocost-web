@@ -128,8 +128,10 @@ func (m *Middleware) Recover(next http.Handler) http.Handler {
 // CsrfToken is middleware that applies CSRF protection to HTTP requests using nosurf, setting a secure base cookie.
 func (m *Middleware) CsrfToken(next http.Handler) http.Handler {
 	cookie := http.Cookie{
+		Name:     "gocost_csrf",
 		HttpOnly: true,
 		MaxAge:   86400, // 24 hours
+		Path:     "/",
 	}
 
 	if m.config.GetEnvironment() == "production" {
@@ -140,6 +142,11 @@ func (m *Middleware) CsrfToken(next http.Handler) http.Handler {
 
 	csrfHandler := nosurf.New(next)
 	csrfHandler.SetBaseCookie(cookie)
+
+	csrfHandler.SetFailureHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		m.logger.Error("CSRF validation failed", "reason", nosurf.Reason(r))
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+	}))
 
 	return csrfHandler
 }
