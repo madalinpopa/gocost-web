@@ -41,7 +41,7 @@ Some features I would like to implement in the coming months.
 - [ ] **Data Export:** functionality to export all data to CSV/JSON format for user backup.
 
 ### 5. Budgeting Features
-- [ ] **Category Limits:** Allow users to set a maximum budget per category (e.g., "Groceries: $500/month").
+- [x] **Category Limits:** Allow users to set a maximum budget per category (e.g., "Groceries: $500/month").
 - [x] **Visual Indicators:** Progress bars on the dashboard showing budget usage (Green/Yellow/Red).
 - [ ] **Balance Display:** Display total amount budgeted vs current balance for the month.
 
