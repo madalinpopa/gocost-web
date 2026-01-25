@@ -82,7 +82,7 @@ func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 
 	req := &usecase.CreateExpenseRequest{
 		CategoryID:  expenseForm.CategoryID,
-		Amount:      expenseForm.Amount,
+		Amount:      expenseForm.ParsedAmount(),
 		Description: expenseForm.Description,
 		SpentAt:     spentAt,
 		IsPaid:      isPaid,
@@ -158,7 +158,7 @@ func (h *ExpenseHandler) EditExpense(w http.ResponseWriter, r *http.Request) {
 	req := &usecase.UpdateExpenseRequest{
 		ID:          expenseForm.ID,
 		CategoryID:  expenseForm.CategoryID,
-		Amount:      expenseForm.Amount,
+		Amount:      expenseForm.ParsedAmount(),
 		Description: expenseForm.Description,
 		SpentAt:     existing.SpentAt,
 		IsPaid:      isPaid,
