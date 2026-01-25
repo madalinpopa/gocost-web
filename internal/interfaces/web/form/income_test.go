@@ -16,7 +16,7 @@ func TestCreateIncomeForm_Validate(t *testing.T) {
 		{
 			name: "valid form",
 			form: CreateIncomeForm{
-				Amount:      100.50,
+				Amount:      "100.50",
 				Description: "Salary",
 				Date:        "2023-10-27",
 			},
@@ -26,7 +26,7 @@ func TestCreateIncomeForm_Validate(t *testing.T) {
 		{
 			name: "invalid amount",
 			form: CreateIncomeForm{
-				Amount:      0,
+				Amount:      "0",
 				Description: "Salary",
 				Date:        "2023-10-27",
 			},
@@ -36,9 +36,21 @@ func TestCreateIncomeForm_Validate(t *testing.T) {
 			},
 		},
 		{
+			name: "invalid amount - not a number",
+			form: CreateIncomeForm{
+				Amount:      "abc",
+				Description: "Salary",
+				Date:        "2023-10-27",
+			},
+			wantValid: false,
+			wantErrors: map[string]string{
+				"income-amount": "amount must be a number",
+			},
+		},
+		{
 			name: "missing description",
 			form: CreateIncomeForm{
-				Amount:      100,
+				Amount:      "100",
 				Description: "",
 				Date:        "2023-10-27",
 			},
@@ -50,7 +62,7 @@ func TestCreateIncomeForm_Validate(t *testing.T) {
 		{
 			name: "description too long",
 			form: CreateIncomeForm{
-				Amount:      100,
+				Amount:      "100",
 				Description: "this is a very long description that definitely exceeds the one hundred character limit defined in the validation rules for this field",
 				Date:        "2023-10-27",
 			},
@@ -62,7 +74,7 @@ func TestCreateIncomeForm_Validate(t *testing.T) {
 		{
 			name: "missing date",
 			form: CreateIncomeForm{
-				Amount:      100,
+				Amount:      "100",
 				Description: "Salary",
 				Date:        "",
 			},
@@ -74,7 +86,7 @@ func TestCreateIncomeForm_Validate(t *testing.T) {
 		{
 			name: "invalid date format",
 			form: CreateIncomeForm{
-				Amount:      100,
+				Amount:      "100",
 				Description: "Salary",
 				Date:        "invalid-date",
 			},
