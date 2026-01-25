@@ -1,14 +1,21 @@
 package form
 
+import "strconv"
+
 type CreateCategoryForm struct {
-	GroupID     string  `form:"group-id"`
-	Name        string  `form:"category-name"`
-	Description string  `form:"category-desc"`
-	Type        string  `form:"type"`
-	StartMonth  string  `form:"category-start"`
-	EndMonth    string  `form:"category-end"`
-	Budget      float64 `form:"category-budget"`
+	GroupID     string `form:"group-id"`
+	Name        string `form:"category-name"`
+	Description string `form:"category-desc"`
+	Type        string `form:"type"`
+	StartMonth  string `form:"category-start"`
+	EndMonth    string `form:"category-end"`
+	Budget      string `form:"category-budget"`
 	Base        `form:"-"`
+}
+
+func (f *CreateCategoryForm) ParsedBudget() float64 {
+	val, _ := strconv.ParseFloat(f.Budget, 64)
+	return val
 }
 
 func (f *CreateCategoryForm) Validate() {
@@ -32,10 +39,16 @@ func (f *CreateCategoryForm) Validate() {
 		"type",
 		"invalid category type",
 	)
-	f.CheckField(f.Budget >= 0,
-		"category-budget",
-		"budget must be zero or positive",
-	)
+
+	if !ValidFloat(f.Budget) {
+		f.AddFieldError("category-budget", "budget must be a number")
+	} else {
+		f.CheckField(f.ParsedBudget() >= 0,
+			"category-budget",
+			"budget must be zero or positive",
+		)
+	}
+
 	if !NotBlank(f.StartMonth) {
 		f.AddFieldError("category-start", "this field is required")
 	} else {
@@ -60,16 +73,21 @@ func (f *CreateCategoryForm) Validate() {
 }
 
 type UpdateCategoryForm struct {
-	ID           string  `form:"category-id"`
-	GroupID      string  `form:"group-id"`
-	Name         string  `form:"edit-name"`
-	Description  string  `form:"edit-desc"`
-	Type         string  `form:"type"`
-	StartMonth   string  `form:"edit-start"`
-	EndMonth     string  `form:"edit-end"`
-	CurrentMonth string  `form:"current-month"`
-	Budget       float64 `form:"edit-budget"`
+	ID           string `form:"category-id"`
+	GroupID      string `form:"group-id"`
+	Name         string `form:"edit-name"`
+	Description  string `form:"edit-desc"`
+	Type         string `form:"type"`
+	StartMonth   string `form:"edit-start"`
+	EndMonth     string `form:"edit-end"`
+	CurrentMonth string `form:"current-month"`
+	Budget       string `form:"edit-budget"`
 	Base         `form:"-"`
+}
+
+func (f *UpdateCategoryForm) ParsedBudget() float64 {
+	val, _ := strconv.ParseFloat(f.Budget, 64)
+	return val
 }
 
 func (f *UpdateCategoryForm) Validate() {
@@ -97,10 +115,16 @@ func (f *UpdateCategoryForm) Validate() {
 		"type",
 		"invalid category type",
 	)
-	f.CheckField(f.Budget >= 0,
-		"edit-budget",
-		"budget must be zero or positive",
-	)
+
+	if !ValidFloat(f.Budget) {
+		f.AddFieldError("edit-budget", "budget must be a number")
+	} else {
+		f.CheckField(f.ParsedBudget() >= 0,
+			"edit-budget",
+			"budget must be zero or positive",
+		)
+	}
+
 	if !NotBlank(f.StartMonth) {
 		f.AddFieldError("edit-start", "this field is required")
 	} else {

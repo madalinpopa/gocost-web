@@ -17,7 +17,7 @@ func TestCreateExpenseForm_Validate(t *testing.T) {
 			name: "valid unpaid expense",
 			form: CreateExpenseForm{
 				CategoryID:    "cat-123",
-				Amount:        50.00,
+				Amount:        "50.00",
 				Month:         "2023-10",
 				PaymentStatus: "unpaid",
 			},
@@ -28,7 +28,7 @@ func TestCreateExpenseForm_Validate(t *testing.T) {
 			name: "valid paid expense",
 			form: CreateExpenseForm{
 				CategoryID:    "cat-123",
-				Amount:        50.00,
+				Amount:        "50.00",
 				Month:         "2023-10",
 				PaymentStatus: "paid",
 			},
@@ -36,10 +36,10 @@ func TestCreateExpenseForm_Validate(t *testing.T) {
 			wantErrors: nil,
 		},
 		{
-			name: "invalid amount",
+			name: "invalid amount - negative",
 			form: CreateExpenseForm{
 				CategoryID:    "cat-123",
-				Amount:        -10.00,
+				Amount:        "-10.00",
 				Month:         "2023-10",
 				PaymentStatus: "unpaid",
 			},
@@ -49,10 +49,23 @@ func TestCreateExpenseForm_Validate(t *testing.T) {
 			},
 		},
 		{
+			name: "invalid amount - not a number",
+			form: CreateExpenseForm{
+				CategoryID:    "cat-123",
+				Amount:        "abc",
+				Month:         "2023-10",
+				PaymentStatus: "unpaid",
+			},
+			wantValid: false,
+			wantErrors: map[string]string{
+				"expense-amount": "amount must be a number",
+			},
+		},
+		{
 			name: "invalid month format",
 			form: CreateExpenseForm{
 				CategoryID:    "cat-123",
-				Amount:        10.00,
+				Amount:        "10.00",
 				Month:         "2023-10-27",
 				PaymentStatus: "unpaid",
 			},
@@ -85,7 +98,7 @@ func TestUpdateExpenseForm_Validate(t *testing.T) {
 			form: UpdateExpenseForm{
 				ID:            "exp-123",
 				CategoryID:    "cat-123",
-				Amount:        75.00,
+				Amount:        "75.00",
 				PaymentStatus: "unpaid",
 			},
 			wantValid:  true,
@@ -95,7 +108,7 @@ func TestUpdateExpenseForm_Validate(t *testing.T) {
 			name: "missing expense ID",
 			form: UpdateExpenseForm{
 				CategoryID:    "cat-123",
-				Amount:        75.00,
+				Amount:        "75.00",
 				PaymentStatus: "unpaid",
 			},
 			wantValid: false,

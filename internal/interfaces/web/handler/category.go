@@ -23,6 +23,28 @@ func NewCategoryHandler(app HandlerContext, category usecase.CategoryUseCase) Ca
 	}
 }
 
+func (h *CategoryHandler) GetCreateForm(w http.ResponseWriter, r *http.Request) {
+	groupID, err := web.GetRequiredQueryParam(r, "group-id")
+	if err != nil {
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	categoryStart, err := web.GetRequiredQueryParam(r, "category-start")
+	if err != nil {
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	categoryForm := &form.CreateCategoryForm{
+		GroupID:    groupID,
+		StartMonth: categoryStart,
+	}
+
+	component := components.AddCategoryForm(categoryForm, h.app.Config.Currency, categoryStart)
+	h.app.Template.Render(w, r, component, http.StatusOK)
+}
+
 func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
@@ -50,7 +72,7 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 		IsRecurrent: isRecurrent,
 		StartMonth:  categoryForm.StartMonth,
 		EndMonth:    categoryForm.EndMonth,
-		Budget:      categoryForm.Budget,
+		Budget:      categoryForm.ParsedBudget(),
 	}
 
 	userID := h.app.Session.GetUserID(r.Context())
@@ -101,7 +123,7 @@ func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request)
 		StartMonth:   categoryForm.StartMonth,
 		EndMonth:     categoryForm.EndMonth,
 		CurrentMonth: categoryForm.CurrentMonth,
-		Budget:       categoryForm.Budget,
+		Budget:       categoryForm.ParsedBudget(),
 	}
 
 	userID := h.app.Session.GetUserID(r.Context())

@@ -1,0 +1,308 @@
+package components
+
+import (
+	"fmt"
+)
+
+// ============================================================================
+// Modal Wrapper
+// ============================================================================
+
+templ Modal(id string, title string) {
+	<div
+		x-data="{ open: false }"
+		x-show="open"
+		@open-modal.window={ fmt.Sprintf("if ($event.detail.id === '%s') open = true", id) }
+		@close-modal.window={ fmt.Sprintf("if ($event.detail.id === '%s') open = false", id) }
+		@keydown.escape.window="open = false"
+		class="relative z-50"
+		aria-labelledby={ "modal-title-" + id }
+		role="dialog"
+		aria-modal="true"
+		style="display: none;"
+	>
+		<!-- Background backdrop -->
+		<div
+			x-show="open"
+			x-transition:enter="ease-out duration-300"
+			x-transition:enter-start="opacity-0"
+			x-transition:enter-end="opacity-100"
+			x-transition:leave="ease-in duration-200"
+			x-transition:leave-start="opacity-100"
+			x-transition:leave-end="opacity-0"
+			class="fixed inset-0 bg-slate-900/50 dark:bg-slate-950/75 transition-opacity backdrop-blur-sm"
+			@click="open = false"
+		></div>
+		<!-- Modal panel -->
+		<div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+			<div class="flex min-h-full items-end justify-center p-0 text-center sm:items-center sm:p-0">
+				<div
+					x-show="open"
+					x-transition:enter="ease-out duration-300"
+					x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+					x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+					x-transition:leave="ease-in duration-200"
+					x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+					x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+					class="relative transform overflow-hidden rounded-t-xl sm:rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all w-full sm:my-8 sm:w-full sm:max-w-lg sm:p-6"
+				>
+					<div class="absolute right-0 top-0 pr-4 pt-4">
+						<button
+							type="button"
+							class="rounded-md text-slate-400 hover:text-slate-500 dark:text-slate-400 dark:hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+							@click="open = false"
+						>
+							<span class="sr-only">Close</span>
+							<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+							</svg>
+						</button>
+					</div>
+					<div>
+						<div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+							<h3 class="text-base font-semibold leading-6 text-slate-900 dark:text-white" id={ "modal-title-" + id }>
+								{ title }
+							</h3>
+							<div class="mt-4">
+								{ children... }
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+// ============================================================================
+// Loaders & Indicators
+// ============================================================================
+
+templ Spinner() {
+	<div id="spinner" class="htmx-indicator absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-10 pointer-events-none">
+		<div class="pointer-events-auto">
+			<svg width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="text-accent-600 animate-spin">
+				<g>
+					<circle cx="3" cy="12" r="2"></circle>
+					<circle cx="21" cy="12" r="2"></circle>
+					<circle cx="12" cy="21" r="2"></circle>
+					<circle cx="12" cy="3" r="2"></circle>
+					<circle cx="5.64" cy="5.64" r="2"></circle>
+					<circle cx="18.36" cy="18.36" r="2"></circle>
+					<circle cx="5.64" cy="18.36" r="2"></circle>
+					<circle cx="18.36" cy="5.64" r="2"></circle>
+				</g>
+			</svg>
+		</div>
+	</div>
+}
+
+// LoadingSpinner displays a centered loading spinner with optional message
+templ LoadingSpinner(message string) {
+	<div class="flex justify-center items-center py-10">
+		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+		if message != "" {
+			<span class="ml-3 text-slate-600 dark:text-slate-500">{ message }</span>
+		}
+	</div>
+}
+
+// ============================================================================
+// Form Components
+// ============================================================================
+
+// InputField renders a labeled text input with error handling
+templ InputField(id string, label string, placeholder string, inputType string, value string, err string) {
+	<div>
+		<label for={ id } class="block text-sm font-medium leading-6 text-slate-900 dark:text-white">{ label }</label>
+		<div class="mt-2">
+			<input
+				type={ inputType }
+				name={ id }
+				id={ id }
+				value={ value }
+				class={ "block w-full rounded-md border-0 bg-white dark:bg-slate-800 py-1.5 px-3 text-slate-900 dark:text-white ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert-[0.6] dark:[&::-webkit-calendar-picker-indicator]:invert", templ.KV("ring-red-500", err != "") }
+				placeholder={ placeholder }
+			/>
+		</div>
+		if err != "" {
+			<p class="mt-2 text-sm text-red-500">{ err }</p>
+		}
+	</div>
+}
+
+// AmountField renders a currency-prefixed input field
+templ AmountField(id string, label string, currency string, value string, err string) {
+	<div>
+		<label for={ id } class="block text-sm font-medium leading-6 text-slate-900 dark:text-white">{ label }</label>
+		<div class="relative mt-2 rounded-md shadow-sm">
+			<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+				<span class="text-slate-500 dark:text-slate-400 sm:text-sm">{ currency }</span>
+			</div>
+			<input
+				type="text"
+				name={ id }
+				id={ id }
+				value={ value }
+				class={ "block w-full rounded-md border-0 bg-white dark:bg-slate-800 py-1.5 pl-8 pr-3 text-slate-900 dark:text-white ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", err != "") }
+				placeholder="0.00"
+			/>
+		</div>
+		if err != "" {
+			<p class="mt-2 text-sm text-red-500">{ err }</p>
+		}
+	</div>
+}
+
+type SelectOption struct {
+	Value string
+	Label string
+}
+
+// SelectField renders a dropdown select field with consistent styling
+templ SelectField(id string, name string, label string, xModel string, options []SelectOption, err string) {
+	<div>
+		<label for={ id } class="block text-sm font-medium leading-6 text-slate-900 dark:text-white">{ label }</label>
+		<div class="relative mt-2">
+			<select
+				id={ id }
+				name={ name }
+				if xModel != "" {
+					x-model={ xModel }
+				}
+				class={ "appearance-none block w-full rounded-md border-0 bg-white dark:bg-slate-800 py-1.5 pl-3 pr-10 text-slate-900 dark:text-white ring-1 ring-inset ring-slate-300 dark:ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", err != "") }
+			>
+				for _, opt := range options {
+					<option value={ opt.Value }>{ opt.Label }</option>
+				}
+			</select>
+			<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+				@IconChevronDown()
+			</div>
+		</div>
+		if err != "" {
+			<p class="mt-2 text-sm text-red-500">{ err }</p>
+		}
+	</div>
+}
+
+templ ModalButtons(cancelText string, confirmText string) {
+	<div class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+		<button
+			type="submit"
+			class="inline w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2"
+		>
+			{ confirmText }
+		</button>
+		<button
+			type="button"
+			class="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-slate-800 px-3 py-2 text-sm font-semibold text-slate-900 dark:text-white shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 sm:col-start-1 sm:mt-0"
+			@click="open = false"
+		>
+			{ cancelText }
+		</button>
+	</div>
+}
+
+// ============================================================================
+// Error Components
+// ============================================================================
+
+templ Error(message string) {
+	if message != "" {
+		<p class="mt-2 text-sm text-secondary-600" x-data="{ show: true }" x-show="show" x-cloak x-init="setTimeout(() => show = false, 5000)" x-transition>
+			<span class="flex items-center">
+				<iconify-icon icon="heroicons:exclamation-circle" class="w-4 mr-1"></iconify-icon>
+				{ message }
+			</span>
+		</p>
+	}
+}
+
+func checkFieldError(field string, fieldErrors map[string]string) bool {
+	_, ok := fieldErrors[field]
+	return ok
+}
+
+templ FieldError(field string, fieldErrors map[string]string) {
+	if checkFieldError(field, fieldErrors) {
+		<p class="text-red-600">{ fieldErrors[field] }</p>
+	}
+}
+
+// NonFieldErrors displays a list of non-field-specific errors
+templ NonFieldErrors(errors []string) {
+	if len(errors) > 0 {
+		<div class="rounded-md bg-red-50 p-4 mb-4">
+			<div class="flex">
+				<div class="ml-3">
+					<h3 class="text-sm font-medium text-red-800">Error</h3>
+					<div class="mt-2 text-sm text-red-700">
+						<ul role="list" class="list-disc pl-5 space-y-1">
+							for _, err := range errors {
+								<li>{ err }</li>
+							}
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// FieldErrorInline displays a single field error message inline
+templ FieldErrorInline(err string) {
+	if err != "" {
+		<div class="rounded-md bg-red-50 p-4 mb-4">
+			<p class="text-sm text-red-700">{ err }</p>
+		</div>
+	}
+}
+
+// ============================================================================
+// Toast Components
+// ============================================================================
+
+templ ToastEvent() {
+	<div
+		x-data="toastManager"
+		class="fixed top-4 right-4 z-50"
+	>
+		<div
+			x-show="toast && toast.visible"
+			x-transition:enter="transition ease-out duration-300"
+			x-transition:enter-start="opacity-0 transform translate-x-full"
+			x-transition:enter-end="opacity-100 transform translate-x-0"
+			x-transition:leave="transition ease-in duration-300"
+			x-transition:leave-start="opacity-100 transform translate-x-0"
+			x-transition:leave-end="opacity-0 transform translate-x-full"
+			:class="toast ? getToastClass(toast.level) : ''"
+			class="max-w-sm w-full flex items-center p-4 rounded-lg shadow-lg"
+			role="alert"
+		>
+			<!-- Icon -->
+			<div class="mr-3 shrink-0">
+				<iconify-icon
+					:icon="toast ? toast.icon : ''"
+					class="w-5 h-5 block"
+					:class="{
+              'text-green-600 dark:text-green-400': toast && toast.level === 'success',
+              'text-red-600 dark:text-red-400': toast && toast.level === 'error',
+              'text-amber-600 dark:text-amber-400': toast && toast.level === 'warning',
+              'text-blue-600 dark:text-blue-400': toast && toast.level === 'info'
+            }"
+				></iconify-icon>
+			</div>
+			<!-- Message -->
+			<p class="text-sm font-medium grow" x-text="toast ? toast.message : ''"></p>
+			<!-- Close Button -->
+			<button
+				type="button"
+				class="ml-4 text-primary-400 hover:text-primary-600 dark:text-primary-300 dark:hover:text-primary-500 focus:outline-none shrink-0"
+				@click="hideToast()"
+			>
+				<iconify-icon icon="heroicons:x-mark" class="w-5 h-5 block"></iconify-icon>
+			</button>
+		</div>
+	</div>
+}

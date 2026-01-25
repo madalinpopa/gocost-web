@@ -24,6 +24,16 @@ func NewIncomeHandler(app HandlerContext, income usecase.IncomeUseCase, expense 
 	}
 }
 
+func (h *IncomeHandler) GetCreateForm(w http.ResponseWriter, r *http.Request) {
+	currentMonth, err := web.GetRequiredQueryParam(r, "current-month")
+	if err != nil {
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
+		return
+	}
+	component := components.AddIncomeForm(nil, h.app.Config.Currency, currentMonth)
+	h.app.Template.Render(w, r, component, http.StatusOK)
+}
+
 func (h *IncomeHandler) CreateIncome(w http.ResponseWriter, r *http.Request) {
 	var incomeForm form.CreateIncomeForm
 	err := form.ParseAndValidateForm(r, h.app.Decoder, &incomeForm)
@@ -41,7 +51,7 @@ func (h *IncomeHandler) CreateIncome(w http.ResponseWriter, r *http.Request) {
 	date, _ := time.Parse("2006-01-02", incomeForm.Date)
 
 	req := &usecase.CreateIncomeRequest{
-		Amount:     incomeForm.Amount,
+		Amount:     incomeForm.ParsedAmount(),
 		Source:     incomeForm.Description,
 		ReceivedAt: date,
 	}

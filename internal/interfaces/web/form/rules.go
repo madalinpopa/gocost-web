@@ -122,6 +122,12 @@ func PositiveFloat(value float64) bool {
 	return value > 0
 }
 
+// ValidFloat checks if the given string represents a valid float number.
+func ValidFloat(value string) bool {
+	_, err := strconv.ParseFloat(value, 64)
+	return err == nil
+}
+
 // ValidDateString checks if the string matches the YYYY-MM-DD format.
 func ValidDateString(value string) bool {
 	_, err := time.Parse("2006-01-02", value)

@@ -26,6 +26,28 @@ func NewExpenseHandler(app HandlerContext, expense usecase.ExpenseUseCase) Expen
 	}
 }
 
+func (h *ExpenseHandler) GetCreateForm(w http.ResponseWriter, r *http.Request) {
+	categoryID, err := web.GetRequiredQueryParam(r, "category-id")
+	if err != nil {
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	month, err := web.GetRequiredQueryParam(r, "month")
+	if err != nil {
+		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	expenseForm := &form.CreateExpenseForm{
+		CategoryID: categoryID,
+		Month:      month,
+	}
+
+	component := components.AddExpenseForm(expenseForm, h.app.Config.Currency)
+	h.app.Template.Render(w, r, component, http.StatusOK)
+}
+
 func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
@@ -60,7 +82,7 @@ func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 
 	req := &usecase.CreateExpenseRequest{
 		CategoryID:  expenseForm.CategoryID,
-		Amount:      expenseForm.Amount,
+		Amount:      expenseForm.ParsedAmount(),
 		Description: expenseForm.Description,
 		SpentAt:     spentAt,
 		IsPaid:      isPaid,
@@ -136,7 +158,7 @@ func (h *ExpenseHandler) EditExpense(w http.ResponseWriter, r *http.Request) {
 	req := &usecase.UpdateExpenseRequest{
 		ID:          expenseForm.ID,
 		CategoryID:  expenseForm.CategoryID,
-		Amount:      expenseForm.Amount,
+		Amount:      expenseForm.ParsedAmount(),
 		Description: expenseForm.Description,
 		SpentAt:     existing.SpentAt,
 		IsPaid:      isPaid,

@@ -23,6 +23,11 @@ func NewGroupHandler(app HandlerContext, group usecase.GroupUseCase) GroupHandle
 	}
 }
 
+func (h *GroupHandler) GetCreateForm(w http.ResponseWriter, r *http.Request) {
+	component := components.AddGroupForm(nil)
+	h.app.Template.Render(w, r, component, http.StatusOK)
+}
+
 func (h *GroupHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		h.app.Errors.Error(w, r, http.StatusBadRequest, err)
