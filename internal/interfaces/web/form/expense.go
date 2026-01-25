@@ -1,12 +1,19 @@
 package form
 
+import "strconv"
+
 type CreateExpenseForm struct {
-	CategoryID    string  `form:"category-id"`
-	Amount        float64 `form:"expense-amount"`
-	Description   string  `form:"expense-desc"`
-	Month         string  `form:"month"`
-	PaymentStatus string  `form:"payment-status"`
+	CategoryID    string `form:"category-id"`
+	Amount        string `form:"expense-amount"`
+	Description   string `form:"expense-desc"`
+	Month         string `form:"month"`
+	PaymentStatus string `form:"payment-status"`
 	Base          `form:"-"`
+}
+
+func (f *CreateExpenseForm) ParsedAmount() float64 {
+	val, _ := strconv.ParseFloat(f.Amount, 64)
+	return val
 }
 
 func (f *CreateExpenseForm) Validate() {
@@ -14,10 +21,14 @@ func (f *CreateExpenseForm) Validate() {
 		"category-id",
 		"category ID is required",
 	)
-	f.CheckField(PositiveFloat(f.Amount),
-		"expense-amount",
-		"amount must be greater than 0",
-	)
+	if !ValidFloat(f.Amount) {
+		f.AddFieldError("expense-amount", "amount must be a number")
+	} else {
+		f.CheckField(PositiveFloat(f.ParsedAmount()),
+			"expense-amount",
+			"amount must be greater than 0",
+		)
+	}
 	f.CheckField(MaxChars(f.Description, 255),
 		"expense-desc",
 		"description must be at most 255 characters long",
@@ -33,12 +44,17 @@ func (f *CreateExpenseForm) Validate() {
 }
 
 type UpdateExpenseForm struct {
-	ID            string  `form:"expense-id"`
-	CategoryID    string  `form:"category-id"`
-	Amount        float64 `form:"edit-amount"`
-	Description   string  `form:"edit-desc"`
-	PaymentStatus string  `form:"payment-status"`
+	ID            string `form:"expense-id"`
+	CategoryID    string `form:"category-id"`
+	Amount        string `form:"edit-amount"`
+	Description   string `form:"edit-desc"`
+	PaymentStatus string `form:"payment-status"`
 	Base          `form:"-"`
+}
+
+func (f *UpdateExpenseForm) ParsedAmount() float64 {
+	val, _ := strconv.ParseFloat(f.Amount, 64)
+	return val
 }
 
 func (f *UpdateExpenseForm) Validate() {
@@ -50,10 +66,14 @@ func (f *UpdateExpenseForm) Validate() {
 		"category-id",
 		"category ID is required",
 	)
-	f.CheckField(PositiveFloat(f.Amount),
-		"edit-amount",
-		"amount must be greater than 0",
-	)
+	if !ValidFloat(f.Amount) {
+		f.AddFieldError("edit-amount", "amount must be a number")
+	} else {
+		f.CheckField(PositiveFloat(f.ParsedAmount()),
+			"edit-amount",
+			"amount must be greater than 0",
+		)
+	}
 	f.CheckField(MaxChars(f.Description, 255),
 		"edit-desc",
 		"description must be at most 255 characters long",
