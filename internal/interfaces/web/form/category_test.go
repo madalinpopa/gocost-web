@@ -20,6 +20,7 @@ func TestCreateCategoryForm_Validate(t *testing.T) {
 				Name:       "Rent",
 				Type:       "monthly",
 				StartMonth: "2023-10",
+				Budget:     "100.00",
 			},
 			wantValid:  true,
 			wantErrors: nil,
@@ -32,6 +33,7 @@ func TestCreateCategoryForm_Validate(t *testing.T) {
 				Type:       "recurrent",
 				StartMonth: "2023-01",
 				EndMonth:   "2023-12",
+				Budget:     "100.00",
 			},
 			wantValid:  true,
 			wantErrors: nil,
@@ -42,6 +44,7 @@ func TestCreateCategoryForm_Validate(t *testing.T) {
 				Name:       "Rent",
 				Type:       "monthly",
 				StartMonth: "2023-10",
+				Budget:     "100.00",
 			},
 			wantValid: false,
 			wantErrors: map[string]string{
@@ -56,10 +59,25 @@ func TestCreateCategoryForm_Validate(t *testing.T) {
 				Type:       "recurrent",
 				StartMonth: "2023-12",
 				EndMonth:   "2023-01",
+				Budget:     "100.00",
 			},
 			wantValid: false,
 			wantErrors: map[string]string{
 				"category-end": "end month must be after start month",
+			},
+		},
+		{
+			name: "invalid budget - not a number",
+			form: CreateCategoryForm{
+				GroupID:    "123",
+				Name:       "Rent",
+				Type:       "monthly",
+				StartMonth: "2023-10",
+				Budget:     "abc",
+			},
+			wantValid: false,
+			wantErrors: map[string]string{
+				"category-budget": "budget must be a number",
 			},
 		},
 	}
