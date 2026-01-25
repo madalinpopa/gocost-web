@@ -72,7 +72,7 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 		IsRecurrent: isRecurrent,
 		StartMonth:  categoryForm.StartMonth,
 		EndMonth:    categoryForm.EndMonth,
-		Budget:      categoryForm.Budget,
+		Budget:      categoryForm.ParsedBudget(),
 	}
 
 	userID := h.app.Session.GetUserID(r.Context())
@@ -123,7 +123,7 @@ func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request)
 		StartMonth:   categoryForm.StartMonth,
 		EndMonth:     categoryForm.EndMonth,
 		CurrentMonth: categoryForm.CurrentMonth,
-		Budget:       categoryForm.Budget,
+		Budget:       categoryForm.ParsedBudget(),
 	}
 
 	userID := h.app.Session.GetUserID(r.Context())

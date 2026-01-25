@@ -44,6 +44,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		formValues.Set("category-desc", "Test Description")
 		formValues.Set("type", "monthly")
 		formValues.Set("category-start", "2023-01")
+		formValues.Set("category-budget", "100.00")
 
 		req := httptest.NewRequest(http.MethodPost, "/categories", strings.NewReader(formValues.Encode()))
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -54,6 +55,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 			Description: "Test Description",
 			IsRecurrent: false,
 			StartMonth:  "2023-01",
+			Budget:      100.0,
 		}
 
 		mockSession.On("GetUserID", req.Context()).Return("user-123")
@@ -135,6 +137,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		formValues.Set("category-desc", "Test Description")
 		formValues.Set("type", "monthly")
 		formValues.Set("category-start", "2023-01")
+		formValues.Set("category-budget", "100.00")
 
 		req := httptest.NewRequest(http.MethodPost, "/categories", strings.NewReader(formValues.Encode()))
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -179,6 +182,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		formValues.Set("category-desc", "Test Description")
 		formValues.Set("type", "monthly")
 		formValues.Set("category-start", "2023-01")
+		formValues.Set("category-budget", "100.00")
 
 		req := httptest.NewRequest(http.MethodPost, "/categories", strings.NewReader(formValues.Encode()))
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
