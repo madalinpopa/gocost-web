@@ -17,7 +17,7 @@ templ HomePage(data web.Data, dashboard views.DashboardView) {
 					<!-- Balance Display -->
 					@components.BalanceDisplay(dashboard, false)
 					<!-- Action Buttons -->
-					@components.DashboardActions(dashboard.CurrentMonthParam)
+					@components.DashboardActions(dashboard.CurrentMonthParam, false)
 				</div>
 			</div>
 			<!-- Groups -->
@@ -26,7 +26,7 @@ templ HomePage(data web.Data, dashboard views.DashboardView) {
 				class="relative min-h-[200px]"
 				hx-get={ "/home/groups?month=" + dashboard.CurrentMonthParam }
 				hx-trigger="load, dashboard:refresh from:body"
-				hx-swap="innerHTML"
+				hx-swap="outerHTML"
 			>
 				@components.Spinner()
 			</div>
