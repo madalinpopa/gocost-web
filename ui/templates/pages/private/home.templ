@@ -17,7 +17,7 @@ templ HomePage(data web.Data, dashboard views.DashboardView) {
 					<!-- Balance Display -->
 					@components.BalanceDisplay(dashboard, false)
 					<!-- Action Buttons -->
-					@components.DashboardActions()
+					@components.DashboardActions(dashboard.CurrentMonthParam)
 				</div>
 			</div>
 			<!-- Groups -->
