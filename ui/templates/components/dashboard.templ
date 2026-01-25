@@ -23,6 +23,7 @@ templ MonthNavigation(dashboard views.DashboardView, oob bool) {
 			hx-get={ "/home/groups?month=" + dashboard.PrevMonth }
 			hx-target="#dashboard-groups"
 			hx-replace-url={ "/home?month=" + dashboard.PrevMonth }
+			hx-swap="outerHTML"
 			class="rounded-md p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
 		>
 			@IconChevronLeft()
@@ -32,6 +33,7 @@ templ MonthNavigation(dashboard views.DashboardView, oob bool) {
 			hx-get={ "/home/groups?month=" + dashboard.NextMonth }
 			hx-target="#dashboard-groups"
 			hx-replace-url={ "/home?month=" + dashboard.NextMonth }
+			hx-swap="outerHTML"
 			class="rounded-md p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
 		>
 			@IconChevronRight()
@@ -72,8 +74,14 @@ templ BalanceDisplay(dashboard views.DashboardView, oob bool) {
 	</div>
 }
 
-templ DashboardActions(month string) {
-	<div class="flex items-center gap-2">
+templ DashboardActions(month string, oob bool) {
+	<div
+		id="dashboard-actions"
+		class="flex items-center gap-2"
+		if oob {
+			hx-swap-oob="true"
+		}
+	>
 		<button
 			@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'add-income-modal', currentMonth: '%s' })", month) }
 			class="flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 transition-colors"
@@ -94,6 +102,18 @@ templ DashboardActions(month string) {
 // ============================================================================
 // Groups & Categories Components
 // ============================================================================
+
+templ DashboardGroups(groups []views.GroupView, month string) {
+	<div
+		id="dashboard-groups"
+		class="relative min-h-[200px]"
+		hx-get={ "/home/groups?month=" + month }
+		hx-trigger="dashboard:refresh from:body"
+		hx-swap="outerHTML"
+	>
+		@GroupsList(groups, month)
+	</div>
+}
 
 templ ExpenseItem(expense views.ExpenseView, categoryId string) {
 	<div class="flex items-center justify-between text-sm group/expense">
