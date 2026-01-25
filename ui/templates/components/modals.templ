@@ -52,18 +52,29 @@ templ AddIncomeForm(f *form.CreateIncomeForm, currency string, currentMonth stri
 
 // AddIncomeModal lazy-loads the income form when opened.
 // The form is fetched via HTMX when the modal opens, displaying a spinner until loaded.
-// Alpine.js captures 'currentMonth' from the open-modal event for the form.
+// Alpine.js captures 'currentMonth' from the open-modal event and triggers the HTMX request.
 templ AddIncomeModal(currency string, currentMonth string) {
 	@Modal("add-income-modal", "Add Income") {
 		<div
-			id="add-income-form-container"
-			class="min-h-[100px]"
-			hx-get="/incomes/form"
-			hx-trigger="open-modal[detail.id=='add-income-modal'] from:body"
-			hx-vals='js:{ "current-month": event.detail.currentMonth }'
-			hx-swap="innerHTML"
+			x-data="{ currentMonth: '' }"
+			@open-modal.window="if ($event.detail.id === 'add-income-modal') {
+                currentMonth = $event.detail.currentMonth;
+                $nextTick(() => {
+                    htmx.trigger($el.querySelector('#add-income-form-container'), 'load-form');
+                });
+            }"
 		>
-			@LoadingSpinner("")
+			<input type="hidden" id="add-income-current-month" name="current-month" :value="currentMonth"/>
+			<div
+				id="add-income-form-container"
+				class="min-h-[100px]"
+				hx-get="/incomes/form"
+				hx-trigger="load-form"
+				hx-include="#add-income-current-month"
+				hx-swap="innerHTML"
+			>
+				@LoadingSpinner("")
+			</div>
 		</div>
 	}
 }
@@ -226,14 +237,27 @@ templ AddCategoryForm(f *form.CreateCategoryForm, currency string, currentMonth 
 templ AddCategoryModal(currency string, currentMonth string) {
 	@Modal("add-category-modal", "New Category") {
 		<div
-			id="add-category-form-container"
-			class="min-h-[100px]"
-			hx-get="/categories/form"
-			hx-trigger="open-modal[detail.id=='add-category-modal'] from:body"
-			hx-vals='js:{ "group-id": event.detail.groupId, "category-start": event.detail.categoryStart }'
-			hx-swap="innerHTML"
+			x-data="{ groupId: '', categoryStart: '' }"
+			@open-modal.window="if ($event.detail.id === 'add-category-modal') {
+                groupId = $event.detail.groupId;
+                categoryStart = $event.detail.categoryStart;
+                $nextTick(() => {
+                    htmx.trigger($el.querySelector('#add-category-form-container'), 'load-form');
+                });
+            }"
 		>
-			@LoadingSpinner("")
+			<input type="hidden" id="add-category-group-id" name="group-id" :value="groupId"/>
+			<input type="hidden" id="add-category-start" name="category-start" :value="categoryStart"/>
+			<div
+				id="add-category-form-container"
+				class="min-h-[100px]"
+				hx-get="/categories/form"
+				hx-trigger="load-form"
+				hx-include="#add-category-group-id, #add-category-start"
+				hx-swap="innerHTML"
+			>
+				@LoadingSpinner("")
+			</div>
 		</div>
 	}
 }
@@ -366,14 +390,27 @@ templ AddExpenseForm(f *form.CreateExpenseForm, currency string) {
 templ AddExpenseModal(currency string) {
 	@Modal("add-expense-modal", "Add Expense") {
 		<div
-			id="add-expense-form-container"
-			class="min-h-[100px]"
-			hx-get="/expenses/form"
-			hx-trigger="open-modal[detail.id=='add-expense-modal'] from:body"
-			hx-vals='js:{ "category-id": event.detail.categoryId, "month": event.detail.month }'
-			hx-swap="innerHTML"
+			x-data="{ categoryId: '', month: '' }"
+			@open-modal.window="if ($event.detail.id === 'add-expense-modal') {
+                categoryId = $event.detail.categoryId;
+                month = $event.detail.month;
+                $nextTick(() => {
+                    htmx.trigger($el.querySelector('#add-expense-form-container'), 'load-form');
+                });
+            }"
 		>
-			@LoadingSpinner("")
+			<input type="hidden" id="add-expense-category-id" name="category-id" :value="categoryId"/>
+			<input type="hidden" id="add-expense-month" name="month" :value="month"/>
+			<div
+				id="add-expense-form-container"
+				class="min-h-[100px]"
+				hx-get="/expenses/form"
+				hx-trigger="load-form"
+				hx-include="#add-expense-category-id, #add-expense-month"
+				hx-swap="innerHTML"
+			>
+				@LoadingSpinner("")
+			</div>
 		</div>
 	}
 }
