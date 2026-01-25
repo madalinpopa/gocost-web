@@ -73,10 +73,10 @@ templ BalanceDisplay(dashboard views.DashboardView, oob bool) {
 	</div>
 }
 
-templ DashboardActions() {
+templ DashboardActions(month string) {
 	<div class="flex items-center gap-2">
 		<button
-			@click="$dispatch('open-modal', { id: 'add-income-modal' })"
+			@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'add-income-modal', currentMonth: '%s' })", month) }
 			class="flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 transition-colors"
 		>
 			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
@@ -231,7 +231,7 @@ templ CategoryHeader(category views.CategoryView, groupId string, month string) 
 		</div>
 		<div class="flex items-center gap-2">
 			<button
-				@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'add-expense-modal', context: { categoryId: '%s', month: '%s' } })", category.ID, month) }
+				@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'add-expense-modal', categoryId: '%s', month: '%s' })", category.ID, month) }
 				class="text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-white"
 				title="Add Expense"
 			>
@@ -306,7 +306,7 @@ templ GroupCard(group views.GroupView, month string) {
 			</div>
 			<div class="flex items-center gap-4">
 				<button
-					@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'add-category-modal', context: { groupId: '%s' } })", group.ID) }
+					@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'add-category-modal', groupId: '%s', categoryStart: '%s' })", group.ID, month) }
 					class="text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400"
 				>
 					+ Add Category
