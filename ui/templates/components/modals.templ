@@ -120,7 +120,14 @@ templ AddIncomeForm(f *form.CreateIncomeForm, currency string, currentMonth stri
 
 templ AddIncomeModal(currency string, currentMonth string) {
 	@Modal("add-income-modal", "Add Income") {
-		<div id="add-income-form-container" class="min-h-[100px]">
+		<div
+			id="add-income-form-container"
+			class="min-h-[100px]"
+			hx-get="/incomes/form"
+			hx-trigger="open-modal[detail.id=='add-income-modal'] from:body"
+			hx-vals='js:{ "current-month": event.detail.currentMonth }'
+			hx-swap="innerHTML"
+		>
 			<div class="flex justify-center items-center py-10">
 				<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
 			</div>
@@ -174,7 +181,13 @@ templ AddGroupForm(f *form.CreateGroupForm) {
 
 templ AddGroupModal() {
 	@Modal("add-group-modal", "New Group") {
-		<div id="add-group-form-container" class="min-h-[100px]">
+		<div
+			id="add-group-form-container"
+			class="min-h-[100px]"
+			hx-get="/groups/form"
+			hx-trigger="open-modal[detail.id=='add-group-modal'] from:body"
+			hx-swap="innerHTML"
+		>
 			<div class="flex justify-center items-center py-10">
 				<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
 			</div>
@@ -336,7 +349,14 @@ templ AddCategoryForm(f *form.CreateCategoryForm, currency string, currentMonth 
 
 templ AddCategoryModal(currency string, currentMonth string) {
 	@Modal("add-category-modal", "New Category") {
-		<div id="add-category-form-container" class="min-h-[100px]">
+		<div
+			id="add-category-form-container"
+			class="min-h-[100px]"
+			hx-get="/categories/form"
+			hx-trigger="open-modal[detail.id=='add-category-modal'] from:body"
+			hx-vals='js:{ "group-id": event.detail.groupId, "current-month": event.detail.currentMonth }'
+			hx-swap="innerHTML"
+		>
 			<div class="flex justify-center items-center py-10">
 				<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
 			</div>
@@ -539,7 +559,14 @@ templ AddExpenseForm(f *form.CreateExpenseForm, currency string) {
 
 templ AddExpenseModal(currency string) {
 	@Modal("add-expense-modal", "Add Expense") {
-		<div id="add-expense-form-container" class="min-h-[100px]">
+		<div
+			id="add-expense-form-container"
+			class="min-h-[100px]"
+			hx-get="/expenses/form"
+			hx-trigger="open-modal[detail.id=='add-expense-modal'] from:body"
+			hx-vals='js:{ "category-id": event.detail.categoryId, "month": event.detail.month }'
+			hx-swap="innerHTML"
+		>
 			<div class="flex justify-center items-center py-10">
 				<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
 			</div>
