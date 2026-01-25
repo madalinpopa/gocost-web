@@ -273,3 +273,93 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		mockSession.AssertExpectations(t)
 	})
 }
+
+func TestCategoryHandler_GetCreateForm(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		// Arrange
+		mockCategoryUC := new(MockCategoryUseCase)
+		mockErrorHandler := new(MockErrorHandler)
+		mockSession := new(MockSessionManager)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+		appCtx := HandlerContext{
+			Config:  &config.Config{Currency: "$"},
+			Logger:  logger,
+			Session: mockSession,
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
+		}
+
+		handler := NewCategoryHandler(appCtx, mockCategoryUC)
+
+		req := httptest.NewRequest(http.MethodGet, "/categories/form?group-id=group-1&category-start=2023-01", nil)
+		rec := httptest.NewRecorder()
+
+		// Act
+		handler.GetCreateForm(rec, req)
+
+		// Assert
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Contains(t, rec.Body.String(), "Add Category")
+		assert.Contains(t, rec.Body.String(), "group-1")
+		assert.Contains(t, rec.Body.String(), "2023-01")
+	})
+
+	t.Run("missing group-id", func(t *testing.T) {
+		// Arrange
+		mockCategoryUC := new(MockCategoryUseCase)
+		mockErrorHandler := new(MockErrorHandler)
+		mockSession := new(MockSessionManager)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+		appCtx := HandlerContext{
+			Config:  &config.Config{Currency: "$"},
+			Logger:  logger,
+			Session: mockSession,
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
+		}
+
+		handler := NewCategoryHandler(appCtx, mockCategoryUC)
+
+		req := httptest.NewRequest(http.MethodGet, "/categories/form?category-start=2023-01", nil)
+		rec := httptest.NewRecorder()
+
+		mockErrorHandler.On("Error", rec, req, http.StatusBadRequest, mock.Anything).Return()
+
+		// Act
+		handler.GetCreateForm(rec, req)
+
+		// Assert
+		mockErrorHandler.AssertExpectations(t)
+	})
+
+	t.Run("missing category-start", func(t *testing.T) {
+		// Arrange
+		mockCategoryUC := new(MockCategoryUseCase)
+		mockErrorHandler := new(MockErrorHandler)
+		mockSession := new(MockSessionManager)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+		appCtx := HandlerContext{
+			Config:  &config.Config{Currency: "$"},
+			Logger:  logger,
+			Session: mockSession,
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
+		}
+
+		handler := NewCategoryHandler(appCtx, mockCategoryUC)
+
+		req := httptest.NewRequest(http.MethodGet, "/categories/form?group-id=group-1", nil)
+		rec := httptest.NewRecorder()
+
+		mockErrorHandler.On("Error", rec, req, http.StatusBadRequest, mock.Anything).Return()
+
+		// Act
+		handler.GetCreateForm(rec, req)
+
+		// Assert
+		mockErrorHandler.AssertExpectations(t)
+	})
+}
