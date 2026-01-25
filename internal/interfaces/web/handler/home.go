@@ -76,7 +76,7 @@ func (hh HomeHandler) GetDashboardGroups(w http.ResponseWriter, r *http.Request)
 	dashboardData.NextMonth = nextDate.Format("2006-01")
 
 	// 1. Render the Groups List (Main Target)
-	err = components.GroupsList(dashboardData.Groups, monthStr).Render(r.Context(), w)
+	err = components.DashboardGroups(dashboardData.Groups, monthStr).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -91,6 +91,12 @@ func (hh HomeHandler) GetDashboardGroups(w http.ResponseWriter, r *http.Request)
 
 	// Balance Display
 	err = components.BalanceDisplay(dashboardData, true).Render(r.Context(), w)
+	if err != nil {
+		hh.app.Errors.LogServerError(r, err)
+	}
+
+	// Dashboard Actions
+	err = components.DashboardActions(monthStr, true).Render(r.Context(), w)
 	if err != nil {
 		hh.app.Errors.LogServerError(r, err)
 	}
