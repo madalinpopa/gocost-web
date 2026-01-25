@@ -506,3 +506,93 @@ func TestExpenseHandler_DeleteExpense(t *testing.T) {
 		mockErrorHandler.AssertExpectations(t)
 	})
 }
+
+func TestExpenseHandler_GetCreateForm(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		// Arrange
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockSession := new(MockSessionManager)
+		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+		appCtx := HandlerContext{
+			Config:  &config.Config{Currency: "$"},
+			Logger:  logger,
+			Session: mockSession,
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
+		}
+
+		handler := NewExpenseHandler(appCtx, mockExpenseUC)
+
+		req := httptest.NewRequest(http.MethodGet, "/expenses/form?category-id=cat-1&month=2023-10", nil)
+		rec := httptest.NewRecorder()
+
+		// Act
+		handler.GetCreateForm(rec, req)
+
+		// Assert
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Contains(t, rec.Body.String(), "Add Expense")
+		assert.Contains(t, rec.Body.String(), "cat-1")
+		assert.Contains(t, rec.Body.String(), "2023-10")
+	})
+
+	t.Run("missing category-id", func(t *testing.T) {
+		// Arrange
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockSession := new(MockSessionManager)
+		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+		appCtx := HandlerContext{
+			Config:  &config.Config{Currency: "$"},
+			Logger:  logger,
+			Session: mockSession,
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
+		}
+
+		handler := NewExpenseHandler(appCtx, mockExpenseUC)
+
+		req := httptest.NewRequest(http.MethodGet, "/expenses/form?month=2023-10", nil)
+		rec := httptest.NewRecorder()
+
+		mockErrorHandler.On("Error", rec, req, http.StatusBadRequest, mock.Anything).Return()
+
+		// Act
+		handler.GetCreateForm(rec, req)
+
+		// Assert
+		mockErrorHandler.AssertExpectations(t)
+	})
+
+	t.Run("missing month", func(t *testing.T) {
+		// Arrange
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockSession := new(MockSessionManager)
+		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+		appCtx := HandlerContext{
+			Config:  &config.Config{Currency: "$"},
+			Logger:  logger,
+			Session: mockSession,
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
+		}
+
+		handler := NewExpenseHandler(appCtx, mockExpenseUC)
+
+		req := httptest.NewRequest(http.MethodGet, "/expenses/form?category-id=cat-1", nil)
+		rec := httptest.NewRecorder()
+
+		mockErrorHandler.On("Error", rec, req, http.StatusBadRequest, mock.Anything).Return()
+
+		// Act
+		handler.GetCreateForm(rec, req)
+
+		// Assert
+		mockErrorHandler.AssertExpectations(t)
+	})
+}
