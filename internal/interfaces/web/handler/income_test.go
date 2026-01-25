@@ -104,7 +104,7 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 		// Should render form with errors
 		assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
 		// Basic check that response contains error message
-		assert.Contains(t, rec.Body.String(), "amount must be greater than 0")
+		assert.Contains(t, rec.Body.String(), "amount must be a number")
 
 		mockSession.AssertNotCalled(t, "GetUserID", mock.Anything)
 		mockIncomeUC.AssertNotCalled(t, "Create", mock.Anything, mock.Anything, mock.Anything)

@@ -51,7 +51,7 @@ func (h *IncomeHandler) CreateIncome(w http.ResponseWriter, r *http.Request) {
 	date, _ := time.Parse("2006-01-02", incomeForm.Date)
 
 	req := &usecase.CreateIncomeRequest{
-		Amount:     incomeForm.Amount,
+		Amount:     incomeForm.ParsedAmount(),
 		Source:     incomeForm.Description,
 		ReceivedAt: date,
 	}
