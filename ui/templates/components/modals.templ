@@ -22,8 +22,8 @@ templ AddIncomeForm(f *form.CreateIncomeForm, currency string, currentMonth stri
 		}
 
 		if f != nil {
-			if f.Amount > 0 {
-				amountVal = fmt.Sprintf("%g", f.Amount)
+			if f.Amount != "" {
+				amountVal = f.Amount
 			}
 			descVal = f.Description
 			if f.Date != "" {
@@ -196,8 +196,8 @@ templ AddCategoryForm(f *form.CreateCategoryForm, currency string, currentMonth 
 			}
 			endVal = f.EndMonth
 			groupIDVal = f.GroupID
-			if f.Budget > 0 {
-				budgetVal = fmt.Sprintf("%.2f", f.Budget)
+			if f.Budget != "" {
+				budgetVal = f.Budget
 			}
 
 			nameErr = f.FieldErrors["category-name"]
@@ -280,8 +280,8 @@ templ EditCategoryForm(f *form.UpdateCategoryForm, currency string) {
 			endVal = f.EndMonth
 			groupIDVal = f.GroupID
 			currentMonthVal = f.CurrentMonth
-			if f.Budget > 0 {
-				budgetVal = fmt.Sprintf("%.2f", f.Budget)
+			if f.Budget != "" {
+				budgetVal = f.Budget
 			}
 
 			nameErr = f.FieldErrors["edit-name"]
@@ -347,8 +347,8 @@ templ AddExpenseForm(f *form.CreateExpenseForm, currency string) {
 		statusVal = "paid" // Default
 
 		if f != nil {
-			if f.Amount > 0 {
-				amountVal = fmt.Sprintf("%g", f.Amount)
+			if f.Amount != "" {
+				amountVal = f.Amount
 			}
 			descVal = f.Description
 			if f.PaymentStatus != "" {
@@ -424,8 +424,8 @@ templ EditExpenseForm(f *form.UpdateExpenseForm, currency string) {
 
 		if f != nil {
 			idVal = f.ID
-			if f.Amount > 0 {
-				amountVal = fmt.Sprintf("%g", f.Amount)
+			if f.Amount != "" {
+				amountVal = f.Amount
 			}
 			descVal = f.Description
 			if f.PaymentStatus != "" {
