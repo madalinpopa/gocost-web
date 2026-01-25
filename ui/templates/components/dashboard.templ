@@ -3,8 +3,13 @@ package components
 import (
 	"fmt"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/views"
+	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"math"
 )
+
+// ============================================================================
+// Dashboard Navigation & Header Components
+// ============================================================================
 
 templ MonthNavigation(dashboard views.DashboardView, oob bool) {
 	<div
@@ -20,9 +25,7 @@ templ MonthNavigation(dashboard views.DashboardView, oob bool) {
 			hx-replace-url={ "/home?month=" + dashboard.PrevMonth }
 			class="rounded-md p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
 		>
-			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
-			</svg>
+			@IconChevronLeft()
 		</button>
 		<span class="min-w-[150px] text-center text-lg font-semibold text-slate-900 dark:text-white">{ dashboard.CurrentMonth }</span>
 		<button
@@ -31,9 +34,7 @@ templ MonthNavigation(dashboard views.DashboardView, oob bool) {
 			hx-replace-url={ "/home?month=" + dashboard.NextMonth }
 			class="rounded-md p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
 		>
-			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
-				<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
-			</svg>
+			@IconChevronRight()
 		</button>
 	</div>
 }
@@ -66,9 +67,7 @@ templ BalanceDisplay(dashboard views.DashboardView, oob bool) {
 			class="ml-2 rounded-full p-1 text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
 			title="View Monthly Incomes"
 		>
-			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 17.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"></path>
-			</svg>
+			@IconList()
 		</button>
 	</div>
 }
@@ -79,22 +78,22 @@ templ DashboardActions(month string) {
 			@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'add-income-modal', currentMonth: '%s' })", month) }
 			class="flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 transition-colors"
 		>
-			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
-			</svg>
+			@IconAdd()
 			Income
 		</button>
 		<button
 			@click="$dispatch('open-modal', { id: 'add-group-modal' })"
 			class="flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
 		>
-			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3h-6m4.5 5.25h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v9.75A2.25 2.25 0 0 0 4.5 18.75Z"></path>
-			</svg>
+			@IconAdd()
 			New Group
 		</button>
 	</div>
 }
+
+// ============================================================================
+// Groups & Categories Components
+// ============================================================================
 
 templ ExpenseItem(expense views.ExpenseView, categoryId string) {
 	<div class="flex items-center justify-between text-sm group/expense">
@@ -111,9 +110,7 @@ templ ExpenseItem(expense views.ExpenseView, categoryId string) {
                     expense.ID, categoryId, expense.Amount, expense.Description, expense.SpentAt, expense.Status, expense.PaidAt) }
 				title="Edit Expense"
 			>
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-					<path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"></path>
-				</svg>
+				@IconEdit()
 			</button>
 			<!-- Delete Button -->
 			<button
@@ -123,9 +120,7 @@ templ ExpenseItem(expense views.ExpenseView, categoryId string) {
 				class="lg:opacity-0 lg:group-hover/expense:opacity-100 transition-opacity text-slate-400 hover:text-rose-600 dark:text-slate-500 dark:hover:text-rose-500"
 				title="Delete Expense"
 			>
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-					<path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"></path>
-				</svg>
+				@IconDelete()
 			</button>
 			<!-- Toggle Status -->
 			<form hx-post="/expenses/edit" hx-swap="none">
@@ -221,9 +216,7 @@ templ CategoryHeader(category views.CategoryView, groupId string, month string) 
 				<h3 class="font-medium text-slate-900 dark:text-white">{ category.Name }</h3>
 				if category.Type == views.TypeRecurrent {
 					<span class="inline-flex items-center gap-1 rounded-full bg-indigo-100 dark:bg-indigo-500/10 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:text-indigo-400">
-						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-3 w-3">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"></path>
-						</svg>
+						@IconRefresh()
 						Recurrent
 					</span>
 				}
@@ -235,18 +228,14 @@ templ CategoryHeader(category views.CategoryView, groupId string, month string) 
 				class="text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-white"
 				title="Add Expense"
 			>
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
-				</svg>
+				@IconAdd()
 			</button>
 			<button
 				@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'edit-category-modal', context: { categoryId: '%s', groupId: '%s', name: '%s', description: '%s', type: '%s', startMonth: '%s', endMonth: '%s', budget: '%g', viewMonth: '%s' } })", category.ID, groupId, category.Name, category.Description, category.Type, category.StartMonth, category.EndMonth, category.Budget, month) }
 				class="text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-white"
 				title="Edit Category"
 			>
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-					<path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"></path>
-				</svg>
+				@IconEdit()
 			</button>
 			<button
 				hx-delete={ fmt.Sprintf("/groups/%s/categories/%s", groupId, category.ID) }
@@ -254,9 +243,7 @@ templ CategoryHeader(category views.CategoryView, groupId string, month string) 
 				class="text-slate-400 hover:text-rose-600 dark:text-slate-500 dark:hover:text-rose-500 transition-colors"
 				title="Delete Category"
 			>
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-					<path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"></path>
-				</svg>
+				@IconDelete()
 			</button>
 		</div>
 	</div>
@@ -289,9 +276,7 @@ templ GroupCard(group views.GroupView, month string) {
 					class="text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-white"
 					title="Edit Group"
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-						<path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"></path>
-					</svg>
+					@IconEdit()
 				</button>
 				<button
 					hx-delete={ "/groups/" + group.ID }
@@ -299,9 +284,7 @@ templ GroupCard(group views.GroupView, month string) {
 					class="text-slate-400 hover:text-rose-600 dark:text-slate-500 dark:hover:text-rose-500 transition-colors"
 					title="Delete Group"
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-						<path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"></path>
-					</svg>
+					@IconDelete()
 				</button>
 			</div>
 			<div class="flex items-center gap-4">
@@ -316,9 +299,9 @@ templ GroupCard(group views.GroupView, month string) {
 					class="text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-white transition-colors"
 					:title="expanded ? 'Collapse Group' : 'Expand Group'"
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 transition-transform duration-200" :class="expanded ? '' : '-rotate-180'">
-						<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5"></path>
-					</svg>
+					<div :class="expanded ? '' : '-rotate-180'">
+						@IconChevronUp()
+					</div>
 				</button>
 			</div>
 		</div>
@@ -340,6 +323,46 @@ templ GroupsList(groups []views.GroupView, month string) {
 			<div class="text-center text-slate-600 dark:text-slate-500 py-10">
 				No groups found.
 			</div>
+		}
+	</div>
+}
+
+// ============================================================================
+// Income List Component
+// ============================================================================
+
+templ IncomeList(incomes []*usecase.IncomeResponse, currency string) {
+	<div id="income-list-content">
+		if len(incomes) == 0 {
+			<p class="text-sm text-slate-600 dark:text-slate-500 text-center py-4">No incomes found for this month.</p>
+		} else {
+			<ul class="divide-y divide-slate-200 dark:divide-slate-700">
+				for _, income := range incomes {
+					<li class="flex items-center justify-between py-3">
+						<div>
+							<p class="text-sm font-medium text-slate-900 dark:text-white">{ income.Source }</p>
+							<p class="text-xs text-slate-500 dark:text-slate-400">{ income.ReceivedAt.Format("2006-01-02") }</p>
+						</div>
+						<div class="flex items-center gap-4">
+							<span class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+								{ fmt.Sprintf("%s %.2f", currency, income.Amount) }
+							</span>
+							<button
+								hx-delete={ fmt.Sprintf("/incomes/%s", income.ID) }
+								hx-confirm="Are you sure you want to delete this income?"
+								hx-target="closest li"
+								hx-swap="outerHTML"
+								class="text-slate-400 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-500 transition-colors"
+								title="Delete Income"
+							>
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+									<path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd"></path>
+								</svg>
+							</button>
+						</div>
+					</li>
+				}
+			</ul>
 		}
 	</div>
 }
