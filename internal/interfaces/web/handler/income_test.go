@@ -227,6 +227,67 @@ func TestIncomeHandler_ListIncomes(t *testing.T) {
 	})
 }
 
+func TestIncomeHandler_GetCreateForm(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		// Arrange
+		mockSession := new(MockSessionManager)
+		mockIncomeUC := new(MockIncomeUseCase)
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+		appCtx := HandlerContext{
+			Config:  &config.Config{Currency: "$"},
+			Session: mockSession,
+			Logger:  logger,
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
+		}
+
+		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
+
+		req := httptest.NewRequest(http.MethodGet, "/incomes/form?current-month=2023-10", nil)
+		rec := httptest.NewRecorder()
+
+		// Act
+		handler.GetCreateForm(rec, req)
+
+		// Assert
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Contains(t, rec.Body.String(), "Add Income")
+		assert.Contains(t, rec.Body.String(), "2023-10")
+	})
+
+	t.Run("missing current-month", func(t *testing.T) {
+		// Arrange
+		mockSession := new(MockSessionManager)
+		mockIncomeUC := new(MockIncomeUseCase)
+		mockExpenseUC := new(MockExpenseUseCase)
+		mockErrorHandler := new(MockErrorHandler)
+		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+		appCtx := HandlerContext{
+			Config:  &config.Config{Currency: "$"},
+			Session: mockSession,
+			Logger:  logger,
+			Errors:  newTestErrors(logger, mockErrorHandler),
+			Notify:  respond.NewNotify(logger),
+		}
+
+		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
+
+		req := httptest.NewRequest(http.MethodGet, "/incomes/form", nil)
+		rec := httptest.NewRecorder()
+
+		mockErrorHandler.On("Error", rec, req, http.StatusBadRequest, mock.Anything).Return()
+
+		// Act
+		handler.GetCreateForm(rec, req)
+
+		// Assert
+		mockErrorHandler.AssertExpectations(t)
+	})
+}
 func TestIncomeHandler_DeleteIncome(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockSession := new(MockSessionManager)
