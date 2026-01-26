@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"math"
 	"net/http"
 	"time"
 
@@ -115,8 +114,6 @@ func (hh HomeHandler) fetchDashboardData(ctx context.Context, userID string, dat
 		return views.DashboardView{}, err
 	}
 
-	balance := totalIncome - totalExpenses
-
 	// Fetch groups
 	groupsDTO, err := hh.groupUC.List(ctx, userID)
 	if err != nil {
@@ -129,105 +126,6 @@ func (hh HomeHandler) fetchDashboardData(ctx context.Context, userID string, dat
 		return views.DashboardView{}, err
 	}
 
-	// Create a map of expenses by category for easier lookup
-	expensesByCategory := make(map[string][]views.ExpenseView)
-	categorySpent := make(map[string]float64)
-
-	for _, exp := range expensesDTO {
-		status := views.StatusUnpaid
-		paidAt := ""
-		if exp.IsPaid {
-			status = views.StatusPaid
-			if exp.PaidAt != nil {
-				paidAt = exp.PaidAt.Format("2006-01-02")
-			}
-		}
-		expensesByCategory[exp.CategoryID] = append(expensesByCategory[exp.CategoryID], views.ExpenseView{
-			ID:          exp.ID,
-			Amount:      exp.Amount,
-			Currency:    hh.app.Config.Currency,
-			Description: exp.Description,
-			Status:      status,
-			SpentAt:     exp.SpentAt.Format("2006-01-02"),
-			PaidAt:      paidAt,
-		})
-		categorySpent[exp.CategoryID] += exp.Amount
-	}
-
-	// Round spent amounts to avoid floating point precision issues
-	for id, spent := range categorySpent {
-		categorySpent[id] = math.Round(spent*100) / 100
-	}
-
-	// Map to views
-	var groupViews []views.GroupView
-	for _, grp := range groupsDTO {
-		var categoryViews []views.CategoryView
-
-		for _, cat := range grp.Categories {
-			catType := views.TypeMonthly
-			if cat.IsRecurrent {
-				catType = views.TypeRecurrent
-			}
-
-			// Check if category is active for this month
-			// StartMonth is required. EndMonth is optional.
-			// Format is YYYY-MM
-			start, _ := time.Parse("2006-01", cat.StartMonth)
-			var end time.Time
-			if cat.EndMonth != "" {
-				end, _ = time.Parse("2006-01", cat.EndMonth)
-			}
-
-			// Logic to show category:
-			// If recurrent: show if date >= start (and <= end if end is set)
-			// If monthly: show if date == start
-
-			showCategory := false
-			currentMonthStart, _ := time.Parse("2006-01", monthStr)
-
-			if cat.IsRecurrent {
-				if !currentMonthStart.Before(start) {
-					if cat.EndMonth == "" || !currentMonthStart.After(end) {
-						showCategory = true
-					}
-				}
-			} else {
-				if cat.StartMonth == monthStr {
-					showCategory = true
-				}
-			}
-
-			if showCategory {
-				categoryViews = append(categoryViews, views.CategoryView{
-					ID:          cat.ID,
-					Name:        cat.Name,
-					Type:        catType,
-					Description: cat.Description,
-					StartMonth:  cat.StartMonth,
-					EndMonth:    cat.EndMonth,
-					Budget:      cat.Budget,
-					Spent:       categorySpent[cat.ID],
-					Currency:    hh.app.Config.Currency,
-					Expenses:    expensesByCategory[cat.ID],
-				})
-			}
-		}
-
-		groupViews = append(groupViews, views.GroupView{
-			ID:          grp.ID,
-			Name:        grp.Name,
-			Description: grp.Description,
-			Order:       grp.Order,
-			Categories:  categoryViews,
-		})
-	}
-
-	return views.DashboardView{
-		TotalIncome:   totalIncome,
-		TotalExpenses: totalExpenses,
-		Balance:       balance,
-		Currency:      hh.app.Config.Currency,
-		Groups:        groupViews,
-	}, nil
+	presenter := views.NewDashboardPresenter(hh.app.Config.Currency)
+	return presenter.Present(totalIncome, totalExpenses, groupsDTO, expensesDTO, date), nil
 }
