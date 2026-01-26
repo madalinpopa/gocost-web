@@ -126,16 +126,13 @@ func (p *DashboardPresenter) Present(
 					}
 				}
 
-				// Bar color logic
-				barColor := "bg-emerald-500"
-				if spent > cat.Budget {
-					barColor = "bg-rose-500"
-				} else if percentage > 85 {
-					barColor = "bg-amber-500"
-				}
-
 				// Budget calculations
 				isOverBudget := spent > cat.Budget
+				isNearBudget := false
+				if !isOverBudget && percentage > 85 {
+					isNearBudget = true
+				}
+
 				overBudgetAmount := 0.0
 				remainingBudget := 0.0
 
@@ -161,7 +158,7 @@ func (p *DashboardPresenter) Present(
 					UnpaidSpent:      unpaidSpent,
 					PaidPercentage:   paidPercentage,
 					UnpaidPercentage: unpaidPercentage,
-					BarColor:         barColor,
+					IsNearBudget:     isNearBudget,
 					IsOverBudget:     isOverBudget,
 					OverBudgetAmount: overBudgetAmount,
 					RemainingBudget:  remainingBudget,
