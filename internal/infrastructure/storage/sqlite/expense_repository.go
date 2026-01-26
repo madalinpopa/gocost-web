@@ -88,16 +88,21 @@ func (r *SQLiteExpenseRepository) FindByUserID(ctx context.Context, userID ident
 }
 
 func (r *SQLiteExpenseRepository) FindByUserIDAndMonth(ctx context.Context, userID identifier.ID, month string) ([]expense.Expense, error) {
+	start, end, err := monthToDateRange(month)
+	if err != nil {
+		return nil, err
+	}
+
 	query := `
 		SELECT e.id, e.category_id, e.amount, e.description, e.spent_at, e.is_paid, e.paid_at 
 		FROM expenses e 
 		JOIN categories c ON e.category_id = c.id 
 		JOIN groups g ON c.group_id = g.id 
-		WHERE g.user_id = ? AND strftime('%Y-%m', e.spent_at) = ?
+		WHERE g.user_id = ? AND e.spent_at >= ? AND e.spent_at < ?
 		ORDER BY e.spent_at DESC
 	`
 
-	return r.fetchExpenses(ctx, query, userID.String(), month)
+	return r.fetchExpenses(ctx, query, userID.String(), start, end)
 }
 
 func (r *SQLiteExpenseRepository) fetchExpenses(ctx context.Context, query string, args ...any) ([]expense.Expense, error) {
@@ -134,15 +139,20 @@ func (r *SQLiteExpenseRepository) fetchExpenses(ctx context.Context, query strin
 }
 
 func (r *SQLiteExpenseRepository) Total(ctx context.Context, userID identifier.ID, month string) (float64, error) {
+	start, end, err := monthToDateRange(month)
+	if err != nil {
+		return 0, err
+	}
+
 	query := `
 		SELECT COALESCE(SUM(e.amount), 0)
 		FROM expenses e
 		JOIN categories c ON e.category_id = c.id
 		JOIN groups g ON c.group_id = g.id
-		WHERE g.user_id = ? AND strftime('%Y-%m', e.spent_at) = ?
+		WHERE g.user_id = ? AND e.spent_at >= ? AND e.spent_at < ?
 	`
 	var total float64
-	err := r.db.QueryRowContext(ctx, query, userID.String(), month).Scan(&total)
+	err = r.db.QueryRowContext(ctx, query, userID.String(), start, end).Scan(&total)
 	if err != nil {
 		return 0, err
 	}
@@ -202,4 +212,13 @@ func (r *SQLiteExpenseRepository) mapToExpense(idStr, categoryIDStr string, amou
 	}
 
 	return *exp, nil
+}
+
+func monthToDateRange(month string) (start, end time.Time, err error) {
+	start, err = time.Parse("2006-01", month)
+	if err != nil {
+		return
+	}
+	end = start.AddDate(0, 1, 0)
+	return
 }
