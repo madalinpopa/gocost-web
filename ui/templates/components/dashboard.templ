@@ -58,7 +58,7 @@ templ BalanceDisplay(dashboard views.DashboardView, oob bool) {
 			if dashboard.Balance >= 0 {
 				{ dashboard.Currency } { fmt.Sprintf("%.2f", dashboard.Balance) }
 			} else {
-				- { dashboard.Currency } { fmt.Sprintf("%.2f", math.Abs(dashboard.Balance)) }
+				- { dashboard.Currency } { fmt.Sprintf("%.2f", dashboard.BalanceAbs) }
 			}
 		</div>
 		<button
