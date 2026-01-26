@@ -37,7 +37,6 @@ templ AddIncomeForm(f *form.CreateIncomeForm, currency string, currentMonth stri
 		<input type="hidden" name="current-month" value={ currentMonth }/>
 		@AmountField("income-amount", "Amount", currency, amountVal, amountErr)
 		@InputField("income-desc", "Description", "Salary, Freelance...", "text", descVal, descErr)
-		@InputField("income-date", "Received At", "", "date", dateVal, dateErr)
 		@ModalButtons("Cancel", "Add Income")
 	</form>
 }
