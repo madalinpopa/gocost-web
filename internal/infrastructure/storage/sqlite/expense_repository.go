@@ -88,11 +88,10 @@ func (r *SQLiteExpenseRepository) FindByUserID(ctx context.Context, userID ident
 }
 
 func (r *SQLiteExpenseRepository) FindByUserIDAndMonth(ctx context.Context, userID identifier.ID, month string) ([]expense.Expense, error) {
-	start, err := time.Parse("2006-01", month)
+	start, end, err := monthToDateRange(month)
 	if err != nil {
 		return nil, err
 	}
-	end := start.AddDate(0, 1, 0)
 
 	query := `
 		SELECT e.id, e.category_id, e.amount, e.description, e.spent_at, e.is_paid, e.paid_at 
@@ -140,11 +139,10 @@ func (r *SQLiteExpenseRepository) fetchExpenses(ctx context.Context, query strin
 }
 
 func (r *SQLiteExpenseRepository) Total(ctx context.Context, userID identifier.ID, month string) (float64, error) {
-	start, err := time.Parse("2006-01", month)
+	start, end, err := monthToDateRange(month)
 	if err != nil {
 		return 0, err
 	}
-	end := start.AddDate(0, 1, 0)
 
 	query := `
 		SELECT COALESCE(SUM(e.amount), 0)
@@ -214,4 +212,13 @@ func (r *SQLiteExpenseRepository) mapToExpense(idStr, categoryIDStr string, amou
 	}
 
 	return *exp, nil
+}
+
+func monthToDateRange(month string) (start, end time.Time, err error) {
+	start, err = time.Parse("2006-01", month)
+	if err != nil {
+		return
+	}
+	end = start.AddDate(0, 1, 0)
+	return
 }
