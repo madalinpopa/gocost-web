@@ -13,8 +13,8 @@ import (
 // It is separated to allow HTMX replacement on validation error without closing the modal.
 templ AddIncomeForm(f *form.CreateIncomeForm, currency string, currentMonth string) {
 	{{
-		var amountVal, descVal, dateVal string
-		var amountErr, descErr, dateErr string
+		var amountVal, descVal string
+		var amountErr, descErr string
 		var nonFieldErrors []string
 
 		if currentMonth != "" {
