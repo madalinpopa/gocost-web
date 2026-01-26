@@ -41,7 +41,7 @@ type CategoryView struct {
 	UnpaidSpent      float64
 	PaidPercentage   float64
 	UnpaidPercentage float64
-	BarColor         string
+	IsNearBudget     bool
 	IsOverBudget     bool
 	OverBudgetAmount float64
 	RemainingBudget  float64
