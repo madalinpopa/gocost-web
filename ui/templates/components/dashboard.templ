@@ -43,33 +43,34 @@ templ MonthNavigation(dashboard views.DashboardView, oob bool) {
 templ BalanceDisplay(dashboard views.DashboardView, oob bool) {
 	<div
 		id="dashboard-balance"
-		class="flex items-center gap-3"
+		class="flex items-center gap-6"
 		if oob {
 			hx-swap-oob="true"
 		}
 	>
-		<span class="text-sm font-medium text-slate-500 dark:text-slate-400">Balance</span>
-		<div
-			class={ "text-xl font-mono font-bold",
+		<!-- Total Budgeted -->
+		<div class="flex items-center gap-2">
+			<span class="text-sm font-medium text-slate-500 dark:text-slate-400">Budgeted</span>
+			<span class="text-xl font-mono font-bold text-slate-900 dark:text-white">
+				{ dashboard.Currency } { fmt.Sprintf("%.2f", dashboard.TotalBudgeted) }
+			</span>
+		</div>
+
+		<!-- Balance -->
+		<div class="flex items-center gap-2">
+			<span class="text-sm font-medium text-slate-500 dark:text-slate-400">Balance</span>
+			<div
+				class={ "text-xl font-mono font-bold",
               templ.KV("text-slate-900 dark:text-white", dashboard.Balance >= 0),
               templ.KV("text-rose-600 dark:text-rose-500", dashboard.Balance < 0) }
-		>
-			if dashboard.Balance >= 0 {
-				{ dashboard.Currency } { fmt.Sprintf("%.2f", dashboard.Balance) }
-			} else {
-				- { dashboard.Currency } { fmt.Sprintf("%.2f", dashboard.BalanceAbs) }
-			}
+			>
+				if dashboard.Balance >= 0 {
+					{ dashboard.Currency } { fmt.Sprintf("%.2f", dashboard.Balance) }
+				} else {
+					- { dashboard.Currency } { fmt.Sprintf("%.2f", dashboard.BalanceAbs) }
+				}
+			</div>
 		</div>
-		<button
-			@click="$dispatch('open-modal', { id: 'income-list-modal' })"
-			hx-get={ "/incomes?month=" + dashboard.CurrentMonthParam }
-			hx-target="#income-list-container"
-			hx-trigger="click, dashboard:refresh from:body"
-			class="ml-2 rounded-full p-1 text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
-			title="View Monthly Incomes"
-		>
-			@IconList()
-		</button>
 	</div>
 }
 
@@ -82,6 +83,13 @@ templ DashboardActions(month string, oob bool) {
 		}
 	>
 		<button
+			@click="$dispatch('open-modal', { id: 'add-group-modal' })"
+			class="flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
+		>
+			@IconAdd()
+			New Group
+		</button>
+		<button
 			@click={ fmt.Sprintf("$dispatch('open-modal', { id: 'add-income-modal', currentMonth: '%s' })", month) }
 			class="flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 transition-colors"
 		>
@@ -89,11 +97,14 @@ templ DashboardActions(month string, oob bool) {
 			Income
 		</button>
 		<button
-			@click="$dispatch('open-modal', { id: 'add-group-modal' })"
-			class="flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
+			@click="$dispatch('open-modal', { id: 'income-list-modal' })"
+			hx-get={ "/incomes?month=" + month }
+			hx-target="#income-list-container"
+			hx-trigger="click, dashboard:refresh from:body"
+			class="rounded-full p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
+			title="View Monthly Incomes"
 		>
-			@IconAdd()
-			New Group
+			@IconList()
 		</button>
 	</div>
 }
@@ -169,6 +180,16 @@ templ ExpenseItem(expense views.ExpenseView, categoryId string) {
 	</div>
 }
 
+func getProgressBarClass(c views.CategoryView) string {
+    if c.IsOverBudget {
+        return "bg-rose-500"
+    }
+    if c.IsNearBudget {
+        return "bg-amber-500"
+    }
+    return "bg-emerald-500"
+}
+
 templ CategoryProgressBar(category views.CategoryView) {
 	if category.Budget > 0 {
 		<div class="mb-6">
@@ -185,7 +206,7 @@ templ CategoryProgressBar(category views.CategoryView) {
 			</div>
 			<div class="h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex">
 				<div
-					class={ "h-full transition-all duration-500 " + category.BarColor }
+					class={ "h-full transition-all duration-500", getProgressBarClass(category) }
 					style={ fmt.Sprintf("width: %.2f%%", category.PaidPercentage) }
 				></div>
 				<div

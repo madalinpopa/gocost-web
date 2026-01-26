@@ -29,6 +29,7 @@ func (p *DashboardPresenter) Present(
 	// Create a map of expenses by category for easier lookup
 	expensesByCategory := make(map[string][]ExpenseView)
 	categorySpent := make(map[string]float64)
+	totalBudgeted := 0.0
 
 	for _, exp := range expenses {
 		status := StatusUnpaid
@@ -90,6 +91,7 @@ func (p *DashboardPresenter) Present(
 			}
 
 			if showCategory {
+				totalBudgeted += cat.Budget
 				spent := categorySpent[cat.ID]
 				catExpenses := expensesByCategory[cat.ID]
 
@@ -124,16 +126,10 @@ func (p *DashboardPresenter) Present(
 					}
 				}
 
-				// Bar color logic
-				barColor := "bg-emerald-500"
-				if spent > cat.Budget {
-					barColor = "bg-rose-500"
-				} else if percentage > 85 {
-					barColor = "bg-amber-500"
-				}
-
 				// Budget calculations
 				isOverBudget := spent > cat.Budget
+				isNearBudget := !isOverBudget && percentage > 85
+
 				overBudgetAmount := 0.0
 				remainingBudget := 0.0
 
@@ -159,7 +155,7 @@ func (p *DashboardPresenter) Present(
 					UnpaidSpent:      unpaidSpent,
 					PaidPercentage:   paidPercentage,
 					UnpaidPercentage: unpaidPercentage,
-					BarColor:         barColor,
+					IsNearBudget:     isNearBudget,
 					IsOverBudget:     isOverBudget,
 					OverBudgetAmount: overBudgetAmount,
 					RemainingBudget:  remainingBudget,
@@ -179,6 +175,7 @@ func (p *DashboardPresenter) Present(
 	return DashboardView{
 		TotalIncome:   totalIncome,
 		TotalExpenses: totalExpenses,
+		TotalBudgeted: totalBudgeted,
 		Balance:       balance,
 		BalanceAbs:    math.Abs(balance),
 		Currency:      p.Currency,

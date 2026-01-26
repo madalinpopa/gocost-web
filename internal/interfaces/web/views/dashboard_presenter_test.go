@@ -55,7 +55,7 @@ func TestDashboardPresenter_Present_ProgressBar(t *testing.T) {
 	assert.Equal(t, 20.0, c1.UnpaidPercentage)
 	assert.False(t, c1.IsOverBudget)
 	assert.Equal(t, 30.0, c1.RemainingBudget)
-	assert.Equal(t, "bg-emerald-500", c1.BarColor)
+	assert.False(t, c1.IsNearBudget)
 
 	// Verify c2 (Rent)
 	c2 := view.Groups[0].Categories[1]
@@ -67,7 +67,7 @@ func TestDashboardPresenter_Present_ProgressBar(t *testing.T) {
 	assert.Equal(t, 0.0, c2.UnpaidPercentage)
 	assert.True(t, c2.IsOverBudget)
 	assert.Equal(t, 10.0, c2.OverBudgetAmount)
-	assert.Equal(t, "bg-rose-500", c2.BarColor)
+	assert.False(t, c2.IsNearBudget)
 }
 
 func TestDashboardPresenter_Present_Balance(t *testing.T) {
