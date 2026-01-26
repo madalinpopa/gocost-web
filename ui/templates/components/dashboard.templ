@@ -287,8 +287,8 @@ templ CategoryCard(category views.CategoryView, groupId string, month string) {
 
 templ GroupCard(group views.GroupView, month string) {
 	<div 
-		x-data={ fmt.Sprintf("{ expanded: localStorage.getItem('gocost_group_expanded_%s') === 'false' ? false : true }", group.ID) }
-		x-init={ fmt.Sprintf("$watch('expanded', val => localStorage.setItem('gocost_group_expanded_%s', val))", group.ID) }
+		x-data={ fmt.Sprintf("{ key: 'gocost_group_expanded_%s', expanded: true }", group.ID) }
+		x-init="expanded = localStorage.getItem(key) === 'false' ? false : true; $watch('expanded', val => localStorage.setItem(key, val))"
 		class="overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50"
 	>
 		<!-- Group Header -->
