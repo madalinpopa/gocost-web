@@ -42,7 +42,7 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 		formValues := url.Values{}
 		formValues.Set("income-amount", "100.50")
 		formValues.Set("income-desc", "Salary")
-		formValues.Set("income-date", "2023-10-27")
+		formValues.Set("current-month", "2023-10")
 
 		req := httptest.NewRequest(http.MethodPost, "/incomes", strings.NewReader(formValues.Encode()))
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -53,7 +53,7 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 		expectedReq := &usecase.CreateIncomeRequest{
 			Amount:     100.50,
 			Source:     "Salary",
-			ReceivedAt: time.Date(2023, 10, 27, 0, 0, 0, 0, time.UTC),
+			ReceivedAt: time.Date(2023, 10, 1, 0, 0, 0, 0, time.UTC),
 		}
 
 		mockIncomeUC.On("Create", req.Context(), "user-123", mock.MatchedBy(func(r *usecase.CreateIncomeRequest) bool {
@@ -89,9 +89,10 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 
 		handler := NewIncomeHandler(appCtx, mockIncomeUC, mockExpenseUC)
 
-		// Missing amount and date
+		// Missing amount
 		formValues := url.Values{}
 		formValues.Set("income-desc", "Salary")
+		formValues.Set("current-month", "2023-10")
 
 		req := httptest.NewRequest(http.MethodPost, "/incomes", strings.NewReader(formValues.Encode()))
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -132,7 +133,7 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 		formValues := url.Values{}
 		formValues.Set("income-amount", "100.50")
 		formValues.Set("income-desc", "Salary")
-		formValues.Set("income-date", "2023-10-27")
+		formValues.Set("current-month", "2023-10")
 
 		req := httptest.NewRequest(http.MethodPost, "/incomes", strings.NewReader(formValues.Encode()))
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -173,7 +174,7 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 		formValues := url.Values{}
 		formValues.Set("income-amount", "100.50")
 		formValues.Set("income-desc", "Salary")
-		formValues.Set("income-date", "2023-10-27")
+		formValues.Set("current-month", "2023-10")
 
 		req := httptest.NewRequest(http.MethodPost, "/incomes", strings.NewReader(formValues.Encode()))
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")

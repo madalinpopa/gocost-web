@@ -13,25 +13,17 @@ import (
 // It is separated to allow HTMX replacement on validation error without closing the modal.
 templ AddIncomeForm(f *form.CreateIncomeForm, currency string, currentMonth string) {
 	{{
-		var amountVal, descVal, dateVal string
-		var amountErr, descErr, dateErr string
+		var amountVal, descVal string
+		var amountErr, descErr string
 		var nonFieldErrors []string
-
-		if currentMonth != "" {
-			dateVal = currentMonth + "-01"
-		}
 
 		if f != nil {
 			if f.Amount != "" {
 				amountVal = f.Amount
 			}
 			descVal = f.Description
-			if f.Date != "" {
-				dateVal = f.Date
-			}
 			amountErr = f.FieldErrors["income-amount"]
 			descErr = f.FieldErrors["income-desc"]
-			dateErr = f.FieldErrors["income-date"]
 			nonFieldErrors = f.NonFieldErrors
 		}
 	}}
@@ -45,7 +37,6 @@ templ AddIncomeForm(f *form.CreateIncomeForm, currency string, currentMonth stri
 		<input type="hidden" name="current-month" value={ currentMonth }/>
 		@AmountField("income-amount", "Amount", currency, amountVal, amountErr)
 		@InputField("income-desc", "Description", "Salary, Freelance...", "text", descVal, descErr)
-		@InputField("income-date", "Received At", "", "date", dateVal, dateErr)
 		@ModalButtons("Cancel", "Add Income")
 	</form>
 }
@@ -227,7 +218,7 @@ templ AddCategoryForm(f *form.CreateCategoryForm, currency string, currentMonth 
 			{Value: "monthly", Label: "This month only"},
 			{Value: "recurrent", Label: "Recurrent"},
 		}, typeErr)
-		<div x-show="categoryType === 'recurrent'">
+		<div x-show="categoryType === 'recurrent'" x-cloak>
 			@InputField("category-end", "End Month", "YYYY-MM", "month", endVal, endErr)
 		</div>
 		@ModalButtons("Cancel", "Add Category")
@@ -325,7 +316,7 @@ templ EditCategoryForm(f *form.UpdateCategoryForm, currency string) {
 			{Value: "recurrent", Label: "Recurrent"},
 		}, typeErr)
 		@InputField("edit-start", "Start Month", "YYYY-MM", "month", startVal, startErr)
-		<div x-show="categoryType === 'recurrent'">
+		<div x-show="categoryType === 'recurrent'" x-cloak>
 			@InputField("edit-end", "End Month", "YYYY-MM", "month", endVal, endErr)
 		</div>
 		@ModalButtons("Cancel", "Save Changes")

@@ -18,7 +18,6 @@ func TestCreateIncomeForm_Validate(t *testing.T) {
 			form: CreateIncomeForm{
 				Amount:      "100.50",
 				Description: "Salary",
-				Date:        "2023-10-27",
 			},
 			wantValid:  true,
 			wantErrors: nil,
@@ -28,7 +27,6 @@ func TestCreateIncomeForm_Validate(t *testing.T) {
 			form: CreateIncomeForm{
 				Amount:      "0",
 				Description: "Salary",
-				Date:        "2023-10-27",
 			},
 			wantValid: false,
 			wantErrors: map[string]string{
@@ -40,7 +38,6 @@ func TestCreateIncomeForm_Validate(t *testing.T) {
 			form: CreateIncomeForm{
 				Amount:      "abc",
 				Description: "Salary",
-				Date:        "2023-10-27",
 			},
 			wantValid: false,
 			wantErrors: map[string]string{
@@ -52,7 +49,6 @@ func TestCreateIncomeForm_Validate(t *testing.T) {
 			form: CreateIncomeForm{
 				Amount:      "100",
 				Description: "",
-				Date:        "2023-10-27",
 			},
 			wantValid: false,
 			wantErrors: map[string]string{
@@ -64,35 +60,10 @@ func TestCreateIncomeForm_Validate(t *testing.T) {
 			form: CreateIncomeForm{
 				Amount:      "100",
 				Description: "this is a very long description that definitely exceeds the one hundred character limit defined in the validation rules for this field",
-				Date:        "2023-10-27",
 			},
 			wantValid: false,
 			wantErrors: map[string]string{
 				"income-desc": "description must be at most 100 characters long",
-			},
-		},
-		{
-			name: "missing date",
-			form: CreateIncomeForm{
-				Amount:      "100",
-				Description: "Salary",
-				Date:        "",
-			},
-			wantValid: false,
-			wantErrors: map[string]string{
-				"income-date": "this field is required",
-			},
-		},
-		{
-			name: "invalid date format",
-			form: CreateIncomeForm{
-				Amount:      "100",
-				Description: "Salary",
-				Date:        "invalid-date",
-			},
-			wantValid: false,
-			wantErrors: map[string]string{
-				"income-date": "invalid date format",
 			},
 		},
 	}

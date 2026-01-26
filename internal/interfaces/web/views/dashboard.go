@@ -35,6 +35,16 @@ type CategoryView struct {
 	Spent       float64
 	Currency    string
 	Expenses    []ExpenseView
+
+	// Progress Bar & Budget fields
+	PaidSpent        float64
+	UnpaidSpent      float64
+	PaidPercentage   float64
+	UnpaidPercentage float64
+	BarColor         string
+	IsOverBudget     bool
+	OverBudgetAmount float64
+	RemainingBudget  float64
 }
 
 type GroupView struct {
@@ -53,6 +63,7 @@ type DashboardView struct {
 	TotalIncome       float64
 	TotalExpenses     float64
 	Balance           float64
+	BalanceAbs        float64
 	Currency          string
 	Groups            []GroupView
 }
