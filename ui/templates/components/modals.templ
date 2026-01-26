@@ -227,7 +227,7 @@ templ AddCategoryForm(f *form.CreateCategoryForm, currency string, currentMonth 
 			{Value: "monthly", Label: "This month only"},
 			{Value: "recurrent", Label: "Recurrent"},
 		}, typeErr)
-		<div x-show="categoryType === 'recurrent'">
+		<div x-show="categoryType === 'recurrent'" x-cloak>
 			@InputField("category-end", "End Month", "YYYY-MM", "month", endVal, endErr)
 		</div>
 		@ModalButtons("Cancel", "Add Category")
@@ -325,7 +325,7 @@ templ EditCategoryForm(f *form.UpdateCategoryForm, currency string) {
 			{Value: "recurrent", Label: "Recurrent"},
 		}, typeErr)
 		@InputField("edit-start", "Start Month", "YYYY-MM", "month", startVal, startErr)
-		<div x-show="categoryType === 'recurrent'">
+		<div x-show="categoryType === 'recurrent'" x-cloak>
 			@InputField("edit-end", "End Month", "YYYY-MM", "month", endVal, endErr)
 		</div>
 		@ModalButtons("Cancel", "Save Changes")
