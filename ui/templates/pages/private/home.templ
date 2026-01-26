@@ -10,15 +10,13 @@ templ HomePage(data web.Data, dashboard views.DashboardView) {
 		<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 			<!-- Header / Month Navigation & Actions -->
 			<div class="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
-				<!-- Month Navigation -->
-				@components.MonthNavigation(dashboard, false)
-				<!-- Balance & Actions -->
+				<!-- Left: Month Navigation & Actions -->
 				<div class="flex flex-col items-center gap-4 sm:flex-row">
-					<!-- Balance Display -->
-					@components.BalanceDisplay(dashboard, false)
-					<!-- Action Buttons -->
+					@components.MonthNavigation(dashboard, false)
 					@components.DashboardActions(dashboard.CurrentMonthParam, false)
 				</div>
+				<!-- Right: Balance Display -->
+				@components.BalanceDisplay(dashboard, false)
 			</div>
 			<!-- Groups -->
 			<div
