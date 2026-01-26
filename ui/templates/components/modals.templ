@@ -17,21 +17,13 @@ templ AddIncomeForm(f *form.CreateIncomeForm, currency string, currentMonth stri
 		var amountErr, descErr string
 		var nonFieldErrors []string
 
-		if currentMonth != "" {
-			dateVal = currentMonth + "-01"
-		}
-
 		if f != nil {
 			if f.Amount != "" {
 				amountVal = f.Amount
 			}
 			descVal = f.Description
-			if f.Date != "" {
-				dateVal = f.Date
-			}
 			amountErr = f.FieldErrors["income-amount"]
 			descErr = f.FieldErrors["income-desc"]
-			dateErr = f.FieldErrors["income-date"]
 			nonFieldErrors = f.NonFieldErrors
 		}
 	}}
