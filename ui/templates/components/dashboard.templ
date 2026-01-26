@@ -185,7 +185,7 @@ templ CategoryProgressBar(category views.CategoryView) {
 			</div>
 			<div class="h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex">
 				<div
-					class={ "h-full transition-all duration-500", category.BarColor }
+					class={ "h-full transition-all duration-500 " + category.BarColor }
 					style={ fmt.Sprintf("width: %.2f%%", category.PaidPercentage) }
 				></div>
 				<div
