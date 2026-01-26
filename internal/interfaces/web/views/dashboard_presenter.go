@@ -128,10 +128,7 @@ func (p *DashboardPresenter) Present(
 
 				// Budget calculations
 				isOverBudget := spent > cat.Budget
-				isNearBudget := false
-				if !isOverBudget && percentage > 85 {
-					isNearBudget = true
-				}
+				isNearBudget := !isOverBudget && percentage > 85
 
 				overBudgetAmount := 0.0
 				remainingBudget := 0.0
