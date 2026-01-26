@@ -62,6 +62,7 @@ type DashboardView struct {
 	NextMonth         string
 	TotalIncome       float64
 	TotalExpenses     float64
+	TotalBudgeted     float64
 	Balance           float64
 	BalanceAbs        float64
 	Currency          string
