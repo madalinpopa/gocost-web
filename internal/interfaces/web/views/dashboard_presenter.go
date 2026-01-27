@@ -34,7 +34,7 @@ func (p *DashboardPresenter) Present(
 	date time.Time,
 ) DashboardView {
 	monthStr := date.Format("2006-01")
-	balance := totalIncome - totalExpenses
+	balance := totalIncome
 
 	// Create a map of expenses by category for easier lookup
 	expensesByCategory := make(map[string][]ExpenseView)
