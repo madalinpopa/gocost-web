@@ -48,10 +48,9 @@ templ BalanceDisplay(dashboard views.DashboardView, oob bool) {
 		}
 	>
 		<div class="flex items-center gap-2">
-			<span class="text-sm font-medium text-slate-500 dark:text-slate-400">Balance</span>
 			<div class="flex items-center gap-2">
 				<div
-					class={ "text-xl font-mono font-bold",
+					class={ "text-2xl font-mono font-bold",
 	              templ.KV("text-slate-900 dark:text-white", dashboard.Balance >= 0),
 	              templ.KV("text-rose-600 dark:text-rose-500", dashboard.Balance < 0) }
 				>
@@ -62,7 +61,7 @@ templ BalanceDisplay(dashboard views.DashboardView, oob bool) {
 					}
 				</div>
 				<span class="text-slate-400 dark:text-slate-500">/</span>
-				<span class="text-xl font-mono font-semibold text-slate-500 dark:text-slate-400">
+				<span class="text-base font-mono font-semibold text-slate-500 dark:text-slate-400">
 					{ fmt.Sprintf("%.2f", dashboard.TotalBudgeted) }
 				</span>
 				<button
