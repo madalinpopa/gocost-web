@@ -13,7 +13,7 @@ func TestDashboardPresenter_Present_ProgressBar(t *testing.T) {
 
 	// Setup data
 	date, _ := time.Parse("2006-01", "2024-01")
-	
+
 	groups := []*usecase.GroupResponse{
 		{
 			ID: "g1",
@@ -70,19 +70,17 @@ func TestDashboardPresenter_Present_ProgressBar(t *testing.T) {
 	assert.False(t, c2.IsNearBudget)
 }
 
-func TestDashboardPresenter_Present_Balance(t *testing.T) {
+func TestDashboardPresenter_Present_TotalIncome(t *testing.T) {
 	presenter := NewDashboardPresenter("$")
 	date, _ := time.Parse("2006-01", "2024-01")
 
-	// Case 1: Balance equals total income
+	// Case 1: Total income preserved
 	view1 := presenter.Present(100, 40, nil, nil, date)
-	assert.Equal(t, 100.0, view1.Balance)
-	assert.Equal(t, 100.0, view1.BalanceAbs)
+	assert.Equal(t, 100.0, view1.TotalIncome)
 
-	// Case 2: Balance is still total income even when expenses are higher
+	// Case 2: Total income unaffected by expenses
 	view2 := presenter.Present(40, 100, nil, nil, date)
-	assert.Equal(t, 40.0, view2.Balance)
-	assert.Equal(t, 40.0, view2.BalanceAbs)
+	assert.Equal(t, 40.0, view2.TotalIncome)
 }
 
 func TestDashboardPresenter_Present_TotalBudgetedStatus(t *testing.T) {
