@@ -13,7 +13,7 @@ func TestDashboardPresenter_Present_ProgressBar(t *testing.T) {
 
 	// Setup data
 	date, _ := time.Parse("2006-01", "2024-01")
-	
+
 	groups := []*usecase.GroupResponse{
 		{
 			ID: "g1",
@@ -70,17 +70,51 @@ func TestDashboardPresenter_Present_ProgressBar(t *testing.T) {
 	assert.False(t, c2.IsNearBudget)
 }
 
-func TestDashboardPresenter_Present_Balance(t *testing.T) {
+func TestDashboardPresenter_Present_TotalIncome(t *testing.T) {
 	presenter := NewDashboardPresenter("$")
 	date, _ := time.Parse("2006-01", "2024-01")
 
-	// Case 1: Positive Balance
+	// Case 1: Total income preserved
 	view1 := presenter.Present(100, 40, nil, nil, date)
-	assert.Equal(t, 60.0, view1.Balance)
-	assert.Equal(t, 60.0, view1.BalanceAbs)
+	assert.Equal(t, 100.0, view1.TotalIncome)
 
-	// Case 2: Negative Balance
+	// Case 2: Total income unaffected by expenses
 	view2 := presenter.Present(40, 100, nil, nil, date)
-	assert.Equal(t, -60.0, view2.Balance)
-	assert.Equal(t, 60.0, view2.BalanceAbs)
+	assert.Equal(t, 40.0, view2.TotalIncome)
+}
+
+func TestDashboardPresenter_Present_TotalBudgetedStatus(t *testing.T) {
+	presenter := NewDashboardPresenter("$")
+	date, _ := time.Parse("2006-01", "2024-01")
+
+	makeGroups := func(budget float64) []*usecase.GroupResponse {
+		return []*usecase.GroupResponse{
+			{
+				ID: "g1",
+				Categories: []usecase.CategoryResponse{
+					{
+						ID:         "c1",
+						Name:       "Food",
+						StartMonth: "2024-01",
+						Budget:     budget,
+					},
+				},
+			},
+		}
+	}
+
+	t.Run("under", func(t *testing.T) {
+		view := presenter.Present(100, 0, makeGroups(50), nil, date)
+		assert.Equal(t, BudgetStatusUnder, view.TotalBudgetedStatus)
+	})
+
+	t.Run("equal", func(t *testing.T) {
+		view := presenter.Present(100, 0, makeGroups(100), nil, date)
+		assert.Equal(t, BudgetStatusEqual, view.TotalBudgetedStatus)
+	})
+
+	t.Run("over", func(t *testing.T) {
+		view := presenter.Present(100, 0, makeGroups(150), nil, date)
+		assert.Equal(t, BudgetStatusOver, view.TotalBudgetedStatus)
+	})
 }

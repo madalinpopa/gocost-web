@@ -9,7 +9,6 @@ import (
 // ============================================================================
 // Dashboard Navigation & Header Components
 // ============================================================================
-
 templ MonthNavigation(dashboard views.DashboardView, oob bool) {
 	<div
 		id="dashboard-month-nav"
@@ -43,32 +42,40 @@ templ MonthNavigation(dashboard views.DashboardView, oob bool) {
 templ BalanceDisplay(dashboard views.DashboardView, oob bool) {
 	<div
 		id="dashboard-balance"
-		class="flex items-center gap-6"
+		class="flex items-center gap-3"
 		if oob {
 			hx-swap-oob="true"
 		}
 	>
-		<!-- Total Budgeted -->
 		<div class="flex items-center gap-2">
-			<span class="text-sm font-medium text-slate-500 dark:text-slate-400">Budgeted</span>
-			<span class="text-xl font-mono font-bold text-slate-900 dark:text-white">
-				{ dashboard.Currency } { fmt.Sprintf("%.2f", dashboard.TotalBudgeted) }
-			</span>
-		</div>
-
-		<!-- Balance -->
-		<div class="flex items-center gap-2">
-			<span class="text-sm font-medium text-slate-500 dark:text-slate-400">Balance</span>
-			<div
-				class={ "text-xl font-mono font-bold",
-              templ.KV("text-slate-900 dark:text-white", dashboard.Balance >= 0),
-              templ.KV("text-rose-600 dark:text-rose-500", dashboard.Balance < 0) }
-			>
-				if dashboard.Balance >= 0 {
-					{ dashboard.Currency } { fmt.Sprintf("%.2f", dashboard.Balance) }
+			<div class="flex items-center gap-2">
+				<div class="text-2xl font-mono font-bold text-slate-900 dark:text-white">
+					{ dashboard.Currency } { fmt.Sprintf("%.2f", dashboard.TotalIncome) }
+				</div>
+				<span class="text-slate-400 dark:text-slate-500">/</span>
+				if dashboard.TotalBudgetedStatus == views.BudgetStatusUnder {
+					<span class="text-base font-mono font-semibold text-emerald-600 dark:text-emerald-500">
+						{ fmt.Sprintf("%.2f", dashboard.TotalBudgeted) }
+					</span>
+				} else if dashboard.TotalBudgetedStatus == views.BudgetStatusOver {
+					<span class="text-base font-mono font-semibold text-rose-600 dark:text-rose-500">
+						{ fmt.Sprintf("%.2f", dashboard.TotalBudgeted) }
+					</span>
 				} else {
-					- { dashboard.Currency } { fmt.Sprintf("%.2f", dashboard.BalanceAbs) }
+					<span class="text-base font-mono font-semibold text-slate-500 dark:text-slate-400">
+						{ fmt.Sprintf("%.2f", dashboard.TotalBudgeted) }
+					</span>
 				}
+				<button
+					@click="$dispatch('open-modal', { id: 'income-list-modal' })"
+					hx-get={ "/incomes?month=" + dashboard.CurrentMonthParam }
+					hx-target="#income-list-container"
+					hx-trigger="click, dashboard:refresh from:body"
+					class="inline-flex h-10 w-10 items-center justify-center rounded-full text-xl text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
+					title="View Monthly Incomes"
+				>
+					@IconList()
+				</button>
 			</div>
 		</div>
 	</div>
@@ -96,23 +103,12 @@ templ DashboardActions(month string, oob bool) {
 			@IconAdd()
 			Income
 		</button>
-		<button
-			@click="$dispatch('open-modal', { id: 'income-list-modal' })"
-			hx-get={ "/incomes?month=" + month }
-			hx-target="#income-list-container"
-			hx-trigger="click, dashboard:refresh from:body"
-			class="rounded-full p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
-			title="View Monthly Incomes"
-		>
-			@IconList()
-		</button>
 	</div>
 }
 
 // ============================================================================
 // Groups & Categories Components
 // ============================================================================
-
 templ DashboardGroups(groups []views.GroupView, month string) {
 	<div
 		id="dashboard-groups"
@@ -181,13 +177,13 @@ templ ExpenseItem(expense views.ExpenseView, categoryId string) {
 }
 
 func getProgressBarClass(c views.CategoryView) string {
-    if c.IsOverBudget {
-        return "bg-rose-500"
-    }
-    if c.IsNearBudget {
-        return "bg-amber-500"
-    }
-    return "bg-emerald-500"
+	if c.IsOverBudget {
+		return "bg-rose-500"
+	}
+	if c.IsNearBudget {
+		return "bg-amber-500"
+	}
+	return "bg-emerald-500"
 }
 
 templ CategoryProgressBar(category views.CategoryView) {
@@ -275,7 +271,7 @@ templ CategoryCard(category views.CategoryView, groupId string, month string) {
 }
 
 templ GroupCard(group views.GroupView, month string) {
-	<div 
+	<div
 		x-data={ fmt.Sprintf("{ key: 'gocost_group_expanded_%s', expanded: true }", group.ID) }
 		x-init="expanded = localStorage.getItem(key) === 'false' ? false : true; $watch('expanded', val => localStorage.setItem(key, val))"
 		class="overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50"
@@ -343,7 +339,6 @@ templ GroupsList(groups []views.GroupView, month string) {
 // ============================================================================
 // Income List Component
 // ============================================================================
-
 templ IncomeList(incomes []*usecase.IncomeResponse, currency string) {
 	<div id="income-list-content">
 		if len(incomes) == 0 {
