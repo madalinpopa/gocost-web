@@ -72,8 +72,6 @@ type DashboardView struct {
 	TotalExpenses       float64
 	TotalBudgeted       float64
 	TotalBudgetedStatus BudgetStatus
-	Balance             float64
-	BalanceAbs          float64
 	Currency            string
 	Groups              []GroupView
 }
