@@ -49,16 +49,8 @@ templ BalanceDisplay(dashboard views.DashboardView, oob bool) {
 	>
 		<div class="flex items-center gap-2">
 			<div class="flex items-center gap-2">
-				<div
-					class={ "text-2xl font-mono font-bold",
-	              templ.KV("text-slate-900 dark:text-white", dashboard.Balance >= 0),
-	              templ.KV("text-rose-600 dark:text-rose-500", dashboard.Balance < 0) }
-				>
-					if dashboard.Balance >= 0 {
-						{ dashboard.Currency } { fmt.Sprintf("%.2f", dashboard.Balance) }
-					} else {
-						- { dashboard.Currency } { fmt.Sprintf("%.2f", dashboard.BalanceAbs) }
-					}
+				<div class="text-2xl font-mono font-bold text-slate-900 dark:text-white">
+					{ dashboard.Currency } { fmt.Sprintf("%.2f", dashboard.TotalIncome) }
 				</div>
 				<span class="text-slate-400 dark:text-slate-500">/</span>
 				if dashboard.TotalBudgetedStatus == views.BudgetStatusUnder {
