@@ -12,13 +12,14 @@ type DashboardPresenter struct {
 }
 
 func budgetStatus(totalBudgeted, balance float64) BudgetStatus {
-	if totalBudgeted < balance {
+	switch {
+	case totalBudgeted < balance:
 		return BudgetStatusUnder
-	}
-	if totalBudgeted > balance {
+	case totalBudgeted > balance:
 		return BudgetStatusOver
+	default:
+		return BudgetStatusEqual
 	}
-	return BudgetStatusEqual
 }
 
 func NewDashboardPresenter(currency string) *DashboardPresenter {
@@ -34,8 +35,6 @@ func (p *DashboardPresenter) Present(
 	date time.Time,
 ) DashboardView {
 	monthStr := date.Format("2006-01")
-	balance := totalIncome
-
 	// Create a map of expenses by category for easier lookup
 	expensesByCategory := make(map[string][]ExpenseView)
 	categorySpent := make(map[string]float64)
@@ -186,9 +185,7 @@ func (p *DashboardPresenter) Present(
 		TotalIncome:         totalIncome,
 		TotalExpenses:       totalExpenses,
 		TotalBudgeted:       totalBudgeted,
-		TotalBudgetedStatus: budgetStatus(totalBudgeted, balance),
-		Balance:             balance,
-		BalanceAbs:          math.Abs(balance),
+		TotalBudgetedStatus: budgetStatus(totalBudgeted, totalIncome),
 		Currency:            p.Currency,
 		Groups:              groupViews,
 	}
