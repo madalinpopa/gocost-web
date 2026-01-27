@@ -61,9 +61,19 @@ templ BalanceDisplay(dashboard views.DashboardView, oob bool) {
 					}
 				</div>
 				<span class="text-slate-400 dark:text-slate-500">/</span>
-				<span class="text-base font-mono font-semibold text-slate-500 dark:text-slate-400">
-					{ fmt.Sprintf("%.2f", dashboard.TotalBudgeted) }
-				</span>
+				if dashboard.TotalBudgetedStatus == views.BudgetStatusUnder {
+					<span class="text-base font-mono font-semibold text-emerald-600 dark:text-emerald-500">
+						{ fmt.Sprintf("%.2f", dashboard.TotalBudgeted) }
+					</span>
+				} else if dashboard.TotalBudgetedStatus == views.BudgetStatusOver {
+					<span class="text-base font-mono font-semibold text-rose-600 dark:text-rose-500">
+						{ fmt.Sprintf("%.2f", dashboard.TotalBudgeted) }
+					</span>
+				} else {
+					<span class="text-base font-mono font-semibold text-slate-500 dark:text-slate-400">
+						{ fmt.Sprintf("%.2f", dashboard.TotalBudgeted) }
+					</span>
+				}
 				<button
 					@click="$dispatch('open-modal', { id: 'income-list-modal' })"
 					hx-get={ "/incomes?month=" + dashboard.CurrentMonthParam }

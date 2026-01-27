@@ -11,6 +11,16 @@ type DashboardPresenter struct {
 	Currency string
 }
 
+func budgetStatus(totalBudgeted, balance float64) BudgetStatus {
+	if totalBudgeted < balance {
+		return BudgetStatusUnder
+	}
+	if totalBudgeted > balance {
+		return BudgetStatusOver
+	}
+	return BudgetStatusEqual
+}
+
 func NewDashboardPresenter(currency string) *DashboardPresenter {
 	return &DashboardPresenter{
 		Currency: currency,
@@ -173,12 +183,13 @@ func (p *DashboardPresenter) Present(
 	}
 
 	return DashboardView{
-		TotalIncome:   totalIncome,
-		TotalExpenses: totalExpenses,
-		TotalBudgeted: totalBudgeted,
-		Balance:       balance,
-		BalanceAbs:    math.Abs(balance),
-		Currency:      p.Currency,
-		Groups:        groupViews,
+		TotalIncome:         totalIncome,
+		TotalExpenses:       totalExpenses,
+		TotalBudgeted:       totalBudgeted,
+		TotalBudgetedStatus: budgetStatus(totalBudgeted, balance),
+		Balance:             balance,
+		BalanceAbs:          math.Abs(balance),
+		Currency:            p.Currency,
+		Groups:              groupViews,
 	}
 }

@@ -14,6 +14,14 @@ const (
 	TypeRecurrent CategoryType = "Recurrent"
 )
 
+type BudgetStatus string
+
+const (
+	BudgetStatusUnder BudgetStatus = "under"
+	BudgetStatusEqual BudgetStatus = "equal"
+	BudgetStatusOver  BudgetStatus = "over"
+)
+
 type ExpenseView struct {
 	ID          string
 	Amount      float64
@@ -56,15 +64,16 @@ type GroupView struct {
 }
 
 type DashboardView struct {
-	CurrentMonth      string
-	CurrentMonthParam string
-	PrevMonth         string
-	NextMonth         string
-	TotalIncome       float64
-	TotalExpenses     float64
-	TotalBudgeted     float64
-	Balance           float64
-	BalanceAbs        float64
-	Currency          string
-	Groups            []GroupView
+	CurrentMonth        string
+	CurrentMonthParam   string
+	PrevMonth           string
+	NextMonth           string
+	TotalIncome         float64
+	TotalExpenses       float64
+	TotalBudgeted       float64
+	TotalBudgetedStatus BudgetStatus
+	Balance             float64
+	BalanceAbs          float64
+	Currency            string
+	Groups              []GroupView
 }
