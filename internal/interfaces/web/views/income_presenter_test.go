@@ -13,10 +13,11 @@ func TestIncomeListPresenter_Present_FormatsIncome(t *testing.T) {
 
 	incomes := []*usecase.IncomeResponse{
 		{
-			ID:         "inc-1",
-			Source:     "Salary",
-			Amount:     100.5,
-			ReceivedAt: time.Date(2024, time.February, 3, 0, 0, 0, 0, time.UTC),
+			ID:          "inc-1",
+			Source:      "Salary",
+			AmountCents: 10050,
+			Currency:    "USD",
+			ReceivedAt:  time.Date(2024, time.February, 3, 0, 0, 0, 0, time.UTC),
 		},
 	}
 
@@ -35,10 +36,11 @@ func TestIncomeListPresenter_Present_SkipsNil(t *testing.T) {
 	incomes := []*usecase.IncomeResponse{
 		nil,
 		{
-			ID:         "inc-2",
-			Source:     "Bonus",
-			Amount:     50,
-			ReceivedAt: time.Date(2024, time.March, 1, 0, 0, 0, 0, time.UTC),
+			ID:          "inc-2",
+			Source:      "Bonus",
+			AmountCents: 5000,
+			Currency:    "USD",
+			ReceivedAt:  time.Date(2024, time.March, 1, 0, 0, 0, 0, time.UTC),
 		},
 	}
 
@@ -54,10 +56,10 @@ func TestIncomeListPresenter_Present_FallbackFormatting(t *testing.T) {
 
 		incomes := []*usecase.IncomeResponse{
 			{
-				ID:         "inc-3",
-				Source:     "Misc",
-				Amount:     12.3,
-				ReceivedAt: time.Date(2024, time.April, 2, 0, 0, 0, 0, time.UTC),
+				ID:          "inc-3",
+				Source:      "Misc",
+				AmountCents: 1230,
+				ReceivedAt:  time.Date(2024, time.April, 2, 0, 0, 0, 0, time.UTC),
 			},
 		}
 
@@ -72,10 +74,10 @@ func TestIncomeListPresenter_Present_FallbackFormatting(t *testing.T) {
 
 		incomes := []*usecase.IncomeResponse{
 			{
-				ID:         "inc-4",
-				Source:     "Misc",
-				Amount:     12.3,
-				ReceivedAt: time.Date(2024, time.April, 2, 0, 0, 0, 0, time.UTC),
+				ID:          "inc-4",
+				Source:      "Misc",
+				AmountCents: 1230,
+				ReceivedAt:  time.Date(2024, time.April, 2, 0, 0, 0, 0, time.UTC),
 			},
 		}
 
