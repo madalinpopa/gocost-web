@@ -158,6 +158,11 @@ type ExpenseResponse struct {
 	PaidAt      *time.Time `json:"paid_at,omitempty"`
 }
 
+type DashboardRequest struct {
+	UserID string
+	Month  string
+}
+
 type DashboardCategoryResponse struct {
 	ID             string
 	Name           string
