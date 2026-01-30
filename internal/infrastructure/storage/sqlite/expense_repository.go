@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/madalinpopa/gocost-web/internal/domain/expense"
@@ -48,7 +49,7 @@ func (r *SQLiteExpenseRepository) Save(ctx context.Context, e expense.Expense) e
 		paidAt,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to save expense: %w", err)
 	}
 
 	return nil
@@ -76,7 +77,7 @@ func (r *SQLiteExpenseRepository) FindByID(ctx context.Context, id identifier.ID
 		if errors.Is(err, sql.ErrNoRows) {
 			return expense.Expense{}, expense.ErrExpenseNotFound
 		}
-		return expense.Expense{}, err
+		return expense.Expense{}, fmt.Errorf("failed to find expense by id: %w", err)
 	}
 
 	return r.mapToExpense(idStr, categoryIDStr, amountCents, currencyStr, descriptionStr, spentAt, isPaidInt == 1, paidAt)
@@ -118,7 +119,7 @@ func (r *SQLiteExpenseRepository) FindByUserIDAndMonth(ctx context.Context, user
 func (r *SQLiteExpenseRepository) TotalsByCategoryAndMonth(ctx context.Context, userID identifier.ID, month string) ([]expense.CategoryTotals, error) {
 	start, end, err := monthToDateRange(month)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to parse month: %w", err)
 	}
 
 	query := `
@@ -136,7 +137,7 @@ func (r *SQLiteExpenseRepository) TotalsByCategoryAndMonth(ctx context.Context, 
 
 	rows, err := r.db.QueryContext(ctx, query, userID.String(), start, end)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to query category totals: %w", err)
 	}
 	defer rows.Close()
 
@@ -147,22 +148,22 @@ func (r *SQLiteExpenseRepository) TotalsByCategoryAndMonth(ctx context.Context, 
 		var paidCents int64
 
 		if err := rows.Scan(&categoryIDStr, &totalCents, &paidCents, &currencyStr); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan category total row: %w", err)
 		}
 
 		categoryID, err := identifier.ParseID(categoryIDStr)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to parse category ID: %w", err)
 		}
 
 		totalAmount, err := money.New(totalCents, currencyStr)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to create total amount: %w", err)
 		}
 
 		paidAmount, err := money.New(paidCents, currencyStr)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to create paid amount: %w", err)
 		}
 
 		totals = append(totals, expense.CategoryTotals{
@@ -173,7 +174,7 @@ func (r *SQLiteExpenseRepository) TotalsByCategoryAndMonth(ctx context.Context, 
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error iterating category totals: %w", err)
 	}
 
 	return totals, nil
@@ -182,7 +183,7 @@ func (r *SQLiteExpenseRepository) TotalsByCategoryAndMonth(ctx context.Context, 
 func (r *SQLiteExpenseRepository) fetchExpenses(ctx context.Context, query string, args ...any) ([]expense.Expense, error) {
 	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to query expenses: %w", err)
 	}
 	defer rows.Close()
 
@@ -195,18 +196,18 @@ func (r *SQLiteExpenseRepository) fetchExpenses(ctx context.Context, query strin
 		var paidAt sql.NullTime
 
 		if err := rows.Scan(&idStr, &categoryIDStr, &amountCents, &descriptionStr, &spentAt, &isPaidInt, &paidAt, &currencyStr); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan expense row: %w", err)
 		}
 
 		exp, err := r.mapToExpense(idStr, categoryIDStr, amountCents, currencyStr, descriptionStr, spentAt, isPaidInt == 1, paidAt)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to map expense: %w", err)
 		}
 		expenses = append(expenses, exp)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error iterating expenses: %w", err)
 	}
 
 	return expenses, nil
@@ -215,7 +216,7 @@ func (r *SQLiteExpenseRepository) fetchExpenses(ctx context.Context, query strin
 func (r *SQLiteExpenseRepository) Total(ctx context.Context, userID identifier.ID, month string) (money.Money, error) {
 	start, end, err := monthToDateRange(month)
 	if err != nil {
-		return money.Money{}, err
+		return money.Money{}, fmt.Errorf("failed to parse month: %w", err)
 	}
 
 	query := `
@@ -237,11 +238,11 @@ func (r *SQLiteExpenseRepository) Total(ctx context.Context, userID identifier.I
 			userQuery := `SELECT currency FROM users WHERE id = ?`
 			err = r.db.QueryRowContext(ctx, userQuery, userID.String()).Scan(&currencyStr)
 			if err != nil {
-				return money.Money{}, err
+				return money.Money{}, fmt.Errorf("failed to get user currency: %w", err)
 			}
 			return money.New(0, currencyStr)
 		}
-		return money.Money{}, err
+		return money.Money{}, fmt.Errorf("failed to calculate expense total: %w", err)
 	}
 	return money.New(totalCents, currencyStr)
 }
@@ -250,11 +251,11 @@ func (r *SQLiteExpenseRepository) Delete(ctx context.Context, id identifier.ID) 
 	query := `DELETE FROM expenses WHERE id = ?`
 	result, err := r.db.ExecContext(ctx, query, id.String())
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to delete expense: %w", err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get rows affected: %w", err)
 	}
 	if rowsAffected == 0 {
 		return expense.ErrExpenseNotFound
