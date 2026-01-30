@@ -37,6 +37,14 @@ func TestDashboardPresenter_Present_ProgressBar(t *testing.T) {
 						SpentCents:     6000,
 						PaidSpentCents: 6000,
 					},
+					{
+						ID:             "c3",
+						Name:           "Utilities",
+						StartMonth:     "2024-01",
+						BudgetCents:    8000,
+						SpentCents:     8000,
+						PaidSpentCents: 8000,
+					},
 				},
 			},
 		},
@@ -56,6 +64,7 @@ func TestDashboardPresenter_Present_ProgressBar(t *testing.T) {
 	assert.False(t, c1.IsOverBudget)
 	assert.Equal(t, 30.0, c1.RemainingBudget.Amount())
 	assert.False(t, c1.IsNearBudget)
+	assert.Equal(t, BudgetStatusUnder, c1.BudgetStatus)
 
 	// Verify c2 (Rent)
 	c2 := view.Groups[0].Categories[1]
@@ -68,6 +77,16 @@ func TestDashboardPresenter_Present_ProgressBar(t *testing.T) {
 	assert.True(t, c2.IsOverBudget)
 	assert.Equal(t, 10.0, c2.OverBudgetAmount.Amount())
 	assert.False(t, c2.IsNearBudget)
+	assert.Equal(t, BudgetStatusOver, c2.BudgetStatus)
+
+	// Verify c3 (Utilities)
+	c3 := view.Groups[0].Categories[2]
+	assert.Equal(t, "c3", c3.ID)
+	assert.Equal(t, 80.0, c3.Spent.Amount())
+	assert.Equal(t, 100.0, c3.PaidPercentage)
+	assert.Equal(t, 0.0, c3.UnpaidPercentage)
+	assert.False(t, c3.IsOverBudget)
+	assert.Equal(t, BudgetStatusEqual, c3.BudgetStatus)
 }
 
 func TestDashboardPresenter_Present_TotalIncome(t *testing.T) {
