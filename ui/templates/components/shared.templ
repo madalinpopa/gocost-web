@@ -136,16 +136,13 @@ templ AmountField(id string, label string, currency string, value string, err st
 	<div>
 		<label for={ id } class="block text-sm font-medium leading-6 text-slate-900 dark:text-white">{ label }</label>
 		<div class="relative mt-2 rounded-md shadow-sm">
-			<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-				<span class="text-slate-500 dark:text-slate-400 sm:text-sm">{ currency }</span>
-			</div>
 			<input
 				type="text"
 				name={ id }
 				id={ id }
 				value={ value }
-				class={ "block w-full rounded-md border-0 bg-white dark:bg-slate-800 py-1.5 pl-8 pr-3 text-slate-900 dark:text-white ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", err != "") }
-				placeholder="0.00"
+				class={ "block w-full rounded-md border-0 bg-white dark:bg-slate-800 py-1.5 px-3 text-slate-900 dark:text-white ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", templ.KV("ring-red-500", err != "") }
+				placeholder={ fmt.Sprintf("%s 0.00", currency) }
 			/>
 		</div>
 		if err != "" {
