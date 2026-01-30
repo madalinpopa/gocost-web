@@ -6,6 +6,7 @@ import (
 
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/form"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/views"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/madalinpopa/gocost-web/ui/templates/components"
 )
@@ -89,7 +90,10 @@ func (h *IncomeHandler) ListIncomes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	component := components.IncomeList(incomes, h.app.Config.Currency)
+	currency := h.app.Session.GetCurrency(r.Context())
+	presenter := views.NewIncomeListPresenter(currency)
+	viewIncomes := presenter.Present(incomes)
+	component := components.IncomeList(viewIncomes)
 	h.app.Template.Render(w, r, component, http.StatusOK)
 }
 

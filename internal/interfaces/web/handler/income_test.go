@@ -222,6 +222,7 @@ func TestIncomeHandler_ListIncomes(t *testing.T) {
 		rec := httptest.NewRecorder()
 
 		mockSession.On("GetUserID", req.Context()).Return("user-123")
+		mockSession.On("GetCurrency", req.Context()).Return("USD")
 		mockIncomeUC.On("ListByMonth", req.Context(), "user-123", "2023-10").Return([]*usecase.IncomeResponse{}, nil)
 
 		handler.ListIncomes(rec, req)
@@ -293,6 +294,7 @@ func TestIncomeHandler_GetCreateForm(t *testing.T) {
 		mockErrorHandler.AssertExpectations(t)
 	})
 }
+
 func TestIncomeHandler_DeleteIncome(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockSession := new(MockSessionManager)
