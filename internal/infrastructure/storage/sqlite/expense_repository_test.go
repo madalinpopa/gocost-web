@@ -171,7 +171,7 @@ func TestSQLiteExpenseRepository(t *testing.T) {
 		expMar.SpentAt = time.Date(2023, 3, 5, 0, 0, 0, 0, time.UTC)
 		require.NoError(t, repo.Save(ctx, *expMar))
 
-		err := repo.ReassignCategoryFromMonth(ctx, oldCategory.ID, newCategory.ID, "2023-03")
+		err := repo.ReassignCategoryFromMonth(ctx, user.ID, oldCategory.ID, newCategory.ID, "2023-03")
 		require.NoError(t, err)
 
 		updatedFeb, err := repo.FindByID(ctx, expFeb.ID)

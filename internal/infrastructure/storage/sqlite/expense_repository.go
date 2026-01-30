@@ -180,7 +180,7 @@ func (r *SQLiteExpenseRepository) TotalsByCategoryAndMonth(ctx context.Context, 
 	return totals, nil
 }
 
-func (r *SQLiteExpenseRepository) ReassignCategoryFromMonth(ctx context.Context, fromCategoryID identifier.ID, toCategoryID identifier.ID, month string) error {
+func (r *SQLiteExpenseRepository) ReassignCategoryFromMonth(ctx context.Context, userID identifier.ID, fromCategoryID identifier.ID, toCategoryID identifier.ID, month string) error {
 	start, _, err := monthToDateRange(month)
 	if err != nil {
 		return fmt.Errorf("failed to parse month: %w", err)
@@ -189,10 +189,17 @@ func (r *SQLiteExpenseRepository) ReassignCategoryFromMonth(ctx context.Context,
 	query := `
 		UPDATE expenses
 		SET category_id = ?
-		WHERE category_id = ? AND spent_at >= ?
+		WHERE category_id = ?
+		  AND spent_at >= ?
+		  AND EXISTS (
+			SELECT 1
+			FROM categories c
+			JOIN groups g ON c.group_id = g.id
+			WHERE c.id = expenses.category_id AND g.user_id = ?
+		  )
 	`
 
-	_, err = r.db.ExecContext(ctx, query, toCategoryID.String(), fromCategoryID.String(), start)
+	_, err = r.db.ExecContext(ctx, query, toCategoryID.String(), fromCategoryID.String(), start, userID.String())
 	if err != nil {
 		return fmt.Errorf("failed to reassign expenses: %w", err)
 	}
