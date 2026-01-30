@@ -12,7 +12,7 @@ type ExpenseRepository interface {
 	FindByUserID(ctx context.Context, userID ID) ([]Expense, error)
 	FindByUserIDAndMonth(ctx context.Context, userID ID, month string) ([]Expense, error)
 	TotalsByCategoryAndMonth(ctx context.Context, userID ID, month string) ([]CategoryTotals, error)
-	ReassignCategoryFromMonth(ctx context.Context, fromCategoryID ID, toCategoryID ID, month string) error
+	ReassignCategoryFromMonth(ctx context.Context, userID ID, fromCategoryID ID, toCategoryID ID, month string) error
 	Delete(ctx context.Context, id ID) error
 	Total(ctx context.Context, userID ID, month string) (money.Money, error)
 }
