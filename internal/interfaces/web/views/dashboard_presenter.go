@@ -11,6 +11,11 @@ type DashboardPresenter struct {
 	Currency string
 }
 
+const (
+	monthLayout = "2006-01"
+	dateLayout  = "2006-01-02"
+)
+
 func budgetStatus(totalBudgeted, balance money.Money) BudgetStatus {
 	less, _ := totalBudgeted.LessThan(balance)
 	greater, _ := totalBudgeted.GreaterThan(balance)
