@@ -175,6 +175,7 @@ templ AddCategoryForm(f *form.CreateCategoryForm, currency string, currentMonth 
 		var groupIDErr string
 		typeVal = "monthly" // Default
 		startVal = currentMonth
+		budgetVal = "0"
 
 		if f != nil {
 			nameVal = f.Name
