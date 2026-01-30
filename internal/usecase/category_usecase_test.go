@@ -185,7 +185,7 @@ func TestCategoryUseCase_Update(t *testing.T) {
 		repo.On("Save", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			savedGroup = args.Get(1).(tracking.Group)
 		})
-		expenseRepo.On("ReassignCategoryFromMonth", mock.Anything, fCatID, mock.Anything, "2023-03").Return(nil)
+		expenseRepo.On("ReassignCategoryFromMonth", mock.Anything, validUserID, fCatID, mock.Anything, "2023-03").Return(nil)
 
 		usecase := newTestCategoryUseCase(repo, nil, expenseRepo)
 

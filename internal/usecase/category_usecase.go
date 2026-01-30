@@ -183,7 +183,7 @@ func (u CategoryUseCaseImpl) Update(ctx context.Context, req *UpdateCategoryRequ
 
 	if shouldFork && existingCategory.IsRecurrent {
 		expenseRepo := u.uow.ExpenseRepository()
-		if err := expenseRepo.ReassignCategoryFromMonth(ctx, existingCategory.ID, category.ID, viewMonth.Value()); err != nil {
+		if err := expenseRepo.ReassignCategoryFromMonth(ctx, group.UserID, existingCategory.ID, category.ID, viewMonth.Value()); err != nil {
 			return nil, err
 		}
 	}
