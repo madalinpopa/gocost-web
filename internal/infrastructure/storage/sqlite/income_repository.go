@@ -169,23 +169,18 @@ func (r *SQLiteIncomeRepository) TotalByUserIDAndMonth(ctx context.Context, user
 
 	query := `
 		SELECT COALESCE(SUM(i.amount), 0), u.currency
-		FROM incomes i
-		JOIN users u ON i.user_id = u.id
-		WHERE i.user_id = ? AND i.received_at >= ? AND i.received_at < ?
+		FROM users u
+		LEFT JOIN incomes i ON u.id = i.user_id AND i.received_at >= ? AND i.received_at < ?
+		WHERE u.id = ?
 		GROUP BY u.currency
 	`
 
 	var totalCents int64
 	var currencyStr string
-	err = r.db.QueryRowContext(ctx, query, userID.String(), start, end).Scan(&totalCents, &currencyStr)
+	err = r.db.QueryRowContext(ctx, query, start, end, userID.String()).Scan(&totalCents, &currencyStr)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			userQuery := `SELECT currency FROM users WHERE id = ?`
-			err = r.db.QueryRowContext(ctx, userQuery, userID.String()).Scan(&currencyStr)
-			if err != nil {
-				return money.Money{}, fmt.Errorf("failed to get user currency: %w", err)
-			}
-			return money.New(0, currencyStr)
+			return money.Money{}, fmt.Errorf("failed to get user currency: %w", err)
 		}
 		return money.Money{}, fmt.Errorf("failed to calculate income total: %w", err)
 	}
