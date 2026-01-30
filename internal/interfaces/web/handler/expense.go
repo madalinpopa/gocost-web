@@ -79,7 +79,12 @@ func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 		paidAt = &now
 	}
 
+	userID := h.app.Session.GetUserID(r.Context())
+	currency := h.app.Session.GetCurrency(r.Context())
+
 	req := &usecase.CreateExpenseRequest{
+		UserID:      userID,
+		Currency:    currency,
 		CategoryID:  expenseForm.CategoryID,
 		Amount:      expenseForm.ParsedAmount(),
 		Description: expenseForm.Description,
@@ -88,9 +93,7 @@ func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 		PaidAt:      paidAt,
 	}
 
-	userID := h.app.Session.GetUserID(r.Context())
-
-	_, err = h.expense.Create(r.Context(), userID, req)
+	_, err = h.expense.Create(r.Context(), req)
 	if err != nil {
 		errMessage, isUserFacing := translateExpenseError(err)
 		expenseForm.AddNonFieldError(errMessage)
@@ -154,8 +157,12 @@ func (h *ExpenseHandler) EditExpense(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	currency := h.app.Session.GetCurrency(r.Context())
+
 	req := &usecase.UpdateExpenseRequest{
 		ID:          expenseForm.ID,
+		UserID:      userID,
+		Currency:    currency,
 		CategoryID:  expenseForm.CategoryID,
 		Amount:      expenseForm.ParsedAmount(),
 		Description: expenseForm.Description,
@@ -164,7 +171,7 @@ func (h *ExpenseHandler) EditExpense(w http.ResponseWriter, r *http.Request) {
 		PaidAt:      paidAt,
 	}
 
-	_, err = h.expense.Update(r.Context(), userID, req)
+	_, err = h.expense.Update(r.Context(), req)
 	if err != nil {
 		errMessage, isUserFacing := translateExpenseError(err)
 		expenseForm.AddNonFieldError(errMessage)
