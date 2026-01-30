@@ -22,41 +22,44 @@ func NewDashboardUseCase(uow domain.UnitOfWork, logger *slog.Logger) DashboardUs
 	}
 }
 
-func (u DashboardUseCaseImpl) Get(ctx context.Context, userID string, month string) (*DashboardResponse, error) {
-	if userID == "" {
+func (u DashboardUseCaseImpl) Get(ctx context.Context, req *DashboardRequest) (*DashboardResponse, error) {
+	if req == nil {
+		return nil, errors.New("request cannot be nil")
+	}
+	if req.UserID == "" {
 		return nil, errors.New("user id cannot be empty")
 	}
-	if month == "" {
+	if req.Month == "" {
 		return nil, errors.New("month cannot be empty")
 	}
 
-	uID, err := identifier.ParseID(userID)
+	uID, err := identifier.ParseID(req.UserID)
 	if err != nil {
 		return nil, err
 	}
 
 	trackingRepo := u.uow.TrackingRepository()
-	groups, err := trackingRepo.FindByUserIDAndMonth(ctx, uID, month)
+	groups, err := trackingRepo.FindByUserIDAndMonth(ctx, uID, req.Month)
 	if err != nil {
 		return nil, err
 	}
 
-	incomeTotal, err := u.uow.IncomeRepository().TotalByUserIDAndMonth(ctx, uID, month)
+	incomeTotal, err := u.uow.IncomeRepository().TotalByUserIDAndMonth(ctx, uID, req.Month)
 	if err != nil {
 		return nil, err
 	}
 
-	expenseTotal, err := u.uow.ExpenseRepository().Total(ctx, uID, month)
+	expenseTotal, err := u.uow.ExpenseRepository().Total(ctx, uID, req.Month)
 	if err != nil {
 		return nil, err
 	}
 
-	categoryTotals, err := u.uow.ExpenseRepository().TotalsByCategoryAndMonth(ctx, uID, month)
+	categoryTotals, err := u.uow.ExpenseRepository().TotalsByCategoryAndMonth(ctx, uID, req.Month)
 	if err != nil {
 		return nil, err
 	}
 
-	expenses, err := u.uow.ExpenseRepository().FindByUserIDAndMonth(ctx, uID, month)
+	expenses, err := u.uow.ExpenseRepository().FindByUserIDAndMonth(ctx, uID, req.Month)
 	if err != nil {
 		return nil, err
 	}
