@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/madalinpopa/gocost-web/internal/domain"
 	"github.com/madalinpopa/gocost-web/internal/domain/expense"
@@ -56,7 +57,7 @@ func (u *SqliteUnitOfWork) TrackingRepository() tracking.GroupRepository {
 func (u *SqliteUnitOfWork) Begin(ctx context.Context) (domain.UnitOfWork, error) {
 	tx, err := u.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	return &SqliteUnitOfWork{
 		db: u.db,
