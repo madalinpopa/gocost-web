@@ -54,6 +54,7 @@ type CategoryView struct {
 	UnpaidSpent      money.Money
 	PaidPercentage   float64
 	UnpaidPercentage float64
+	BudgetStatus     BudgetStatus
 	IsNearBudget     bool
 	IsOverBudget     bool
 	OverBudgetAmount money.Money
