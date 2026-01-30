@@ -28,6 +28,19 @@ func budgetStatus(totalBudgeted, balance money.Money) BudgetStatus {
 	}
 }
 
+func categoryBudgetStatus(budget, spent money.Money) BudgetStatus {
+	less, _ := spent.LessThan(budget)
+	greater, _ := spent.GreaterThan(budget)
+	switch {
+	case less:
+		return BudgetStatusUnder
+	case greater:
+		return BudgetStatusOver
+	default:
+		return BudgetStatusEqual
+	}
+}
+
 func NewDashboardPresenter(currency string) (*DashboardPresenter, error) {
 	zero, err := money.New(0, currency)
 	if err != nil {
@@ -102,6 +115,7 @@ func (p *DashboardPresenter) Present(data *usecase.DashboardResponse) (Dashboard
 
 			isOverBudget, _ := spent.GreaterThan(catBudget)
 			isNearBudget := !isOverBudget && usagePercentage > 85
+			budgetStatus := categoryBudgetStatus(catBudget, spent)
 
 			overBudgetAmount := p.zero
 			remainingBudget := p.zero
@@ -137,6 +151,7 @@ func (p *DashboardPresenter) Present(data *usecase.DashboardResponse) (Dashboard
 				UnpaidSpent:      unpaidSpent,
 				PaidPercentage:   paidPercentage,
 				UnpaidPercentage: unpaidPercentage,
+				BudgetStatus:     budgetStatus,
 				IsNearBudget:     isNearBudget,
 				IsOverBudget:     isOverBudget,
 				OverBudgetAmount: overBudgetAmount,
