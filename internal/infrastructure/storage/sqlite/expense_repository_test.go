@@ -156,6 +156,33 @@ func TestSQLiteExpenseRepository(t *testing.T) {
 		assert.Equal(t, exp2.ID, expensesNov[0].ID)
 	})
 
+	t.Run("ReassignCategoryFromMonth_Success", func(t *testing.T) {
+		user := createRandomUser(t)
+		require.NoError(t, userRepo.Save(ctx, *user))
+		group := createRandomGroup(t, user.ID)
+		oldCategory := createRandomCategory(t, group.ID)
+		newCategory := createRandomCategory(t, group.ID)
+
+		expFeb := createRandomExpense(t, oldCategory.ID)
+		expFeb.SpentAt = time.Date(2023, 2, 10, 0, 0, 0, 0, time.UTC)
+		require.NoError(t, repo.Save(ctx, *expFeb))
+
+		expMar := createRandomExpense(t, oldCategory.ID)
+		expMar.SpentAt = time.Date(2023, 3, 5, 0, 0, 0, 0, time.UTC)
+		require.NoError(t, repo.Save(ctx, *expMar))
+
+		err := repo.ReassignCategoryFromMonth(ctx, oldCategory.ID, newCategory.ID, "2023-03")
+		require.NoError(t, err)
+
+		updatedFeb, err := repo.FindByID(ctx, expFeb.ID)
+		require.NoError(t, err)
+		assert.Equal(t, oldCategory.ID, updatedFeb.CategoryID)
+
+		updatedMar, err := repo.FindByID(ctx, expMar.ID)
+		require.NoError(t, err)
+		assert.Equal(t, newCategory.ID, updatedMar.CategoryID)
+	})
+
 	t.Run("Total_Success", func(t *testing.T) {
 		user := createRandomUser(t)
 		require.NoError(t, userRepo.Save(ctx, *user))
@@ -179,22 +206,22 @@ func TestSQLiteExpenseRepository(t *testing.T) {
 
 		total, err := repo.Total(ctx, user.ID, "2023-10")
 		assert.NoError(t, err)
-		
+
 		expectedTotal, _ := exp1.Amount.Add(exp2.Amount)
 		isEqual, err := expectedTotal.Equals(total)
-	assert.NoError(t, err)
-	assert.True(t, isEqual)
+		assert.NoError(t, err)
+		assert.True(t, isEqual)
 
 		totalNov, err := repo.Total(ctx, user.ID, "2023-11")
 		assert.NoError(t, err)
 		isEqual, err = exp3.Amount.Equals(totalNov)
-	assert.NoError(t, err)
-	assert.True(t, isEqual)
+		assert.NoError(t, err)
+		assert.True(t, isEqual)
 
 		totalDec, err := repo.Total(ctx, user.ID, "2023-12")
 		assert.NoError(t, err)
 		isZero, err := totalDec.IsZero()
-	assert.NoError(t, err)
-	assert.True(t, isZero)
+		assert.NoError(t, err)
+		assert.True(t, isZero)
 	})
 }
