@@ -132,12 +132,15 @@ func TestIncomeUseCase_Create(t *testing.T) {
 
 		require.NoError(t, err)
 		require.NotNil(t, resp)
-		assert.Equal(t, validReq.Amount, resp.Amount)
+		expectedAmount, err := money.NewFromFloat(validReq.Amount, validReq.Currency)
+		require.NoError(t, err)
+		assert.Equal(t, expectedAmount.Cents(), resp.AmountCents)
+		assert.Equal(t, validReq.Currency, resp.Currency)
 		assert.Equal(t, validReq.Source, resp.Source)
 		assert.Equal(t, validReq.ReceivedAt, resp.ReceivedAt)
 		assert.NotEmpty(t, resp.ID)
 
-		assert.Equal(t, validReq.Amount, savedIncome.Amount.Amount())
+		assert.Equal(t, expectedAmount.Cents(), savedIncome.Amount.Cents())
 		assert.Equal(t, validReq.Source, savedIncome.Source.Value())
 		assert.Equal(t, validReq.ReceivedAt, savedIncome.ReceivedAt)
 		assert.Equal(t, validUserID, savedIncome.UserID)
@@ -213,11 +216,14 @@ func TestIncomeUseCase_Update(t *testing.T) {
 
 		require.NoError(t, err)
 		require.NotNil(t, resp)
-		assert.Equal(t, validReq.Amount, resp.Amount)
+		expectedAmount, err := money.NewFromFloat(validReq.Amount, validReq.Currency)
+		require.NoError(t, err)
+		assert.Equal(t, expectedAmount.Cents(), resp.AmountCents)
+		assert.Equal(t, validReq.Currency, resp.Currency)
 		assert.Equal(t, validReq.Source, resp.Source)
 		assert.Equal(t, existingIncome.ID.String(), resp.ID)
 
-		assert.Equal(t, validReq.Amount, savedIncome.Amount.Amount())
+		assert.Equal(t, expectedAmount.Cents(), savedIncome.Amount.Cents())
 		assert.Equal(t, validReq.Source, savedIncome.Source.Value())
 	})
 }
@@ -282,7 +288,8 @@ func TestIncomeUseCase_Get(t *testing.T) {
 		resp, err := usecase.Get(context.Background(), validUserID.String(), existingIncome.ID.String())
 		require.NoError(t, err)
 		assert.Equal(t, existingIncome.ID.String(), resp.ID)
-		assert.Equal(t, existingIncome.Amount.Amount(), resp.Amount)
+		assert.Equal(t, existingIncome.Amount.Cents(), resp.AmountCents)
+		assert.Equal(t, existingIncome.Amount.Currency(), resp.Currency)
 	})
 
 	t.Run("returns unauthorized for different user", func(t *testing.T) {

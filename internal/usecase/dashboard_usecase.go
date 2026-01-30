@@ -146,7 +146,8 @@ func mapExpenseToResponse(exp *expense.Expense) *ExpenseResponse {
 	return &ExpenseResponse{
 		ID:          exp.ID.String(),
 		CategoryID:  exp.CategoryID.String(),
-		Amount:      exp.Amount.Amount(),
+		AmountCents: exp.Amount.Cents(),
+		Currency:    exp.Amount.Currency(),
 		Description: exp.Description.Value(),
 		SpentAt:     exp.SpentAt,
 		IsPaid:      exp.Payment.IsPaid(),
