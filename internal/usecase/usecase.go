@@ -15,12 +15,12 @@ type UseCase struct {
 	ExpenseUseCase  ExpenseUseCase
 }
 
-func New(uow *sqlite.SqliteUnitOfWork, logger *slog.Logger) *UseCase {
+func New(uow *sqlite.SqliteUnitOfWork, logger *slog.Logger, defaultCurrency string) *UseCase {
 	// Infra services
 	passwordHasher := security.NewPasswordHasher()
 
 	// Use cases
-	authUseCase := NewAuthUseCase(uow, logger, passwordHasher)
+	authUseCase := NewAuthUseCase(uow, logger, passwordHasher, defaultCurrency)
 	incomeUseCase := NewIncomeUseCase(uow, logger)
 	groupUseCase := NewGroupUseCase(uow, logger)
 	categoryUseCase := NewCategoryUseCase(uow, logger)
