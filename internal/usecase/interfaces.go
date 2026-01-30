@@ -44,5 +44,5 @@ type ExpenseUseCase interface {
 }
 
 type DashboardUseCase interface {
-	Get(ctx context.Context, userID string, month string) (*DashboardResponse, error)
+	Get(ctx context.Context, req *DashboardRequest) (*DashboardResponse, error)
 }
