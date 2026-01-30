@@ -49,15 +49,18 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 		rec := httptest.NewRecorder()
 
 		mockSession.On("GetUserID", req.Context()).Return("user-123")
+		mockSession.On("GetCurrency", req.Context()).Return("USD")
 
 		expectedReq := &usecase.CreateIncomeRequest{
+			UserID:     "user-123",
+			Currency:   "USD",
 			Amount:     100.50,
 			Source:     "Salary",
 			ReceivedAt: time.Date(2023, 10, 1, 0, 0, 0, 0, time.UTC),
 		}
 
-		mockIncomeUC.On("Create", req.Context(), "user-123", mock.MatchedBy(func(r *usecase.CreateIncomeRequest) bool {
-			return r.Amount == expectedReq.Amount && r.Source == expectedReq.Source && r.ReceivedAt.Equal(expectedReq.ReceivedAt)
+		mockIncomeUC.On("Create", req.Context(), mock.MatchedBy(func(r *usecase.CreateIncomeRequest) bool {
+			return r.Amount == expectedReq.Amount && r.Source == expectedReq.Source && r.ReceivedAt.Equal(expectedReq.ReceivedAt) && r.UserID == "user-123" && r.Currency == "USD"
 		})).Return(&usecase.IncomeResponse{ID: "inc-1"}, nil)
 
 		// Act
@@ -181,9 +184,10 @@ func TestIncomeHandler_CreateIncome(t *testing.T) {
 		rec := httptest.NewRecorder()
 
 		mockSession.On("GetUserID", req.Context()).Return("user-123")
+		mockSession.On("GetCurrency", req.Context()).Return("USD")
 
 		expectedErr := errors.New("database error")
-		mockIncomeUC.On("Create", req.Context(), "user-123", mock.Anything).Return(nil, expectedErr)
+		mockIncomeUC.On("Create", req.Context(), mock.Anything).Return(nil, expectedErr)
 
 		mockErrorHandler.On("LogServerError", req, expectedErr).Return()
 
