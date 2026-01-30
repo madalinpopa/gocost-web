@@ -49,12 +49,13 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		mockSession.On("GetUserID", req.Context()).Return("user-123")
 
 		expectedReq := &usecase.CreateGroupRequest{
+			UserID:      "user-123",
 			Name:        "Test Group",
 			Description: "Test Description",
 		}
 
-		mockGroupUC.On("Create", req.Context(), "user-123", mock.MatchedBy(func(r *usecase.CreateGroupRequest) bool {
-			return r.Name == expectedReq.Name && r.Description == expectedReq.Description
+		mockGroupUC.On("Create", req.Context(), mock.MatchedBy(func(r *usecase.CreateGroupRequest) bool {
+			return r.Name == expectedReq.Name && r.Description == expectedReq.Description && r.UserID == "user-123"
 		})).Return(&usecase.GroupResponse{ID: "group-1"}, nil)
 
 		// Act
@@ -134,7 +135,7 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		mockSession.On("GetUserID", req.Context()).Return("user-123")
 
 		expectedErr := tracking.ErrNameTooLong
-		mockGroupUC.On("Create", req.Context(), "user-123", mock.Anything).Return(nil, expectedErr)
+		mockGroupUC.On("Create", req.Context(), mock.Anything).Return(nil, expectedErr)
 
 		// Act
 		handler.CreateGroup(rec, req)
@@ -176,7 +177,7 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		mockSession.On("GetUserID", req.Context()).Return("user-123")
 
 		expectedErr := errors.New("database failure")
-		mockGroupUC.On("Create", req.Context(), "user-123", mock.Anything).Return(nil, expectedErr)
+		mockGroupUC.On("Create", req.Context(), mock.Anything).Return(nil, expectedErr)
 
 		// Act
 		handler.CreateGroup(rec, req)
