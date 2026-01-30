@@ -112,17 +112,20 @@ func TestExpenseUseCase_Create(t *testing.T) {
 		expenseRepo.On("Save", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			savedExpense = args.Get(1).(expense.Expense)
 		})
-		
+
 		usecase := newTestExpenseUseCase(groupRepo, expenseRepo, nil)
 
 		resp, err := usecase.Create(context.Background(), validReq)
 		require.NoError(t, err)
 		assert.NotNil(t, resp)
-		assert.Equal(t, validReq.Amount, resp.Amount)
+		expectedAmount, err := money.NewFromFloat(validReq.Amount, validReq.Currency)
+		require.NoError(t, err)
+		assert.Equal(t, expectedAmount.Cents(), resp.AmountCents)
+		assert.Equal(t, validReq.Currency, resp.Currency)
 		assert.Equal(t, validReq.Description, resp.Description)
 		assert.Equal(t, validReq.CategoryID, resp.CategoryID)
 
-		assert.Equal(t, validReq.Amount, savedExpense.Amount.Amount())
+		assert.Equal(t, expectedAmount.Cents(), savedExpense.Amount.Cents())
 	})
 }
 
@@ -171,7 +174,7 @@ func TestExpenseUseCase_Update(t *testing.T) {
 
 		groupRepo := &MockGroupRepository{}
 		groupRepo.On("FindGroupByCategoryID", mock.Anything, mock.Anything).Return(*otherGroup, nil)
-		
+
 		usecase := newTestExpenseUseCase(groupRepo, expenseRepo, nil)
 
 		resp, err := usecase.Update(context.Background(), validReq)
@@ -189,16 +192,19 @@ func TestExpenseUseCase_Update(t *testing.T) {
 
 		groupRepo := &MockGroupRepository{}
 		groupRepo.On("FindGroupByCategoryID", mock.Anything, mock.Anything).Return(*group, nil)
-		
+
 		usecase := newTestExpenseUseCase(groupRepo, expenseRepo, nil)
 
 		resp, err := usecase.Update(context.Background(), validReq)
 		require.NoError(t, err)
-		assert.Equal(t, validReq.Amount, resp.Amount)
+		expectedAmount, err := money.NewFromFloat(validReq.Amount, validReq.Currency)
+		require.NoError(t, err)
+		assert.Equal(t, expectedAmount.Cents(), resp.AmountCents)
+		assert.Equal(t, validReq.Currency, resp.Currency)
 		assert.Equal(t, validReq.Description, resp.Description)
 		assert.True(t, resp.IsPaid)
 
-		assert.Equal(t, validReq.Amount, savedExpense.Amount.Amount())
+		assert.Equal(t, expectedAmount.Cents(), savedExpense.Amount.Cents())
 		assert.Equal(t, validReq.Description, savedExpense.Description.Value())
 	})
 
@@ -215,7 +221,7 @@ func TestExpenseUseCase_Update(t *testing.T) {
 		groupRepo.On("FindGroupByCategoryID", mock.Anything, catID).Return(*group, nil)
 		// Second call with otherCatID
 		groupRepo.On("FindGroupByCategoryID", mock.Anything, otherCatID).Return(*otherGroup, nil)
-		
+
 		usecase := newTestExpenseUseCase(groupRepo, expenseRepo, nil)
 
 		req := *validReq
