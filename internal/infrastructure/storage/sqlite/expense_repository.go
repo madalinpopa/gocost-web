@@ -21,7 +21,7 @@ func NewSQLiteExpenseRepository(db DBExecutor) *SQLiteExpenseRepository {
 
 func (r *SQLiteExpenseRepository) Save(ctx context.Context, e expense.Expense) error {
 	query := `
-		INSERT INTO expenses (id, category_id, amount, description, spent_at, is_paid, paid_at) 
+		INSERT INTO expenses (id, category_id, amount, description, spent_at, is_paid, paid_at)
 		VALUES (?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(id) DO UPDATE SET
 			category_id = excluded.category_id,
@@ -57,7 +57,7 @@ func (r *SQLiteExpenseRepository) Save(ctx context.Context, e expense.Expense) e
 func (r *SQLiteExpenseRepository) FindByID(ctx context.Context, id identifier.ID) (expense.Expense, error) {
 	// Updated query to join up to users to get currency
 	query := `
-		SELECT e.id, e.category_id, e.amount, e.description, e.spent_at, e.is_paid, e.paid_at, u.currency 
+		SELECT e.id, e.category_id, e.amount, e.description, e.spent_at, e.is_paid, e.paid_at, u.currency
 		FROM expenses e
 		JOIN categories c ON e.category_id = c.id
 		JOIN groups g ON c.group_id = g.id
@@ -84,12 +84,12 @@ func (r *SQLiteExpenseRepository) FindByID(ctx context.Context, id identifier.ID
 
 func (r *SQLiteExpenseRepository) FindByUserID(ctx context.Context, userID identifier.ID) ([]expense.Expense, error) {
 	query := `
-		SELECT e.id, e.category_id, e.amount, e.description, e.spent_at, e.is_paid, e.paid_at, u.currency 
-		FROM expenses e 
-		JOIN categories c ON e.category_id = c.id 
-		JOIN groups g ON c.group_id = g.id 
+		SELECT e.id, e.category_id, e.amount, e.description, e.spent_at, e.is_paid, e.paid_at, u.currency
+		FROM expenses e
+		JOIN categories c ON e.category_id = c.id
+		JOIN groups g ON c.group_id = g.id
 		JOIN users u ON g.user_id = u.id
-		WHERE g.user_id = ? 
+		WHERE g.user_id = ?
 		ORDER BY e.spent_at DESC
 	`
 
@@ -103,16 +103,80 @@ func (r *SQLiteExpenseRepository) FindByUserIDAndMonth(ctx context.Context, user
 	}
 
 	query := `
-		SELECT e.id, e.category_id, e.amount, e.description, e.spent_at, e.is_paid, e.paid_at, u.currency 
-		FROM expenses e 
-		JOIN categories c ON e.category_id = c.id 
-		JOIN groups g ON c.group_id = g.id 
+		SELECT e.id, e.category_id, e.amount, e.description, e.spent_at, e.is_paid, e.paid_at, u.currency
+		FROM expenses e
+		JOIN categories c ON e.category_id = c.id
+		JOIN groups g ON c.group_id = g.id
 		JOIN users u ON g.user_id = u.id
 		WHERE g.user_id = ? AND e.spent_at >= ? AND e.spent_at < ?
 		ORDER BY e.spent_at DESC
 	`
 
 	return r.fetchExpenses(ctx, query, userID.String(), start, end)
+}
+
+func (r *SQLiteExpenseRepository) TotalsByCategoryAndMonth(ctx context.Context, userID identifier.ID, month string) ([]expense.CategoryTotals, error) {
+	start, end, err := monthToDateRange(month)
+	if err != nil {
+		return nil, err
+	}
+
+	query := `
+		SELECT e.category_id,
+			COALESCE(SUM(e.amount), 0) AS total_amount,
+			COALESCE(SUM(CASE WHEN e.is_paid = 1 THEN e.amount ELSE 0 END), 0) AS paid_amount,
+			u.currency
+		FROM expenses e
+		JOIN categories c ON e.category_id = c.id
+		JOIN groups g ON c.group_id = g.id
+		JOIN users u ON g.user_id = u.id
+		WHERE g.user_id = ? AND e.spent_at >= ? AND e.spent_at < ?
+		GROUP BY e.category_id, u.currency
+	`
+
+	rows, err := r.db.QueryContext(ctx, query, userID.String(), start, end)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var totals []expense.CategoryTotals
+	for rows.Next() {
+		var categoryIDStr, currencyStr string
+		var totalCents int64
+		var paidCents int64
+
+		if err := rows.Scan(&categoryIDStr, &totalCents, &paidCents, &currencyStr); err != nil {
+			return nil, err
+		}
+
+		categoryID, err := identifier.ParseID(categoryIDStr)
+		if err != nil {
+			return nil, err
+		}
+
+		totalAmount, err := money.New(totalCents, currencyStr)
+		if err != nil {
+			return nil, err
+		}
+
+		paidAmount, err := money.New(paidCents, currencyStr)
+		if err != nil {
+			return nil, err
+		}
+
+		totals = append(totals, expense.CategoryTotals{
+			CategoryID: categoryID,
+			Total:      totalAmount,
+			PaidTotal:  paidAmount,
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return totals, nil
 }
 
 func (r *SQLiteExpenseRepository) fetchExpenses(ctx context.Context, query string, args ...any) ([]expense.Expense, error) {
@@ -235,13 +299,4 @@ func (r *SQLiteExpenseRepository) mapToExpense(idStr, categoryIDStr string, amou
 	}
 
 	return *exp, nil
-}
-
-func monthToDateRange(month string) (start, end time.Time, err error) {
-	start, err = time.Parse("2006-01", month)
-	if err != nil {
-		return
-	}
-	end = start.AddDate(0, 1, 0)
-	return
 }
