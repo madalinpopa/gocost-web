@@ -115,6 +115,83 @@ func (r *SQLiteIncomeRepository) FindByUserID(ctx context.Context, userID identi
 	return incomes, nil
 }
 
+func (r *SQLiteIncomeRepository) FindByUserIDAndMonth(ctx context.Context, userID identifier.ID, month string) ([]income.Income, error) {
+	start, end, err := monthToDateRange(month)
+	if err != nil {
+		return nil, err
+	}
+
+	query := `
+		SELECT i.id, i.user_id, i.amount, i.source, i.received_at, u.currency 
+		FROM incomes i
+		JOIN users u ON i.user_id = u.id
+		WHERE i.user_id = ? AND i.received_at >= ? AND i.received_at < ?
+		ORDER BY i.received_at DESC
+	`
+
+	rows, err := r.db.QueryContext(ctx, query, userID.String(), start, end)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var incomes []income.Income
+	for rows.Next() {
+		var idStr, userIDStr, currencyStr string
+		var amountCents int64
+		var source sql.NullString
+		var receivedAt time.Time
+
+		if err := rows.Scan(&idStr, &userIDStr, &amountCents, &source, &receivedAt, &currencyStr); err != nil {
+			return nil, err
+		}
+
+		inc, err := r.mapToIncome(idStr, userIDStr, amountCents, currencyStr, source, receivedAt)
+		if err != nil {
+			return nil, err
+		}
+		incomes = append(incomes, inc)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return incomes, nil
+}
+
+func (r *SQLiteIncomeRepository) TotalByUserIDAndMonth(ctx context.Context, userID identifier.ID, month string) (money.Money, error) {
+	start, end, err := monthToDateRange(month)
+	if err != nil {
+		return money.Money{}, err
+	}
+
+	query := `
+		SELECT COALESCE(SUM(i.amount), 0), u.currency
+		FROM incomes i
+		JOIN users u ON i.user_id = u.id
+		WHERE i.user_id = ? AND i.received_at >= ? AND i.received_at < ?
+		GROUP BY u.currency
+	`
+
+	var totalCents int64
+	var currencyStr string
+	err = r.db.QueryRowContext(ctx, query, userID.String(), start, end).Scan(&totalCents, &currencyStr)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			userQuery := `SELECT currency FROM users WHERE id = ?`
+			err = r.db.QueryRowContext(ctx, userQuery, userID.String()).Scan(&currencyStr)
+			if err != nil {
+				return money.Money{}, err
+			}
+			return money.New(0, currencyStr)
+		}
+		return money.Money{}, err
+	}
+
+	return money.New(totalCents, currencyStr)
+}
+
 func (r *SQLiteIncomeRepository) Delete(ctx context.Context, id identifier.ID) error {
 	query := `DELETE FROM incomes WHERE id = ?`
 	result, err := r.db.ExecContext(ctx, query, id.String())
