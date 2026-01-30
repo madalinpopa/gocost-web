@@ -171,7 +171,12 @@ func (p *DashboardPresenter) mapExpenseViews(expenses []*usecase.ExpenseResponse
 			continue
 		}
 
-		expAmount, err := p.moneyFromFloat(exp.Amount)
+		currency := exp.Currency
+		if currency == "" {
+			currency = p.Currency
+		}
+
+		expAmount, err := money.New(exp.AmountCents, currency)
 		if err != nil {
 			return nil, err
 		}
@@ -188,7 +193,7 @@ func (p *DashboardPresenter) mapExpenseViews(expenses []*usecase.ExpenseResponse
 		views = append(views, ExpenseView{
 			ID:          exp.ID,
 			Amount:      expAmount,
-			Currency:    p.Currency,
+			Currency:    currency,
 			Description: exp.Description,
 			Status:      status,
 			SpentAt:     exp.SpentAt.Format(dateLayout),
@@ -246,8 +251,4 @@ func budgetSplitPercentages(budget, paidSpent, unpaidSpent money.Money) (float64
 
 func (p *DashboardPresenter) moneyFromCents(cents int64) (money.Money, error) {
 	return money.New(cents, p.Currency)
-}
-
-func (p *DashboardPresenter) moneyFromFloat(amount float64) (money.Money, error) {
-	return money.NewFromFloat(amount, p.Currency)
 }
