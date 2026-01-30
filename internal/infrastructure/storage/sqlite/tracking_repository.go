@@ -38,7 +38,7 @@ func (r *SQLiteTrackingRepository) Save(ctx context.Context, group tracking.Grou
 		group.Order.Value(),
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to save group: %w", err)
 	}
 
 	categoryQuery := `
@@ -72,7 +72,7 @@ func (r *SQLiteTrackingRepository) Save(ctx context.Context, group tracking.Grou
 			category.Budget.Cents(),
 		)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to save category: %w", err)
 		}
 	}
 
@@ -89,7 +89,7 @@ func (r *SQLiteTrackingRepository) FindByID(ctx context.Context, id tracking.ID)
 		if errors.Is(err, sql.ErrNoRows) {
 			return tracking.Group{}, tracking.ErrGroupNotFound
 		}
-		return tracking.Group{}, err
+		return tracking.Group{}, fmt.Errorf("failed to find group by id: %w", err)
 	}
 
 	group, err := r.mapToGroup(idStr, userIDStr, nameStr, descriptionStr, orderInt)
@@ -155,7 +155,7 @@ func (r *SQLiteTrackingRepository) FindByUserID(ctx context.Context, userID trac
 	categoryQuery := buildCategoriesByGroupIDsQuery(len(groupIDs))
 	categoryRows, err := r.db.QueryContext(ctx, categoryQuery, groupIDs...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to query categories: %w", err)
 	}
 	defer categoryRows.Close()
 
@@ -326,11 +326,11 @@ func (r *SQLiteTrackingRepository) Delete(ctx context.Context, id tracking.ID) e
 	query := `DELETE FROM groups WHERE id = ?`
 	result, err := r.db.ExecContext(ctx, query, id.String())
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to delete group: %w", err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get rows affected: %w", err)
 	}
 	if rowsAffected == 0 {
 		return tracking.ErrGroupNotFound
@@ -342,11 +342,11 @@ func (r *SQLiteTrackingRepository) DeleteCategory(ctx context.Context, id tracki
 	query := `DELETE FROM categories WHERE id = ?`
 	result, err := r.db.ExecContext(ctx, query, id.String())
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to delete category: %w", err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get rows affected: %w", err)
 	}
 	if rowsAffected == 0 {
 		return tracking.ErrCategoryNotFound
@@ -365,7 +365,7 @@ func (r *SQLiteTrackingRepository) findCategoriesByGroupID(ctx context.Context, 
 	`
 	rows, err := r.db.QueryContext(ctx, query, groupID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to query categories by group: %w", err)
 	}
 	defer rows.Close()
 
@@ -379,18 +379,18 @@ func (r *SQLiteTrackingRepository) findCategoriesByGroupID(ctx context.Context, 
 		)
 
 		if err := rows.Scan(&idStr, &groupIDStr, &nameStr, &descriptionStr, &isRecurrentInt, &startMonthStr, &endMonth, &budgetCents, &currencyStr); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan category row: %w", err)
 		}
 
 		category, err := r.mapToCategory(idStr, groupIDStr, nameStr, descriptionStr, isRecurrentInt == 1, startMonthStr, endMonth, budgetCents, currencyStr)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to map category: %w", err)
 		}
 		categories = append(categories, category)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error iterating categories: %w", err)
 	}
 
 	return categories, nil
