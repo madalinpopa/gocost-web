@@ -123,10 +123,10 @@ func TestMoney_Operations(t *testing.T) {
 
 	t.Run("Display formatting", func(t *testing.T) {
 		m, _ := money.New(12345, "USD")
-		assert.Equal(t, "$123.45", m.Display())
+		assert.Equal(t, "$ 123.45", m.Display())
 
 		m2, _ := money.New(12345, "EUR")
-		assert.Contains(t, m2.Display(), "123.45")
+		assert.Equal(t, "€ 123.45", m2.Display())
 	})
 
 	t.Run("Uninitialized Money Display", func(t *testing.T) {

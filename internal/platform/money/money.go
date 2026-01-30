@@ -56,7 +56,31 @@ func (m Money) Display() string {
 	if m.m == nil {
 		return "N/A"
 	}
-	return m.m.Display()
+
+	currency := m.m.Currency()
+	if currency == nil {
+		return m.m.Display()
+	}
+
+	amount := m.m.Amount()
+	sign := ""
+	if amount < 0 {
+		sign = "-"
+		amount = -amount
+	}
+
+	formatter := money.NewFormatter(currency.Fraction, currency.Decimal, currency.Thousand, "", "1")
+	formattedAmount := formatter.Format(amount)
+
+	grapheme := currency.Grapheme
+	if grapheme == "" {
+		grapheme = currency.Code
+	}
+	if grapheme == "" {
+		return sign + formattedAmount
+	}
+
+	return sign + grapheme + " " + formattedAmount
 }
 
 func (m Money) String() string {
