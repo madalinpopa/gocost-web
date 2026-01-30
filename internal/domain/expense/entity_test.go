@@ -14,7 +14,7 @@ func TestNewExpense(t *testing.T) {
 		// Arrange
 		id, _ := identifier.NewID()
 		categoryID, _ := identifier.NewID()
-		amount, _ := money.New(5000)
+		amount, _ := money.New(5000, "USD")
 		description, _ := NewExpenseDescriptionVO("Lunch")
 		spentAt := time.Now()
 		payment := NewUnpaidStatus()
@@ -37,7 +37,7 @@ func TestNewExpense(t *testing.T) {
 		// Arrange
 		id, _ := identifier.NewID()
 		categoryID, _ := identifier.NewID()
-		amount, _ := money.New(0)
+		amount, _ := money.New(0, "USD")
 		description, _ := NewExpenseDescriptionVO("Lunch")
 		spentAt := time.Now()
 		payment := NewUnpaidStatus()
