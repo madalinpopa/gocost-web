@@ -14,12 +14,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func newTestCategoryUseCase(repo *MockGroupRepository) CategoryUseCaseImpl {
-	if repo == nil {
-		repo = &MockGroupRepository{}
+func newTestCategoryUseCase(groupRepo *MockGroupRepository, userRepo *MockUserRepository) CategoryUseCaseImpl {
+	if groupRepo == nil {
+		groupRepo = &MockGroupRepository{}
+	}
+	if userRepo == nil {
+		userRepo = &MockUserRepository{}
 	}
 	return NewCategoryUseCase(
-		&MockUnitOfWork{TrackingRepo: repo},
+		&MockUnitOfWork{TrackingRepo: groupRepo, UserRepo: userRepo},
 		slog.New(slog.NewTextHandler(io.Discard, nil)),
 	)
 }
@@ -28,22 +31,28 @@ func TestCategoryUseCase_Create(t *testing.T) {
 	validUserID, _ := identifier.NewID()
 	group := newTestGroup(t, validUserID)
 	validReq := &CreateCategoryRequest{
+		UserID:      validUserID.String(),
+		GroupID:     group.ID.String(),
+		Currency:    "USD",
 		Name:        "Test Category",
 		Description: "Test Description",
 		StartMonth:  "2023-01",
 		IsRecurrent: false,
+		Budget:      100.0,
 	}
 
 	t.Run("returns error for nil request", func(t *testing.T) {
-		usecase := newTestCategoryUseCase(nil)
-		resp, err := usecase.Create(context.Background(), validUserID.String(), group.ID.String(), nil)
+		usecase := newTestCategoryUseCase(nil, nil)
+		resp, err := usecase.Create(context.Background(), nil)
 		assert.Nil(t, resp)
 		assert.EqualError(t, err, "request cannot be nil")
 	})
 
 	t.Run("returns error for invalid group ID", func(t *testing.T) {
-		usecase := newTestCategoryUseCase(nil)
-		resp, err := usecase.Create(context.Background(), validUserID.String(), "invalid-id", validReq)
+		usecase := newTestCategoryUseCase(nil, nil)
+		req := *validReq
+		req.GroupID = "invalid-id"
+		resp, err := usecase.Create(context.Background(), &req)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, identifier.ErrInvalidID)
 	})
@@ -52,8 +61,8 @@ func TestCategoryUseCase_Create(t *testing.T) {
 		repo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(tracking.Group{}, tracking.ErrGroupNotFound)
 
-		usecase := newTestCategoryUseCase(repo)
-		resp, err := usecase.Create(context.Background(), validUserID.String(), group.ID.String(), validReq)
+		usecase := newTestCategoryUseCase(repo, nil)
+		resp, err := usecase.Create(context.Background(), validReq)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, tracking.ErrGroupNotFound)
 	})
@@ -62,10 +71,12 @@ func TestCategoryUseCase_Create(t *testing.T) {
 		repo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
 
-		usecase := newTestCategoryUseCase(repo)
+		usecase := newTestCategoryUseCase(repo, nil)
 		otherUserID, _ := identifier.NewID()
+		req := *validReq
+		req.UserID = otherUserID.String()
 
-		resp, err := usecase.Create(context.Background(), otherUserID.String(), group.ID.String(), validReq)
+		resp, err := usecase.Create(context.Background(), &req)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, tracking.ErrGroupNotFound)
 	})
@@ -77,10 +88,10 @@ func TestCategoryUseCase_Create(t *testing.T) {
 		repo.On("Save", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			savedGroup = args.Get(1).(tracking.Group)
 		})
+		
+		usecase := newTestCategoryUseCase(repo, nil)
 
-		usecase := newTestCategoryUseCase(repo)
-
-		resp, err := usecase.Create(context.Background(), validUserID.String(), group.ID.String(), validReq)
+		resp, err := usecase.Create(context.Background(), validReq)
 
 		require.NoError(t, err)
 		require.NotNil(t, resp)
@@ -104,18 +115,22 @@ func TestCategoryUseCase_Update(t *testing.T) {
 
 	validReq := &UpdateCategoryRequest{
 		ID:          catID.String(),
+		UserID:      validUserID.String(),
+		GroupID:     group.ID.String(),
+		Currency:    "USD",
 		Name:        "New Name",
 		Description: "New Description",
 		StartMonth:  "2023-02",
 		IsRecurrent: false,
+		Budget:      100.0,
 	}
 
 	t.Run("returns error when group not found", func(t *testing.T) {
 		repo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(tracking.Group{}, tracking.ErrGroupNotFound)
 
-		usecase := newTestCategoryUseCase(repo)
-		resp, err := usecase.Update(context.Background(), validUserID.String(), group.ID.String(), validReq)
+		usecase := newTestCategoryUseCase(repo, nil)
+		resp, err := usecase.Update(context.Background(), validReq)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, tracking.ErrGroupNotFound)
 	})
@@ -124,10 +139,12 @@ func TestCategoryUseCase_Update(t *testing.T) {
 		repo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
 
-		usecase := newTestCategoryUseCase(repo)
+		usecase := newTestCategoryUseCase(repo, nil)
 		otherUserID, _ := identifier.NewID()
+		req := *validReq
+		req.UserID = otherUserID.String()
 
-		resp, err := usecase.Update(context.Background(), otherUserID.String(), group.ID.String(), validReq)
+		resp, err := usecase.Update(context.Background(), &req)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, tracking.ErrGroupNotFound)
 	})
@@ -136,13 +153,13 @@ func TestCategoryUseCase_Update(t *testing.T) {
 		repo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
 
-		usecase := newTestCategoryUseCase(repo)
+		usecase := newTestCategoryUseCase(repo, nil)
 		req := *validReq
 
 		newID, _ := identifier.NewID()
 		req.ID = newID.String() // Different ID
 
-		resp, err := usecase.Update(context.Background(), validUserID.String(), group.ID.String(), &req)
+		resp, err := usecase.Update(context.Background(), &req)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, tracking.ErrCategoryNotFound)
 	})
@@ -157,18 +174,21 @@ func TestCategoryUseCase_Update(t *testing.T) {
 		fName, _ := tracking.NewNameVO("Recurrent Cat")
 		fDesc, _ := tracking.NewDescriptionVO("Desc")
 		fStart, _ := tracking.ParseMonth("2023-01")
-		fBudget, _ := money.NewFromFloat(100.0)
+		fBudget, _ := money.NewFromFloat(100.0, "USD")
 		_, _ = forkGroup.CreateCategory(fCatID, fName, fDesc, true, fStart, tracking.Month{}, fBudget)
 
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*forkGroup, nil)
 		repo.On("Save", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			savedGroup = args.Get(1).(tracking.Group)
 		})
-
-		usecase := newTestCategoryUseCase(repo)
+		
+		usecase := newTestCategoryUseCase(repo, nil)
 
 		req := &UpdateCategoryRequest{
 			ID:           fCatID.String(),
+			UserID:       validUserID.String(),
+			GroupID:      forkGroup.ID.String(),
+			Currency:     "USD",
 			Name:         "Forked Cat",
 			Description:  "New Desc",
 			StartMonth:   "2023-01", // Original Start
@@ -177,7 +197,7 @@ func TestCategoryUseCase_Update(t *testing.T) {
 			Budget:       200.0,
 		}
 
-		resp, err := usecase.Update(context.Background(), validUserID.String(), forkGroup.ID.String(), req)
+		resp, err := usecase.Update(context.Background(), req)
 
 		require.NoError(t, err)
 		assert.NotEqual(t, fCatID.String(), resp.ID) // Response should be the NEW category
@@ -218,10 +238,10 @@ func TestCategoryUseCase_Update(t *testing.T) {
 		repo.On("Save", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			savedGroup = args.Get(1).(tracking.Group)
 		})
+		
+		usecase := newTestCategoryUseCase(repo, nil)
 
-		usecase := newTestCategoryUseCase(repo)
-
-		resp, err := usecase.Update(context.Background(), validUserID.String(), group.ID.String(), validReq)
+		resp, err := usecase.Update(context.Background(), validReq)
 
 		require.NoError(t, err)
 		assert.Equal(t, "New Name", resp.Name)
@@ -247,7 +267,7 @@ func TestCategoryUseCase_Delete(t *testing.T) {
 		repo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
 
-		usecase := newTestCategoryUseCase(repo)
+		usecase := newTestCategoryUseCase(repo, nil)
 
 		newID, _ := identifier.NewID()
 		err := usecase.Delete(context.Background(), validUserID.String(), group.ID.String(), newID.String())
@@ -258,7 +278,7 @@ func TestCategoryUseCase_Delete(t *testing.T) {
 		repo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
 
-		usecase := newTestCategoryUseCase(repo)
+		usecase := newTestCategoryUseCase(repo, nil)
 		otherUserID, _ := identifier.NewID()
 
 		err := usecase.Delete(context.Background(), otherUserID.String(), group.ID.String(), catID.String())
@@ -270,7 +290,7 @@ func TestCategoryUseCase_Delete(t *testing.T) {
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
 		repo.On("DeleteCategory", mock.Anything, catID).Return(nil)
 
-		usecase := newTestCategoryUseCase(repo)
+		usecase := newTestCategoryUseCase(repo, nil)
 
 		err := usecase.Delete(context.Background(), validUserID.String(), group.ID.String(), catID.String())
 		require.NoError(t, err)
@@ -292,7 +312,7 @@ func TestCategoryUseCase_Get(t *testing.T) {
 		repo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
 
-		usecase := newTestCategoryUseCase(repo)
+		usecase := newTestCategoryUseCase(repo, nil)
 
 		resp, err := usecase.Get(context.Background(), validUserID.String(), group.ID.String(), catID.String())
 		require.NoError(t, err)
@@ -304,7 +324,7 @@ func TestCategoryUseCase_Get(t *testing.T) {
 		repo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
 
-		usecase := newTestCategoryUseCase(repo)
+		usecase := newTestCategoryUseCase(repo, nil)
 		otherUserID, _ := identifier.NewID()
 
 		resp, err := usecase.Get(context.Background(), otherUserID.String(), group.ID.String(), catID.String())
@@ -316,7 +336,7 @@ func TestCategoryUseCase_Get(t *testing.T) {
 		repo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
 
-		usecase := newTestCategoryUseCase(repo)
+		usecase := newTestCategoryUseCase(repo, nil)
 
 		newID, _ := identifier.NewID()
 		resp, err := usecase.Get(context.Background(), validUserID.String(), group.ID.String(), newID.String())
@@ -344,7 +364,7 @@ func TestCategoryUseCase_List(t *testing.T) {
 		repo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
 
-		usecase := newTestCategoryUseCase(repo)
+		usecase := newTestCategoryUseCase(repo, nil)
 
 		resps, err := usecase.List(context.Background(), validUserID.String(), group.ID.String())
 		require.NoError(t, err)
@@ -357,7 +377,7 @@ func TestCategoryUseCase_List(t *testing.T) {
 		repo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
 
-		usecase := newTestCategoryUseCase(repo)
+		usecase := newTestCategoryUseCase(repo, nil)
 		otherUserID, _ := identifier.NewID()
 
 		resps, err := usecase.List(context.Background(), otherUserID.String(), group.ID.String())

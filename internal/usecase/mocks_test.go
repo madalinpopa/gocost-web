@@ -8,6 +8,7 @@ import (
 	"github.com/madalinpopa/gocost-web/internal/domain/identity"
 	"github.com/madalinpopa/gocost-web/internal/domain/income"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
+	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -191,7 +192,7 @@ func (m *MockExpenseRepository) Delete(ctx context.Context, id expense.ID) error
 	return args.Error(0)
 }
 
-func (m *MockExpenseRepository) Total(ctx context.Context, userID expense.ID, month string) (float64, error) {
+func (m *MockExpenseRepository) Total(ctx context.Context, userID expense.ID, month string) (money.Money, error) {
 	args := m.Called(ctx, userID, month)
-	return args.Get(0).(float64), args.Error(1)
+	return args.Get(0).(money.Money), args.Error(1)
 }

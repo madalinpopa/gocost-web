@@ -1,5 +1,9 @@
 package views
 
+import (
+	"github.com/madalinpopa/gocost-web/internal/platform/money"
+)
+
 type ExpenseStatus string
 
 const (
@@ -24,7 +28,7 @@ const (
 
 type ExpenseView struct {
 	ID          string
-	Amount      float64
+	Amount      money.Money
 	Currency    string
 	Description string
 	Status      ExpenseStatus
@@ -33,26 +37,27 @@ type ExpenseView struct {
 }
 
 type CategoryView struct {
-	ID          string
-	Name        string
-	Type        CategoryType
-	Description string
-	StartMonth  string
-	EndMonth    string
-	Budget      float64
-	Spent       float64
-	Currency    string
-	Expenses    []ExpenseView
+	ID               string
+	Name             string
+	Type             CategoryType
+	Description      string
+	StartMonth       string	
+	EndMonth         string
+	Budget           money.Money
+	IsBudgetPositive bool
+	Spent            money.Money
+	Currency         string
+	Expenses         []ExpenseView
 
-	// Progress Bar & Budget fields
-	PaidSpent        float64
-	UnpaidSpent      float64
+	// Progress Bar Fields
+	PaidSpent        money.Money
+	UnpaidSpent      money.Money
 	PaidPercentage   float64
 	UnpaidPercentage float64
 	IsNearBudget     bool
 	IsOverBudget     bool
-	OverBudgetAmount float64
-	RemainingBudget  float64
+	OverBudgetAmount money.Money
+	RemainingBudget  money.Money
 }
 
 type GroupView struct {
@@ -64,14 +69,16 @@ type GroupView struct {
 }
 
 type DashboardView struct {
-	CurrentMonth        string
-	CurrentMonthParam   string
-	PrevMonth           string
-	NextMonth           string
-	TotalIncome         float64
-	TotalExpenses       float64
-	TotalBudgeted       float64
-	TotalBudgetedStatus BudgetStatus
-	Currency            string
-	Groups              []GroupView
+	TotalIncome             money.Money
+	TotalExpenses           money.Money
+	TotalBudgeted           money.Money
+	TotalBudgetedStatus     BudgetStatus
+	IsTotalBudgetedNegative bool
+	Currency                string
+	Groups                  []GroupView
+	// Navigation
+	CurrentMonth      string
+	CurrentMonthParam string
+	NextMonth         string
+	PrevMonth         string
 }

@@ -20,7 +20,7 @@ func New(uow *sqlite.SqliteUnitOfWork, logger *slog.Logger, defaultCurrency stri
 	passwordHasher := security.NewPasswordHasher()
 
 	// Use cases
-	authUseCase := NewAuthUseCase(uow, logger, passwordHasher, defaultCurrency)
+	authUseCase := NewAuthUseCase(uow, logger, passwordHasher)
 	incomeUseCase := NewIncomeUseCase(uow, logger)
 	groupUseCase := NewGroupUseCase(uow, logger)
 	categoryUseCase := NewCategoryUseCase(uow, logger)

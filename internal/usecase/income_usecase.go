@@ -24,17 +24,17 @@ func NewIncomeUseCase(uow domain.UnitOfWork, logger *slog.Logger) IncomeUseCaseI
 	}
 }
 
-func (u IncomeUseCaseImpl) Create(ctx context.Context, userID string, req *CreateIncomeRequest) (*IncomeResponse, error) {
+func (u IncomeUseCaseImpl) Create(ctx context.Context, req *CreateIncomeRequest) (*IncomeResponse, error) {
 	if req == nil {
 		return nil, errors.New("request cannot be nil")
 	}
 
-	uID, err := identifier.ParseID(userID)
+	uID, err := identifier.ParseID(req.UserID)
 	if err != nil {
 		return nil, err
 	}
 
-	amount, err := money.NewFromFloat(req.Amount)
+	amount, err := money.NewFromFloat(req.Amount, req.Currency)
 	if err != nil {
 		return nil, err
 	}
@@ -67,12 +67,12 @@ func (u IncomeUseCaseImpl) Create(ctx context.Context, userID string, req *Creat
 	}, nil
 }
 
-func (u IncomeUseCaseImpl) Update(ctx context.Context, userID string, req *UpdateIncomeRequest) (*IncomeResponse, error) {
+func (u IncomeUseCaseImpl) Update(ctx context.Context, req *UpdateIncomeRequest) (*IncomeResponse, error) {
 	if req == nil {
 		return nil, errors.New("request cannot be nil")
 	}
 
-	uID, err := identifier.ParseID(userID)
+	uID, err := identifier.ParseID(req.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (u IncomeUseCaseImpl) Update(ctx context.Context, userID string, req *Updat
 		return nil, errors.New("unauthorized")
 	}
 
-	amount, err := money.NewFromFloat(req.Amount)
+	amount, err := money.NewFromFloat(req.Amount, req.Currency)
 	if err != nil {
 		return nil, err
 	}

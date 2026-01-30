@@ -1,9 +1,9 @@
 package views
 
 import (
-	"math"
 	"time"
 
+	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 )
 
@@ -11,11 +11,13 @@ type DashboardPresenter struct {
 	Currency string
 }
 
-func budgetStatus(totalBudgeted, balance float64) BudgetStatus {
+func budgetStatus(totalBudgeted, balance money.Money) BudgetStatus {
+	less, _ := totalBudgeted.LessThan(balance)
+	greater, _ := totalBudgeted.GreaterThan(balance)
 	switch {
-	case totalBudgeted < balance:
+	case less:
 		return BudgetStatusUnder
-	case totalBudgeted > balance:
+	case greater:
 		return BudgetStatusOver
 	default:
 		return BudgetStatusEqual
@@ -29,45 +31,59 @@ func NewDashboardPresenter(currency string) *DashboardPresenter {
 }
 
 func (p *DashboardPresenter) Present(
-	totalIncome, totalExpenses float64,
+	totalIncomeFloat, totalExpensesFloat float64,
 	groups []*usecase.GroupResponse,
 	expenses []*usecase.ExpenseResponse,
 	date time.Time,
 ) DashboardView {
 	monthStr := date.Format("2006-01")
+
+	// Initialize Money objects
+	totalIncome, _ := money.NewFromFloat(totalIncomeFloat, p.Currency)
+	totalExpenses, _ := money.NewFromFloat(totalExpensesFloat, p.Currency)
+	
 	// Create a map of expenses by category for easier lookup
 	expensesByCategory := make(map[string][]ExpenseView)
-	categorySpent := make(map[string]float64)
-	totalBudgeted := 0.0
-	paidExpensesTotal := 0.0
+	// categorySpent stores Money
+	categorySpent := make(map[string]money.Money)
+	
+	totalBudgeted, _ := money.New(0, p.Currency)
+	paidExpensesTotal, _ := money.New(0, p.Currency)
 
 	for _, exp := range expenses {
 		status := StatusUnpaid
 		paidAt := ""
+		expAmount, _ := money.NewFromFloat(exp.Amount, p.Currency)
+
 		if exp.IsPaid {
 			status = StatusPaid
-			paidExpensesTotal += exp.Amount
+			paidExpensesTotal, _ = paidExpensesTotal.Add(expAmount)
 			if exp.PaidAt != nil {
 				paidAt = exp.PaidAt.Format("2006-01-02")
 			}
 		}
+		
 		expensesByCategory[exp.CategoryID] = append(expensesByCategory[exp.CategoryID], ExpenseView{
 			ID:          exp.ID,
-			Amount:      exp.Amount,
+			Amount:      expAmount,
 			Currency:    p.Currency,
 			Description: exp.Description,
 			Status:      status,
 			SpentAt:     exp.SpentAt.Format("2006-01-02"),
 			PaidAt:      paidAt,
 		})
-		categorySpent[exp.CategoryID] += exp.Amount
+		
+		currentSpent := categorySpent[exp.CategoryID]
+		isZero, err := currentSpent.IsZero()
+		if err != nil || isZero {
+			// Initialize if not present (handling potentially nil map value, though map returns zero value for struct?)
+			// money.Money zero value has nil pointer, so methods might fail if not handled.
+			// My wrapper IsZero checks nil.
+			currentSpent, _ = money.New(0, p.Currency)
+		}
+		newSpent, _ := currentSpent.Add(expAmount)
+		categorySpent[exp.CategoryID] = newSpent
 	}
-
-	// Round spent amounts to avoid floating point precision issues
-	for id, spent := range categorySpent {
-		categorySpent[id] = math.Round(spent*100) / 100
-	}
-	paidExpensesTotal = math.Round(paidExpensesTotal*100) / 100
 
 	// Map to views
 	var groupViews []GroupView
@@ -103,65 +119,79 @@ func (p *DashboardPresenter) Present(
 			}
 
 			if showCategory {
-				totalBudgeted += cat.Budget
-				spent := categorySpent[cat.ID]
+				catBudget, _ := money.NewFromFloat(cat.Budget, p.Currency)
+				totalBudgeted, _ = totalBudgeted.Add(catBudget)
+				
+				spent, ok := categorySpent[cat.ID]
+				if !ok {
+					spent, _ = money.New(0, p.Currency)
+				}
+				
 				catExpenses := expensesByCategory[cat.ID]
 
 				// Calculate progress bar data
-				paidSpent := 0.0
+				paidSpent, _ := money.New(0, p.Currency)
 				for _, exp := range catExpenses {
 					if exp.Status == StatusPaid {
-						paidSpent += exp.Amount
+						paidSpent, _ = paidSpent.Add(exp.Amount)
 					}
 				}
-				unpaidSpent := spent - paidSpent
+				unpaidSpent, _ := spent.Subtract(paidSpent)
 
 				// Percentages
 				percentage := 0.0
 				paidPercentage := 0.0
 				unpaidPercentage := 0.0
+				
+				catBudgetAmount := catBudget.Amount()
+				spentAmount := spent.Amount()
+				paidSpentAmount := paidSpent.Amount()
+				unpaidSpentAmount := unpaidSpent.Amount()
 
-				if cat.Budget > 0 {
-					percentage = (spent / cat.Budget) * 100
+				if catBudgetAmount > 0 {
+					percentage = (spentAmount / catBudgetAmount) * 100
 					if percentage > 100 {
 						percentage = 100
 					}
 
-					paidPercentage = (paidSpent / cat.Budget) * 100
+					paidPercentage = (paidSpentAmount / catBudgetAmount) * 100
 					if paidPercentage > 100 {
 						paidPercentage = 100
 					}
 
-					unpaidPercentage = (unpaidSpent / cat.Budget) * 100
+					unpaidPercentage = (unpaidSpentAmount / catBudgetAmount) * 100
 					if paidPercentage+unpaidPercentage > 100 {
 						unpaidPercentage = 100 - paidPercentage
 					}
 				}
 
 				// Budget calculations
-				isOverBudget := spent > cat.Budget
+				isOverBudget, _ := spent.GreaterThan(catBudget)
 				isNearBudget := !isOverBudget && percentage > 85
 
-				overBudgetAmount := 0.0
-				remainingBudget := 0.0
+				overBudgetAmount, _ := money.New(0, p.Currency)
+				remainingBudget, _ := money.New(0, p.Currency)
 
 				if isOverBudget {
-					overBudgetAmount = spent - cat.Budget
+					overBudgetAmount, _ = spent.Subtract(catBudget)
 				} else {
-					remainingBudget = cat.Budget - spent
+					remainingBudget, _ = catBudget.Subtract(spent)
 				}
 
+				isBudgetPositive, _ := catBudget.IsPositive()
+
 				categoryViews = append(categoryViews, CategoryView{
-					ID:          cat.ID,
-					Name:        cat.Name,
-					Type:        catType,
-					Description: cat.Description,
-					StartMonth:  cat.StartMonth,
-					EndMonth:    cat.EndMonth,
-					Budget:      cat.Budget,
-					Spent:       spent,
-					Currency:    p.Currency,
-					Expenses:    catExpenses,
+					ID:               cat.ID,
+					Name:             cat.Name,
+					Type:             catType,
+					Description:      cat.Description,
+					StartMonth:       cat.StartMonth,
+					EndMonth:         cat.EndMonth,
+					Budget:           catBudget,
+					IsBudgetPositive: isBudgetPositive,
+					Spent:            spent,
+					Currency:         p.Currency,
+					Expenses:         catExpenses,
 					// Progress Bar Fields
 					PaidSpent:        paidSpent,
 					UnpaidSpent:      unpaidSpent,
@@ -185,15 +215,17 @@ func (p *DashboardPresenter) Present(
 	}
 
 	status := budgetStatus(totalBudgeted, totalIncome)
-	displayBudget := totalBudgeted - paidExpensesTotal
-	displayBudget = math.Round(displayBudget*100) / 100
+	displayBudget, _ := totalBudgeted.Subtract(paidExpensesTotal)
+
+	isTotalBudgetedNegative, _ := displayBudget.IsNegative()
 
 	return DashboardView{
-		TotalIncome:         totalIncome,
-		TotalExpenses:       totalExpenses,
-		TotalBudgeted:       displayBudget,
-		TotalBudgetedStatus: status,
-		Currency:            p.Currency,
-		Groups:              groupViews,
+		TotalIncome:             totalIncome,
+		TotalExpenses:           totalExpenses,
+		TotalBudgeted:           displayBudget,
+		TotalBudgetedStatus:     status,
+		IsTotalBudgetedNegative: isTotalBudgetedNegative,
+		Currency:                p.Currency,
+		Groups:                  groupViews,
 	}
 }

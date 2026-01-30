@@ -9,7 +9,7 @@ import (
 )
 
 func TestDashboardPresenter_Present_ProgressBar(t *testing.T) {
-	presenter := NewDashboardPresenter("$")
+	presenter := NewDashboardPresenter("USD")
 
 	// Setup data
 	date, _ := time.Parse("2006-01", "2024-01")
@@ -48,43 +48,43 @@ func TestDashboardPresenter_Present_ProgressBar(t *testing.T) {
 	// Verify c1 (Food)
 	c1 := view.Groups[0].Categories[0]
 	assert.Equal(t, "c1", c1.ID)
-	assert.Equal(t, 70.0, c1.Spent)
-	assert.Equal(t, 50.0, c1.PaidSpent)
-	assert.Equal(t, 20.0, c1.UnpaidSpent)
+	assert.Equal(t, 70.0, c1.Spent.Amount())
+	assert.Equal(t, 50.0, c1.PaidSpent.Amount())
+	assert.Equal(t, 20.0, c1.UnpaidSpent.Amount())
 	assert.Equal(t, 50.0, c1.PaidPercentage)
 	assert.Equal(t, 20.0, c1.UnpaidPercentage)
 	assert.False(t, c1.IsOverBudget)
-	assert.Equal(t, 30.0, c1.RemainingBudget)
+	assert.Equal(t, 30.0, c1.RemainingBudget.Amount())
 	assert.False(t, c1.IsNearBudget)
 
 	// Verify c2 (Rent)
 	c2 := view.Groups[0].Categories[1]
 	assert.Equal(t, "c2", c2.ID)
-	assert.Equal(t, 60.0, c2.Spent)
-	assert.Equal(t, 60.0, c2.PaidSpent)
-	assert.Equal(t, 0.0, c2.UnpaidSpent)
+	assert.Equal(t, 60.0, c2.Spent.Amount())
+	assert.Equal(t, 60.0, c2.PaidSpent.Amount())
+	assert.Equal(t, 0.0, c2.UnpaidSpent.Amount())
 	assert.Equal(t, 100.0, c2.PaidPercentage) // Capped at 100
 	assert.Equal(t, 0.0, c2.UnpaidPercentage)
 	assert.True(t, c2.IsOverBudget)
-	assert.Equal(t, 10.0, c2.OverBudgetAmount)
+	assert.Equal(t, 10.0, c2.OverBudgetAmount.Amount())
 	assert.False(t, c2.IsNearBudget)
 }
 
 func TestDashboardPresenter_Present_TotalIncome(t *testing.T) {
-	presenter := NewDashboardPresenter("$")
+	presenter := NewDashboardPresenter("USD")
 	date, _ := time.Parse("2006-01", "2024-01")
 
 	// Case 1: Total income preserved
 	view1 := presenter.Present(100, 40, nil, nil, date)
-	assert.Equal(t, 100.0, view1.TotalIncome)
+	assert.Equal(t, 100.0, view1.TotalIncome.Amount())
 
 	// Case 2: Total income unaffected by expenses
 	view2 := presenter.Present(40, 100, nil, nil, date)
-	assert.Equal(t, 40.0, view2.TotalIncome)
+	assert.Equal(t, 40.0, view2.TotalIncome.Amount())
 }
 
 func TestDashboardPresenter_Present_TotalBudgetedStatus(t *testing.T) {
-	presenter := NewDashboardPresenter("$")
+	presenter := NewDashboardPresenter("USD")
 	date, _ := time.Parse("2006-01", "2024-01")
 
 	makeGroups := func(budget float64) []*usecase.GroupResponse {
@@ -120,7 +120,7 @@ func TestDashboardPresenter_Present_TotalBudgetedStatus(t *testing.T) {
 }
 
 func TestDashboardPresenter_Present_TotalBudgetedSubtractsPaidExpensesOnly(t *testing.T) {
-	presenter := NewDashboardPresenter("$")
+	presenter := NewDashboardPresenter("USD")
 	date, _ := time.Parse("2006-01", "2024-01")
 
 	groups := []*usecase.GroupResponse{
@@ -141,5 +141,5 @@ func TestDashboardPresenter_Present_TotalBudgetedSubtractsPaidExpensesOnly(t *te
 
 	view := presenter.Present(500, 50, groups, expenses, date)
 
-	assert.Equal(t, 170.0, view.TotalBudgeted)
+	assert.Equal(t, 170.0, view.TotalBudgeted.Amount())
 }

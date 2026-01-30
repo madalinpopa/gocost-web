@@ -16,18 +16,16 @@ var ErrInvalidCredentials = errors.New("invalid credentials")
 const minPasswordLength = 8
 
 type AuthUseCaseImpl struct {
-	uow             domain.UnitOfWork
-	logger          *slog.Logger
-	hasher          security.PasswordHasher
-	defaultCurrency string
+	uow    domain.UnitOfWork
+	logger *slog.Logger
+	hasher security.PasswordHasher
 }
 
-func NewAuthUseCase(uow domain.UnitOfWork, logger *slog.Logger, h security.PasswordHasher, defaultCurrency string) AuthUseCaseImpl {
+func NewAuthUseCase(uow domain.UnitOfWork, logger *slog.Logger, h security.PasswordHasher) AuthUseCaseImpl {
 	return AuthUseCaseImpl{
-		uow:             uow,
-		logger:          logger,
-		hasher:          h,
-		defaultCurrency: defaultCurrency,
+		uow:    uow,
+		logger: logger,
+		hasher: h,
 	}
 }
 
@@ -85,9 +83,9 @@ func (u AuthUseCaseImpl) Register(ctx context.Context, req *RegisterUserRequest)
 		return nil, err
 	}
 
-	currency := req.Currency
-	if currency == "" {
-		currency = u.defaultCurrency
+	currency, err := identity.NewCurrencyVO(req.Currency)
+	if err != nil {
+		return nil, err
 	}
 
 	user := identity.NewUser(id, username, email, password, currency)
@@ -99,6 +97,7 @@ func (u AuthUseCaseImpl) Register(ctx context.Context, req *RegisterUserRequest)
 		ID:       user.ID.String(),
 		Email:    user.Email.Value(),
 		Username: user.Username.Value(),
+		Currency: user.Currency.Value(),
 	}, nil
 }
 
@@ -146,5 +145,6 @@ func (u AuthUseCaseImpl) Login(ctx context.Context, req *LoginRequest) (*LoginRe
 		Username: user.Username.Value(),
 		FullName: "",
 		Role:     "",
+		Currency: user.Currency.Value(),
 	}, nil
 }

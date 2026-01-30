@@ -22,12 +22,12 @@ func NewGroupUseCase(uow domain.UnitOfWork, logger *slog.Logger) GroupUseCaseImp
 	}
 }
 
-func (u GroupUseCaseImpl) Create(ctx context.Context, userID string, req *CreateGroupRequest) (*GroupResponse, error) {
+func (u GroupUseCaseImpl) Create(ctx context.Context, req *CreateGroupRequest) (*GroupResponse, error) {
 	if req == nil {
 		return nil, errors.New("request cannot be nil")
 	}
 
-	uID, err := identifier.ParseID(userID)
+	uID, err := identifier.ParseID(req.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -62,12 +62,12 @@ func (u GroupUseCaseImpl) Create(ctx context.Context, userID string, req *Create
 	return u.mapToResponse(*group), nil
 }
 
-func (u GroupUseCaseImpl) Update(ctx context.Context, userID string, req *UpdateGroupRequest) (*GroupResponse, error) {
+func (u GroupUseCaseImpl) Update(ctx context.Context, req *UpdateGroupRequest) (*GroupResponse, error) {
 	if req == nil {
 		return nil, errors.New("request cannot be nil")
 	}
 
-	uID, err := identifier.ParseID(userID)
+	uID, err := identifier.ParseID(req.UserID)
 	if err != nil {
 		return nil, err
 	}

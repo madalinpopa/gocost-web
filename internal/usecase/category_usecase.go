@@ -23,12 +23,12 @@ func NewCategoryUseCase(uow domain.UnitOfWork, logger *slog.Logger) CategoryUseC
 	}
 }
 
-func (u CategoryUseCaseImpl) Create(ctx context.Context, userID string, groupID string, req *CreateCategoryRequest) (*CategoryResponse, error) {
+func (u CategoryUseCaseImpl) Create(ctx context.Context, req *CreateCategoryRequest) (*CategoryResponse, error) {
 	if req == nil {
 		return nil, errors.New("request cannot be nil")
 	}
 
-	group, err := u.verifyGroupOwnership(ctx, userID, groupID)
+	group, err := u.verifyGroupOwnership(ctx, req.UserID, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func (u CategoryUseCaseImpl) Create(ctx context.Context, userID string, groupID 
 		return nil, err
 	}
 
-	budget, err := money.NewFromFloat(req.Budget)
+	budget, err := money.NewFromFloat(req.Budget, req.Currency)
 	if err != nil {
 		return nil, err
 	}
@@ -79,12 +79,12 @@ func (u CategoryUseCaseImpl) Create(ctx context.Context, userID string, groupID 
 	return u.mapToResponse(category), nil
 }
 
-func (u CategoryUseCaseImpl) Update(ctx context.Context, userID string, groupID string, req *UpdateCategoryRequest) (*CategoryResponse, error) {
+func (u CategoryUseCaseImpl) Update(ctx context.Context, req *UpdateCategoryRequest) (*CategoryResponse, error) {
 	if req == nil {
 		return nil, errors.New("request cannot be nil")
 	}
 
-	group, err := u.verifyGroupOwnership(ctx, userID, groupID)
+	group, err := u.verifyGroupOwnership(ctx, req.UserID, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +129,7 @@ func (u CategoryUseCaseImpl) Update(ctx context.Context, userID string, groupID 
 		}
 	}
 
-	budget, err := money.NewFromFloat(req.Budget)
+	budget, err := money.NewFromFloat(req.Budget, req.Currency)
 	if err != nil {
 		return nil, err
 	}

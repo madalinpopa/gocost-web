@@ -23,12 +23,12 @@ func NewExpenseUseCase(uow domain.UnitOfWork, logger *slog.Logger) ExpenseUseCas
 	}
 }
 
-func (u ExpenseUseCaseImpl) Create(ctx context.Context, userID string, req *CreateExpenseRequest) (*ExpenseResponse, error) {
+func (u ExpenseUseCaseImpl) Create(ctx context.Context, req *CreateExpenseRequest) (*ExpenseResponse, error) {
 	if req == nil {
 		return nil, errors.New("request cannot be nil")
 	}
 
-	uID, err := identifier.ParseID(userID)
+	uID, err := identifier.ParseID(req.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (u ExpenseUseCaseImpl) Create(ctx context.Context, userID string, req *Crea
 		return nil, errors.New("unauthorized")
 	}
 
-	amount, err := money.NewFromFloat(req.Amount)
+	amount, err := money.NewFromFloat(req.Amount, req.Currency)
 	if err != nil {
 		return nil, err
 	}
@@ -80,12 +80,12 @@ func (u ExpenseUseCaseImpl) Create(ctx context.Context, userID string, req *Crea
 	return u.mapToResponse(exp), nil
 }
 
-func (u ExpenseUseCaseImpl) Update(ctx context.Context, userID string, req *UpdateExpenseRequest) (*ExpenseResponse, error) {
+func (u ExpenseUseCaseImpl) Update(ctx context.Context, req *UpdateExpenseRequest) (*ExpenseResponse, error) {
 	if req == nil {
 		return nil, errors.New("request cannot be nil")
 	}
 
-	uID, err := identifier.ParseID(userID)
+	uID, err := identifier.ParseID(req.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +127,7 @@ func (u ExpenseUseCaseImpl) Update(ctx context.Context, userID string, req *Upda
 		exp.CategoryID = newCatID
 	}
 
-	amount, err := money.NewFromFloat(req.Amount)
+	amount, err := money.NewFromFloat(req.Amount, req.Currency)
 	if err != nil {
 		return nil, err
 	}
@@ -258,7 +258,11 @@ func (u ExpenseUseCaseImpl) Total(ctx context.Context, userID string, month stri
 		return 0, err
 	}
 
-	return u.uow.ExpenseRepository().Total(ctx, uID, month)
+	totalMoney, err := u.uow.ExpenseRepository().Total(ctx, uID, month)
+	if err != nil {
+		return 0, err
+	}
+	return totalMoney.Amount(), nil
 }
 
 func (u ExpenseUseCaseImpl) mapToResponse(e *expense.Expense) *ExpenseResponse {

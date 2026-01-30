@@ -18,6 +18,7 @@ type RegisterUserRequest struct {
 	EmailRequest
 	UsernameRequest
 	Password string `json:"password" validate:"required,min=8"`
+	Currency string `json:"currency"`
 }
 
 type LoginRequest struct {
@@ -31,15 +32,19 @@ type LoginResponse struct {
 	Username string `json:"username"`
 	FullName string `json:"full_name"`
 	Role     string `json:"role"`
+	Currency string `json:"currency"`
 }
 
 type UserResponse struct {
 	ID       string `json:"id"`
 	Email    string `json:"email"`
 	Username string `json:"username"`
+	Currency string `json:"currency"`
 }
 
 type CreateIncomeRequest struct {
+	UserID     string    `json:"user_id" validate:"required"`
+	Currency   string    `json:"currency" validate:"required"`
 	Amount     float64   `json:"amount" validate:"required,gt=0"`
 	Source     string    `json:"source" validate:"required,max=100"`
 	ReceivedAt time.Time `json:"received_at" validate:"required"`
@@ -47,6 +52,8 @@ type CreateIncomeRequest struct {
 
 type UpdateIncomeRequest struct {
 	ID         string    `json:"-"`
+	UserID     string    `json:"user_id" validate:"required"`
+	Currency   string    `json:"currency" validate:"required"`
 	Amount     float64   `json:"amount" validate:"required,gt=0"`
 	Source     string    `json:"source" validate:"required,max=100"`
 	ReceivedAt time.Time `json:"received_at" validate:"required"`
@@ -60,6 +67,7 @@ type IncomeResponse struct {
 }
 
 type CreateGroupRequest struct {
+	UserID      string `json:"user_id" validate:"required"`
 	Name        string `json:"name" validate:"required,max=100"`
 	Description string `json:"description" validate:"max=255"`
 	Order       int    `json:"order" validate:"min=0"`
@@ -67,6 +75,7 @@ type CreateGroupRequest struct {
 
 type UpdateGroupRequest struct {
 	ID          string `json:"-"`
+	UserID      string `json:"user_id" validate:"required"`
 	Name        string `json:"name" validate:"required,max=100"`
 	Description string `json:"description" validate:"max=255"`
 	Order       int    `json:"order" validate:"min=0"`
@@ -91,6 +100,9 @@ type GroupResponse struct {
 }
 
 type CreateCategoryRequest struct {
+	GroupID     string  `json:"group_id" validate:"required"`
+	UserID      string  `json:"user_id" validate:"required"`
+	Currency    string  `json:"currency" validate:"required"`
 	Name        string  `json:"name" validate:"required,max=100"`
 	Description string  `json:"description" validate:"max=1000"`
 	IsRecurrent bool    `json:"is_recurrent"`
@@ -101,6 +113,9 @@ type CreateCategoryRequest struct {
 
 type UpdateCategoryRequest struct {
 	ID           string  `json:"-"`
+	GroupID      string  `json:"group_id" validate:"required"`
+	UserID       string  `json:"user_id" validate:"required"`
+	Currency     string  `json:"currency" validate:"required"`
 	Name         string  `json:"name" validate:"required,max=100"`
 	Description  string  `json:"description" validate:"max=1000"`
 	IsRecurrent  bool    `json:"is_recurrent"`
@@ -111,6 +126,8 @@ type UpdateCategoryRequest struct {
 }
 
 type CreateExpenseRequest struct {
+	UserID      string     `json:"user_id" validate:"required"`
+	Currency    string     `json:"currency" validate:"required"`
 	CategoryID  string     `json:"category_id" validate:"required"`
 	Amount      float64    `json:"amount" validate:"required,gt=0"`
 	Description string     `json:"description" validate:"max=255"`
@@ -121,6 +138,8 @@ type CreateExpenseRequest struct {
 
 type UpdateExpenseRequest struct {
 	ID          string     `json:"-"`
+	UserID      string     `json:"user_id" validate:"required"`
+	Currency    string     `json:"currency" validate:"required"`
 	CategoryID  string     `json:"category_id" validate:"required"`
 	Amount      float64    `json:"amount" validate:"required,gt=0"`
 	Description string     `json:"description" validate:"max=255"`
