@@ -13,26 +13,17 @@ import (
 )
 
 type HomeHandler struct {
-	app        HandlerContext
-	incomeUC   usecase.IncomeUseCase
-	expenseUC  usecase.ExpenseUseCase
-	groupUC    usecase.GroupUseCase
-	categoryUC usecase.CategoryUseCase
+	app         HandlerContext
+	dashboardUC usecase.DashboardUseCase
 }
 
 func NewHomeHandler(
 	app HandlerContext,
-	incomeUC usecase.IncomeUseCase,
-	expenseUC usecase.ExpenseUseCase,
-	groupUC usecase.GroupUseCase,
-	categoryUC usecase.CategoryUseCase,
+	dashboardUC usecase.DashboardUseCase,
 ) HomeHandler {
 	return HomeHandler{
-		app:        app,
-		incomeUC:   incomeUC,
-		expenseUC:  expenseUC,
-		groupUC:    groupUC,
-		categoryUC: categoryUC,
+		app:         app,
+		dashboardUC: dashboardUC,
 	}
 }
 
@@ -104,29 +95,16 @@ func (hh HomeHandler) GetDashboardGroups(w http.ResponseWriter, r *http.Request)
 func (hh HomeHandler) fetchDashboardData(ctx context.Context, userID string, date time.Time) (views.DashboardView, error) {
 	monthStr := date.Format("2006-01")
 
-	totalIncome, err := hh.incomeUC.Total(ctx, userID, monthStr)
-	if err != nil {
-		return views.DashboardView{}, err
-	}
-
-	totalExpenses, err := hh.expenseUC.Total(ctx, userID, monthStr)
-	if err != nil {
-		return views.DashboardView{}, err
-	}
-
-	// Fetch groups
-	groupsDTO, err := hh.groupUC.List(ctx, userID)
-	if err != nil {
-		return views.DashboardView{}, err
-	}
-
-	// Fetch expenses for the user and month
-	expensesDTO, err := hh.expenseUC.ListByMonth(ctx, userID, monthStr)
-	if err != nil {
-		return views.DashboardView{}, err
-	}
-
 	currency := hh.app.Session.GetCurrency(ctx)
-	presenter := views.NewDashboardPresenter(currency)
-	return presenter.Present(totalIncome, totalExpenses, groupsDTO, expensesDTO, date), nil
+	dashboardData, err := hh.dashboardUC.Get(ctx, userID, monthStr)
+	if err != nil {
+		return views.DashboardView{}, err
+	}
+
+	presenter, err := views.NewDashboardPresenter(currency)
+	if err != nil {
+		return views.DashboardView{}, err
+	}
+
+	return presenter.Present(dashboardData)
 }
