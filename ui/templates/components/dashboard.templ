@@ -188,20 +188,24 @@ func getProgressBarClass(c views.CategoryView) string {
 }
 
 templ CategoryProgressBar(category views.CategoryView) {
-	if category.IsBudgetPositive {
-		<div class="mb-6">
-			<div class="flex items-center justify-between text-xs mb-1.5">
-				<span class="text-slate-500 dark:text-slate-400">
-					{ category.Spent.Display() }
-					<span class="text-slate-700 dark:text-slate-600">/ { category.Budget.Display() }</span>
-				</span>
+	<div class="mb-6">
+		<div class="flex items-center justify-between text-xs mb-1.5">
+			<span class="text-slate-500 dark:text-slate-400">
+				{ category.Spent.Display() }
+				<span class="text-slate-700 dark:text-slate-600">/ { category.Budget.Display() }</span>
+			</span>
+			if category.IsBudgetPositive {
 				if category.IsOverBudget {
 					<span class="text-rose-600 dark:text-rose-500 font-medium">- { category.OverBudgetAmount.Display() }</span>
 				} else {
 					<span class="text-emerald-600 dark:text-emerald-500 font-medium">{ category.RemainingBudget.Display() } left</span>
 				}
-			</div>
-			<div class="h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex">
+			} else {
+				<span class="text-slate-500 dark:text-slate-400 font-medium">No budget set</span>
+			}
+		</div>
+		<div class="h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex">
+			if category.IsBudgetPositive {
 				<div
 					class={ "h-full transition-all duration-500", getProgressBarClass(category) }
 					style={ fmt.Sprintf("width: %.2f%%", category.PaidPercentage) }
@@ -210,9 +214,11 @@ templ CategoryProgressBar(category views.CategoryView) {
 					class="h-full bg-slate-400 dark:bg-slate-500 transition-all duration-500"
 					style={ fmt.Sprintf("width: %.2f%%", category.UnpaidPercentage) }
 				></div>
-			</div>
+			} else {
+				<div class="h-full w-full bg-slate-300 dark:bg-slate-700"></div>
+			}
 		</div>
-	}
+	</div>
 }
 
 templ CategoryHeader(category views.CategoryView, groupId string, month string) {
