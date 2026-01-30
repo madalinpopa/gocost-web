@@ -45,6 +45,7 @@ func TestHomeHandler_ShowHomePage(t *testing.T) {
 		mockSession.On("GetUserID", req.Context()).Return(userID)
 		mockSession.On("GetUsername", req.Context()).Return("alice")
 		mockSession.On("IsAuthenticated", req.Context()).Return(true)
+		mockSession.On("GetCurrency", req.Context()).Return("USD")
 
 		// Mocks for fetchDashboardData
 		mockIncomeUC.On("Total", req.Context(), userID, "2023-10").Return(1000.0, nil)
@@ -105,6 +106,7 @@ func TestHomeHandler_GetDashboardGroups(t *testing.T) {
 
 		userID := "user-123"
 		mockSession.On("GetUserID", req.Context()).Return(userID)
+		mockSession.On("GetCurrency", req.Context()).Return("USD")
 
 		mockIncomeUC.On("Total", req.Context(), userID, "2023-10").Return(2000.0, nil)
 		mockExpenseUC.On("Total", req.Context(), userID, "2023-10").Return(800.0, nil)

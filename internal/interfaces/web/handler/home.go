@@ -126,6 +126,7 @@ func (hh HomeHandler) fetchDashboardData(ctx context.Context, userID string, dat
 		return views.DashboardView{}, err
 	}
 
-	presenter := views.NewDashboardPresenter(hh.app.Config.Currency)
+	currency := hh.app.Session.GetCurrency(ctx)
+	presenter := views.NewDashboardPresenter(currency)
 	return presenter.Present(totalIncome, totalExpenses, groupsDTO, expensesDTO, date), nil
 }
