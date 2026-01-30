@@ -269,7 +269,8 @@ func (u ExpenseUseCaseImpl) mapToResponse(e *expense.Expense) *ExpenseResponse {
 	return &ExpenseResponse{
 		ID:          e.ID.String(),
 		CategoryID:  e.CategoryID.String(),
-		Amount:      e.Amount.Amount(),
+		AmountCents: e.Amount.Cents(),
+		Currency:    e.Amount.Currency(),
 		Description: e.Description.Value(),
 		SpentAt:     e.SpentAt,
 		IsPaid:      e.Payment.IsPaid(),
