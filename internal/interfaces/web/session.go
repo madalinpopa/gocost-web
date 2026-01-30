@@ -18,6 +18,7 @@ const (
 	AuthenticatedUserKey  = contextKey("authenticatedUser")
 	authenticatedUserID   = "authenticatedUserID"
 	authenticatedUsername = "authenticatedUsername"
+	authenticatedCurrency = "authenticatedCurrency"
 )
 
 type AuthSessionManager interface {
@@ -27,8 +28,10 @@ type AuthSessionManager interface {
 	GetSessionStore() *scs.SessionManager
 	GetUserID(ctx context.Context) string
 	GetUsername(ctx context.Context) string
+	GetCurrency(ctx context.Context) string
 	SetUserID(ctx context.Context, userID string)
 	SetUsername(ctx context.Context, username string)
+	SetCurrency(ctx context.Context, currency string)
 }
 
 // AuthenticatedUser represents the user data stored in the session and context.
@@ -36,6 +39,7 @@ type AuthSessionManager interface {
 type AuthenticatedUser struct {
 	ID       string
 	Username string
+	Currency string
 }
 
 // Manager provides a wrapper around scs.SessionManager to manage session operations.
@@ -84,10 +88,18 @@ func (m *Manager) GetUsername(ctx context.Context) string {
 	return m.Manager.GetString(ctx, authenticatedUsername)
 }
 
+func (m *Manager) GetCurrency(ctx context.Context) string {
+	return m.Manager.GetString(ctx, authenticatedCurrency)
+}
+
 func (m *Manager) SetUserID(ctx context.Context, userID string) {
 	m.Manager.Put(ctx, authenticatedUserID, userID)
 }
 
 func (m *Manager) SetUsername(ctx context.Context, username string) {
 	m.Manager.Put(ctx, authenticatedUsername, username)
+}
+
+func (m *Manager) SetCurrency(ctx context.Context, currency string) {
+	m.Manager.Put(ctx, authenticatedCurrency, currency)
 }
