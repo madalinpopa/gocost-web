@@ -92,7 +92,10 @@ func createRandomUser(t *testing.T) *identity.User {
 	password, err := identity.NewPasswordVO("$2a$12$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ12")
 	assert.NoError(t, err)
 
-	return identity.NewUser(id, username, email, password)
+	currency, err := identity.NewCurrencyVO("USD")
+	assert.NoError(t, err)
+
+	return identity.NewUser(id, username, email, password, currency)
 }
 
 func createRandomIncome(t *testing.T, userID identifier.ID) *income.Income {
@@ -100,7 +103,7 @@ func createRandomIncome(t *testing.T, userID identifier.ID) *income.Income {
 	id, err := identifier.NewID()
 	require.NoError(t, err)
 
-	amount, err := money.New(1000)
+	amount, err := money.New(1000, "USD")
 	require.NoError(t, err)
 
 	source, err := income.NewSourceVO("Salary")
@@ -185,7 +188,7 @@ func createRandomExpense(t *testing.T, categoryID identifier.ID) *expense.Expens
 	id, err := identifier.NewID()
 	require.NoError(t, err)
 
-	amount, err := money.New(500)
+	amount, err := money.New(500, "USD")
 	require.NoError(t, err)
 
 	description, err := expense.NewExpenseDescriptionVO("Lunch")
