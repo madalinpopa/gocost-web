@@ -60,10 +60,11 @@ type UpdateIncomeRequest struct {
 }
 
 type IncomeResponse struct {
-	ID         string    `json:"id"`
-	Amount     float64   `json:"amount"`
-	Source     string    `json:"source"`
-	ReceivedAt time.Time `json:"received_at"`
+	ID          string    `json:"id"`
+	AmountCents int64     `json:"amount_cents"`
+	Currency    string    `json:"currency"`
+	Source      string    `json:"source"`
+	ReceivedAt  time.Time `json:"received_at"`
 }
 
 type CreateGroupRequest struct {
@@ -151,7 +152,8 @@ type UpdateExpenseRequest struct {
 type ExpenseResponse struct {
 	ID          string     `json:"id"`
 	CategoryID  string     `json:"category_id"`
-	Amount      float64    `json:"amount"`
+	AmountCents int64      `json:"amount_cents"`
+	Currency    string     `json:"currency"`
 	Description string     `json:"description"`
 	SpentAt     time.Time  `json:"spent_at"`
 	IsPaid      bool       `json:"is_paid"`
