@@ -290,8 +290,8 @@ type MockDashboardUseCase struct {
 	mock.Mock
 }
 
-func (m *MockDashboardUseCase) Get(ctx context.Context, userID string, month string) (*usecase.DashboardResponse, error) {
-	args := m.Called(ctx, userID, month)
+func (m *MockDashboardUseCase) Get(ctx context.Context, req *usecase.DashboardRequest) (*usecase.DashboardResponse, error) {
+	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
