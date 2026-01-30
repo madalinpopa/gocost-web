@@ -39,12 +39,14 @@ func (p *DashboardPresenter) Present(
 	expensesByCategory := make(map[string][]ExpenseView)
 	categorySpent := make(map[string]float64)
 	totalBudgeted := 0.0
+	paidExpensesTotal := 0.0
 
 	for _, exp := range expenses {
 		status := StatusUnpaid
 		paidAt := ""
 		if exp.IsPaid {
 			status = StatusPaid
+			paidExpensesTotal += exp.Amount
 			if exp.PaidAt != nil {
 				paidAt = exp.PaidAt.Format("2006-01-02")
 			}
@@ -65,6 +67,7 @@ func (p *DashboardPresenter) Present(
 	for id, spent := range categorySpent {
 		categorySpent[id] = math.Round(spent*100) / 100
 	}
+	paidExpensesTotal = math.Round(paidExpensesTotal*100) / 100
 
 	// Map to views
 	var groupViews []GroupView
@@ -180,6 +183,9 @@ func (p *DashboardPresenter) Present(
 			Categories:  categoryViews,
 		})
 	}
+
+	totalBudgeted -= paidExpensesTotal
+	totalBudgeted = math.Round(totalBudgeted*100) / 100
 
 	return DashboardView{
 		TotalIncome:         totalIncome,
