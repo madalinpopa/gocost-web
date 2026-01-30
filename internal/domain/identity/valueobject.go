@@ -93,3 +93,29 @@ func (p PasswordVO) Value() string {
 func (p PasswordVO) String() string {
 	return p.hash
 }
+
+type CurrencyVO struct {
+	code string
+}
+
+func NewCurrencyVO(code string) (CurrencyVO, error) {
+	if code == "" {
+		return CurrencyVO{}, ErrEmptyCurrency
+	}
+	if len(code) != 3 {
+		return CurrencyVO{}, ErrInvalidCurrency
+	}
+	return CurrencyVO{code: code}, nil
+}
+
+func (c CurrencyVO) Value() string {
+	return c.code
+}
+
+func (c CurrencyVO) String() string {
+	return c.code
+}
+
+func (c CurrencyVO) Equals(other CurrencyVO) bool {
+	return c.code == other.code
+}
