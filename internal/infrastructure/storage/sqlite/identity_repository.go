@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/madalinpopa/gocost-web/internal/domain/identity"
 	"github.com/madalinpopa/gocost-web/internal/platform/identifier"
@@ -39,7 +40,7 @@ func (r *SQLiteUserRepository) Save(ctx context.Context, user identity.User) err
 		if isUniqueConstraintViolation(err) {
 			return identity.ErrUserAlreadyExists
 		}
-		return err
+		return fmt.Errorf("failed to save user: %w", err)
 	}
 
 	return nil
@@ -55,7 +56,7 @@ func (r *SQLiteUserRepository) FindByID(ctx context.Context, id identity.ID) (id
 		if errors.Is(err, sql.ErrNoRows) {
 			return identity.User{}, identity.ErrUserNotFound
 		}
-		return identity.User{}, err
+		return identity.User{}, fmt.Errorf("failed to find user by id: %w", err)
 	}
 
 	return r.mapToUser(idStr, usernameStr, emailStr, passwordStr, currencyStr)
@@ -71,7 +72,7 @@ func (r *SQLiteUserRepository) FindByEmail(ctx context.Context, email identity.E
 		if errors.Is(err, sql.ErrNoRows) {
 			return identity.User{}, identity.ErrUserNotFound
 		}
-		return identity.User{}, err
+		return identity.User{}, fmt.Errorf("failed to find user by email: %w", err)
 	}
 
 	return r.mapToUser(idStr, usernameStr, emailStr, passwordStr, currencyStr)
@@ -87,7 +88,7 @@ func (r *SQLiteUserRepository) FindByUsername(ctx context.Context, username iden
 		if errors.Is(err, sql.ErrNoRows) {
 			return identity.User{}, identity.ErrUserNotFound
 		}
-		return identity.User{}, err
+		return identity.User{}, fmt.Errorf("failed to find user by username: %w", err)
 	}
 
 	return r.mapToUser(idStr, usernameStr, emailStr, passwordStr, currencyStr)
@@ -99,7 +100,7 @@ func (r *SQLiteUserRepository) ExistsByEmail(ctx context.Context, email identity
 	var exists bool
 	err := r.db.QueryRowContext(ctx, query, email.Value()).Scan(&exists)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("failed to check if user exists by email: %w", err)
 	}
 
 	return exists, nil
@@ -111,7 +112,7 @@ func (r *SQLiteUserRepository) ExistsByUsername(ctx context.Context, username id
 	var exists bool
 	err := r.db.QueryRowContext(ctx, query, username.Value()).Scan(&exists)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("failed to check if user exists by username: %w", err)
 	}
 
 	return exists, nil
