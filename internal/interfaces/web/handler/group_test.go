@@ -28,7 +28,7 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
@@ -75,7 +75,7 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
@@ -113,7 +113,7 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
@@ -155,7 +155,7 @@ func TestGroupHandler_CreateGroup(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Session: mockSession,
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
@@ -199,7 +199,7 @@ func TestGroupHandler_DeleteGroup(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Session: mockSession,
 			Logger:  logger,
 			Errors:  newTestErrors(logger, mockErrorHandler),
@@ -233,7 +233,7 @@ func TestGroupHandler_DeleteGroup(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Session: mockSession,
 			Logger:  logger,
 			Errors:  newTestErrors(logger, mockErrorHandler),

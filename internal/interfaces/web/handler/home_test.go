@@ -25,7 +25,7 @@ func TestHomeHandler_ShowHomePage(t *testing.T) {
 		mockSession := new(MockSessionManager)
 		mockErrorHandler := new(MockErrorHandler)
 
-		cfg := &config.Config{Currency: "$"}
+		cfg := &config.Config{Currency: "USD"}
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 		appCtx := HandlerContext{
 			Config:   cfg,
@@ -91,7 +91,7 @@ func TestHomeHandler_GetDashboardGroups(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Logger:  logger,
 			Session: mockSession,
 			Errors:  mockErrorHandler,

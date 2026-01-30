@@ -24,7 +24,7 @@ func newTestLogoutHandler(session *MockSessionManager) LogoutHandler {
 	errHandler := respond.NewErrorHandler(logger)
 
 	appCtx := HandlerContext{
-		Config:  &config.Config{Currency: "$"},
+		Config:  &config.Config{Currency: "USD"},
 		Logger:  logger,
 		Session: session,
 		Errors:  errHandler,
