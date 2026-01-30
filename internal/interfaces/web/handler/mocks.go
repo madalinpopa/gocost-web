@@ -285,3 +285,15 @@ func (m *MockExpenseUseCase) Total(ctx context.Context, userID string, month str
 	args := m.Called(ctx, userID, month)
 	return args.Get(0).(float64), args.Error(1)
 }
+
+type MockDashboardUseCase struct {
+	mock.Mock
+}
+
+func (m *MockDashboardUseCase) Get(ctx context.Context, userID string, month string) (*usecase.DashboardResponse, error) {
+	args := m.Called(ctx, userID, month)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*usecase.DashboardResponse), args.Error(1)
+}
