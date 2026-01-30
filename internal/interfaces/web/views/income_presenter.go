@@ -33,22 +33,42 @@ func (p *IncomeListPresenter) Present(incomes []*usecase.IncomeResponse) []Incom
 			ID:            inc.ID,
 			Source:        inc.Source,
 			ReceivedAt:    inc.ReceivedAt.Format(dateLayout),
-			AmountDisplay: p.formatAmount(inc.Amount),
+			AmountDisplay: p.formatAmount(inc.AmountCents, inc.Currency),
 		})
 	}
 
 	return views
 }
 
-func (p *IncomeListPresenter) formatAmount(amount float64) string {
-	m, err := money.NewFromFloat(amount, p.currency)
-	if err == nil {
-		return m.Display()
+func (p *IncomeListPresenter) formatAmount(cents int64, currency string) string {
+	displayCurrency := currency
+	if displayCurrency == "" {
+		displayCurrency = p.currency
 	}
 
-	if p.currency == "" {
-		return fmt.Sprintf("%.2f", amount)
+	if displayCurrency != "" {
+		m, err := money.New(cents, displayCurrency)
+		if err == nil {
+			return m.Display()
+		}
 	}
 
-	return fmt.Sprintf("%s %.2f", p.currency, amount)
+	return formatCents(cents, displayCurrency)
+}
+
+func formatCents(cents int64, currency string) string {
+	sign := ""
+	if cents < 0 {
+		sign = "-"
+		cents = -cents
+	}
+
+	units := cents / 100
+	fraction := cents % 100
+
+	if currency == "" {
+		return fmt.Sprintf("%s%d.%02d", sign, units, fraction)
+	}
+
+	return fmt.Sprintf("%s%s %d.%02d", sign, currency, units, fraction)
 }
