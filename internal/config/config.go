@@ -2,10 +2,14 @@ package config
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
+	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/spf13/viper"
 )
+
+const defaultCurrency = "USD"
 
 type Config struct {
 	// Version specifies the application version
@@ -86,14 +90,21 @@ func (c *Config) LoadEnvironments() error {
 	}
 	c.Domain = viper.GetString("DOMAIN")
 
-	c.Currency = viper.GetString("CURRENCY")
-	if c.Currency == "" {
-		c.Currency = "USD"
-	}
+	c.Currency = currencyCodeOrDefault(viper.GetString("CURRENCY"))
 
 	return nil
 }
 
 func (c *Config) GetEnvironment() string {
 	return c.environment
+}
+
+func currencyCodeOrDefault(value string) string {
+	currency, err := money.New(0, value)
+	if err != nil {
+		slog.Default().Error("invalid currency code; using default", "currency", value, "err", err)
+		return defaultCurrency
+	}
+
+	return currency.Currency()
 }
