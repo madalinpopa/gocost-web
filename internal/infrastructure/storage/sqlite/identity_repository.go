@@ -19,12 +19,13 @@ func NewSQLiteUserRepository(db DBExecutor) *SQLiteUserRepository {
 
 func (r *SQLiteUserRepository) Save(ctx context.Context, user identity.User) error {
 	query := `
-		INSERT INTO users (id, username, email, password) 
-		VALUES (?, ?, ?, ?)
+		INSERT INTO users (id, username, email, password, currency)
+		VALUES (?, ?, ?, ?, ?)
 		ON CONFLICT(id) DO UPDATE SET
 			username = excluded.username,
 			email = excluded.email,
-			password = excluded.password
+			password = excluded.password,
+			currency = excluded.currency
 	`
 
 	_, err := r.db.ExecContext(ctx, query,
@@ -32,6 +33,7 @@ func (r *SQLiteUserRepository) Save(ctx context.Context, user identity.User) err
 		user.Username.Value(),
 		user.Email.Value(),
 		user.Password.Value(),
+		user.Currency.Value(),
 	)
 	if err != nil {
 		if isUniqueConstraintViolation(err) {
@@ -44,11 +46,11 @@ func (r *SQLiteUserRepository) Save(ctx context.Context, user identity.User) err
 }
 
 func (r *SQLiteUserRepository) FindByID(ctx context.Context, id identity.ID) (identity.User, error) {
-	query := `SELECT id, username, email, password FROM users WHERE id = ?`
+	query := `SELECT id, username, email, password, currency FROM users WHERE id = ?`
 
-	var idStr, usernameStr, emailStr, passwordStr string
+	var idStr, usernameStr, emailStr, passwordStr, currencyStr string
 
-	err := r.db.QueryRowContext(ctx, query, id.String()).Scan(&idStr, &usernameStr, &emailStr, &passwordStr)
+	err := r.db.QueryRowContext(ctx, query, id.String()).Scan(&idStr, &usernameStr, &emailStr, &passwordStr, &currencyStr)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return identity.User{}, identity.ErrUserNotFound
@@ -56,15 +58,15 @@ func (r *SQLiteUserRepository) FindByID(ctx context.Context, id identity.ID) (id
 		return identity.User{}, err
 	}
 
-	return r.mapToUser(idStr, usernameStr, emailStr, passwordStr)
+	return r.mapToUser(idStr, usernameStr, emailStr, passwordStr, currencyStr)
 }
 
 func (r *SQLiteUserRepository) FindByEmail(ctx context.Context, email identity.EmailVO) (identity.User, error) {
-	query := `SELECT id, username, email, password FROM users WHERE email = ?`
+	query := `SELECT id, username, email, password, currency FROM users WHERE email = ?`
 
-	var idStr, usernameStr, emailStr, passwordStr string
+	var idStr, usernameStr, emailStr, passwordStr, currencyStr string
 
-	err := r.db.QueryRowContext(ctx, query, email.Value()).Scan(&idStr, &usernameStr, &emailStr, &passwordStr)
+	err := r.db.QueryRowContext(ctx, query, email.Value()).Scan(&idStr, &usernameStr, &emailStr, &passwordStr, &currencyStr)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return identity.User{}, identity.ErrUserNotFound
@@ -72,15 +74,15 @@ func (r *SQLiteUserRepository) FindByEmail(ctx context.Context, email identity.E
 		return identity.User{}, err
 	}
 
-	return r.mapToUser(idStr, usernameStr, emailStr, passwordStr)
+	return r.mapToUser(idStr, usernameStr, emailStr, passwordStr, currencyStr)
 }
 
 func (r *SQLiteUserRepository) FindByUsername(ctx context.Context, username identity.UsernameVO) (identity.User, error) {
-	query := `SELECT id, username, email, password FROM users WHERE username = ?`
+	query := `SELECT id, username, email, password, currency FROM users WHERE username = ?`
 
-	var idStr, usernameStr, emailStr, passwordStr string
+	var idStr, usernameStr, emailStr, passwordStr, currencyStr string
 
-	err := r.db.QueryRowContext(ctx, query, username.Value()).Scan(&idStr, &usernameStr, &emailStr, &passwordStr)
+	err := r.db.QueryRowContext(ctx, query, username.Value()).Scan(&idStr, &usernameStr, &emailStr, &passwordStr, &currencyStr)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return identity.User{}, identity.ErrUserNotFound
@@ -88,7 +90,7 @@ func (r *SQLiteUserRepository) FindByUsername(ctx context.Context, username iden
 		return identity.User{}, err
 	}
 
-	return r.mapToUser(idStr, usernameStr, emailStr, passwordStr)
+	return r.mapToUser(idStr, usernameStr, emailStr, passwordStr, currencyStr)
 }
 
 func (r *SQLiteUserRepository) ExistsByEmail(ctx context.Context, email identity.EmailVO) (bool, error) {
@@ -115,7 +117,7 @@ func (r *SQLiteUserRepository) ExistsByUsername(ctx context.Context, username id
 	return exists, nil
 }
 
-func (r *SQLiteUserRepository) mapToUser(idStr, usernameStr, emailStr, passwordStr string) (identity.User, error) {
+func (r *SQLiteUserRepository) mapToUser(idStr, usernameStr, emailStr, passwordStr, currencyStr string) (identity.User, error) {
 	id, err := identifier.ParseID(idStr)
 	if err != nil {
 		return identity.User{}, err
@@ -136,5 +138,10 @@ func (r *SQLiteUserRepository) mapToUser(idStr, usernameStr, emailStr, passwordS
 		return identity.User{}, err
 	}
 
-	return *identity.NewUser(id, username, email, password), nil
+	currency, err := identity.NewCurrencyVO(currencyStr)
+	if err != nil {
+		return identity.User{}, err
+	}
+
+	return *identity.NewUser(id, username, email, password, currency), nil
 }

@@ -33,6 +33,7 @@ func TestSQLiteUserRepository(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, user.ID.String(), foundUser.ID.String())
 		assert.Equal(t, user.Email.Value(), foundUser.Email.Value())
+		assert.Equal(t, user.Currency.Value(), foundUser.Currency.Value())
 	})
 
 	t.Run("FindByID_NotFound", func(t *testing.T) {
@@ -79,7 +80,8 @@ func TestSQLiteUserRepository(t *testing.T) {
 		assert.NoError(t, err)
 
 		user2 := createRandomUser(t)
-		duplicateUser := identity.NewUser(user2.ID, user2.Username, user1.Email, user2.Password)
+		currency, _ := identity.NewCurrencyVO("USD")
+		duplicateUser := identity.NewUser(user2.ID, user2.Username, user1.Email, user2.Password, currency)
 
 		err = repo.Save(ctx, *duplicateUser)
 		assert.ErrorIs(t, err, identity.ErrUserAlreadyExists)
@@ -91,7 +93,8 @@ func TestSQLiteUserRepository(t *testing.T) {
 		assert.NoError(t, err)
 
 		user2 := createRandomUser(t)
-		duplicateUser := identity.NewUser(user2.ID, user1.Username, user2.Email, user2.Password)
+		currency, _ := identity.NewCurrencyVO("USD")
+		duplicateUser := identity.NewUser(user2.ID, user1.Username, user2.Email, user2.Password, currency)
 
 		err = repo.Save(ctx, *duplicateUser)
 		assert.ErrorIs(t, err, identity.ErrUserAlreadyExists)
@@ -118,7 +121,8 @@ func TestSQLiteUserRepository(t *testing.T) {
 		assert.NoError(t, err)
 
 		newUsername, _ := identity.NewUsernameVO("updated" + user.Username.Value())
-		updatedUser := identity.NewUser(user.ID, newUsername, user.Email, user.Password)
+		currency, _ := identity.NewCurrencyVO("EUR")
+		updatedUser := identity.NewUser(user.ID, newUsername, user.Email, user.Password, currency)
 
 		err = repo.Save(ctx, *updatedUser)
 		assert.NoError(t, err)
@@ -126,5 +130,6 @@ func TestSQLiteUserRepository(t *testing.T) {
 		foundUser, err := repo.FindByID(ctx, user.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, newUsername.Value(), foundUser.Username.Value())
+		assert.Equal(t, "EUR", foundUser.Currency.Value())
 	})
 }
