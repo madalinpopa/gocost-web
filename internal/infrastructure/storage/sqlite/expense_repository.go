@@ -221,26 +221,19 @@ func (r *SQLiteExpenseRepository) Total(ctx context.Context, userID identifier.I
 
 	query := `
 		SELECT COALESCE(SUM(e.amount), 0), u.currency
-		FROM expenses e
-		JOIN categories c ON e.category_id = c.id
-		JOIN groups g ON c.group_id = g.id
-		JOIN users u ON g.user_id = u.id
-		WHERE g.user_id = ? AND e.spent_at >= ? AND e.spent_at < ?
+		FROM users u
+		LEFT JOIN groups g ON u.id = g.user_id
+		LEFT JOIN categories c ON g.id = c.group_id
+		LEFT JOIN expenses e ON c.id = e.category_id AND e.spent_at >= ? AND e.spent_at < ?
+		WHERE u.id = ?
 		GROUP BY u.currency
 	`
 	var totalCents int64
 	var currencyStr string
-	err = r.db.QueryRowContext(ctx, query, userID.String(), start, end).Scan(&totalCents, &currencyStr)
+	err = r.db.QueryRowContext(ctx, query, start, end, userID.String()).Scan(&totalCents, &currencyStr)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			// If no expenses, we still need currency.
-			// Fallback: fetch currency from user directly.
-			userQuery := `SELECT currency FROM users WHERE id = ?`
-			err = r.db.QueryRowContext(ctx, userQuery, userID.String()).Scan(&currencyStr)
-			if err != nil {
-				return money.Money{}, fmt.Errorf("failed to get user currency: %w", err)
-			}
-			return money.New(0, currencyStr)
+			return money.Money{}, fmt.Errorf("failed to get user currency: %w", err)
 		}
 		return money.Money{}, fmt.Errorf("failed to calculate expense total: %w", err)
 	}
