@@ -2,7 +2,6 @@ package money
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/Rhymond/go-money"
 )
@@ -81,18 +80,7 @@ func (m Money) Display() string {
 		return sign + formattedAmount
 	}
 
-	template := currency.Template
-	amountIndex := strings.Index(template, "1")
-	graphemeIndex := strings.Index(template, "$")
-	if amountIndex == -1 || graphemeIndex == -1 {
-		return sign + grapheme + " " + formattedAmount
-	}
-
-	if graphemeIndex < amountIndex {
-		return sign + grapheme + " " + formattedAmount
-	}
-
-	return sign + formattedAmount + " " + grapheme
+	return sign + grapheme + " " + formattedAmount
 }
 
 func (m Money) String() string {
