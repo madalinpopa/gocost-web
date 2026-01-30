@@ -216,6 +216,11 @@ func (m *MockExpenseRepository) TotalsByCategoryAndMonth(ctx context.Context, us
 	return args.Get(0).([]expense.CategoryTotals), args.Error(1)
 }
 
+func (m *MockExpenseRepository) ReassignCategoryFromMonth(ctx context.Context, userID expense.ID, fromCategoryID expense.ID, toCategoryID expense.ID, month string) error {
+	args := m.Called(ctx, userID, fromCategoryID, toCategoryID, month)
+	return args.Error(0)
+}
+
 func (m *MockExpenseRepository) Delete(ctx context.Context, id expense.ID) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
