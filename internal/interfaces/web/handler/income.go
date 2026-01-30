@@ -50,19 +50,22 @@ func (h *IncomeHandler) CreateIncome(w http.ResponseWriter, r *http.Request) {
 
 	date, _ := time.Parse("2006-01-02", incomeForm.CurrentMonth+"-01")
 
-	req := &usecase.CreateIncomeRequest{
-		Amount:     incomeForm.ParsedAmount(),
-		Source:     incomeForm.Description,
-		ReceivedAt: date,
-	}
-
 	userID := h.app.Session.GetUserID(r.Context())
 	if userID == "" {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
+	currency := h.app.Session.GetCurrency(r.Context())
 
-	_, err = h.income.Create(r.Context(), userID, req)
+	req := &usecase.CreateIncomeRequest{
+		UserID:     userID,
+		Currency:   currency,
+		Amount:     incomeForm.ParsedAmount(),
+		Source:     incomeForm.Description,
+		ReceivedAt: date,
+	}
+
+	_, err = h.income.Create(r.Context(), req)
 	if err != nil {
 		h.app.Errors.LogServerError(r, err)
 		return
