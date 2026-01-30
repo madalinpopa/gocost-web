@@ -15,4 +15,6 @@ var (
 	ErrInvalidHash        = errors.New("invalid password hash")
 	ErrUserNotFound       = errors.New("user not found")
 	ErrUserAlreadyExists  = errors.New("user already exists")
+	ErrInvalidCurrency    = errors.New("invalid currency code")
+	ErrEmptyCurrency      = errors.New("currency cannot be empty")
 )
