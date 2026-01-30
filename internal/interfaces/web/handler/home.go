@@ -96,7 +96,10 @@ func (hh HomeHandler) fetchDashboardData(ctx context.Context, userID string, dat
 	monthStr := date.Format("2006-01")
 
 	currency := hh.app.Session.GetCurrency(ctx)
-	dashboardData, err := hh.dashboardUC.Get(ctx, userID, monthStr)
+	dashboardData, err := hh.dashboardUC.Get(ctx, &usecase.DashboardRequest{
+		UserID: userID,
+		Month:  monthStr,
+	})
 	if err != nil {
 		return views.DashboardView{}, err
 	}
