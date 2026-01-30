@@ -157,3 +157,32 @@ type ExpenseResponse struct {
 	IsPaid      bool       `json:"is_paid"`
 	PaidAt      *time.Time `json:"paid_at,omitempty"`
 }
+
+type DashboardCategoryResponse struct {
+	ID             string
+	Name           string
+	Description    string
+	IsRecurrent    bool
+	StartMonth     string
+	EndMonth       string
+	BudgetCents    int64
+	SpentCents     int64
+	PaidSpentCents int64
+	Expenses       []*ExpenseResponse
+}
+
+type DashboardGroupResponse struct {
+	ID          string
+	Name        string
+	Description string
+	Order       int
+	Categories  []DashboardCategoryResponse
+}
+
+type DashboardResponse struct {
+	TotalIncomeCents   int64
+	TotalExpensesCents int64
+	TotalBudgetedCents int64
+	PaidExpensesCents  int64
+	Groups             []DashboardGroupResponse
+}
