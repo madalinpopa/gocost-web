@@ -41,7 +41,7 @@ func (r *SQLiteExpenseRepository) Save(ctx context.Context, e expense.Expense) e
 	_, err := r.db.ExecContext(ctx, query,
 		e.ID.String(),
 		e.CategoryID.String(),
-		e.Amount.Amount(),
+		e.Amount.Cents(), // Changed from Amount() float to Cents() int64
 		e.Description.Value(),
 		e.SpentAt,
 		e.Payment.IsPaid(),
@@ -55,15 +55,23 @@ func (r *SQLiteExpenseRepository) Save(ctx context.Context, e expense.Expense) e
 }
 
 func (r *SQLiteExpenseRepository) FindByID(ctx context.Context, id identifier.ID) (expense.Expense, error) {
-	query := `SELECT id, category_id, amount, description, spent_at, is_paid, paid_at FROM expenses WHERE id = ?`
+	// Updated query to join up to users to get currency
+	query := `
+		SELECT e.id, e.category_id, e.amount, e.description, e.spent_at, e.is_paid, e.paid_at, u.currency 
+		FROM expenses e
+		JOIN categories c ON e.category_id = c.id
+		JOIN groups g ON c.group_id = g.id
+		JOIN users u ON g.user_id = u.id
+		WHERE e.id = ?
+	`
 
-	var idStr, categoryIDStr, descriptionStr string
-	var amountFloat float64
+	var idStr, categoryIDStr, descriptionStr, currencyStr string
+	var amountCents int64
 	var spentAt time.Time
 	var isPaidInt int
 	var paidAt sql.NullTime
 
-	err := r.db.QueryRowContext(ctx, query, id.String()).Scan(&idStr, &categoryIDStr, &amountFloat, &descriptionStr, &spentAt, &isPaidInt, &paidAt)
+	err := r.db.QueryRowContext(ctx, query, id.String()).Scan(&idStr, &categoryIDStr, &amountCents, &descriptionStr, &spentAt, &isPaidInt, &paidAt, &currencyStr)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return expense.Expense{}, expense.ErrExpenseNotFound
@@ -71,15 +79,16 @@ func (r *SQLiteExpenseRepository) FindByID(ctx context.Context, id identifier.ID
 		return expense.Expense{}, err
 	}
 
-	return r.mapToExpense(idStr, categoryIDStr, amountFloat, descriptionStr, spentAt, isPaidInt == 1, paidAt)
+	return r.mapToExpense(idStr, categoryIDStr, amountCents, currencyStr, descriptionStr, spentAt, isPaidInt == 1, paidAt)
 }
 
 func (r *SQLiteExpenseRepository) FindByUserID(ctx context.Context, userID identifier.ID) ([]expense.Expense, error) {
 	query := `
-		SELECT e.id, e.category_id, e.amount, e.description, e.spent_at, e.is_paid, e.paid_at 
+		SELECT e.id, e.category_id, e.amount, e.description, e.spent_at, e.is_paid, e.paid_at, u.currency 
 		FROM expenses e 
 		JOIN categories c ON e.category_id = c.id 
 		JOIN groups g ON c.group_id = g.id 
+		JOIN users u ON g.user_id = u.id
 		WHERE g.user_id = ? 
 		ORDER BY e.spent_at DESC
 	`
@@ -94,10 +103,11 @@ func (r *SQLiteExpenseRepository) FindByUserIDAndMonth(ctx context.Context, user
 	}
 
 	query := `
-		SELECT e.id, e.category_id, e.amount, e.description, e.spent_at, e.is_paid, e.paid_at 
+		SELECT e.id, e.category_id, e.amount, e.description, e.spent_at, e.is_paid, e.paid_at, u.currency 
 		FROM expenses e 
 		JOIN categories c ON e.category_id = c.id 
 		JOIN groups g ON c.group_id = g.id 
+		JOIN users u ON g.user_id = u.id
 		WHERE g.user_id = ? AND e.spent_at >= ? AND e.spent_at < ?
 		ORDER BY e.spent_at DESC
 	`
@@ -114,17 +124,17 @@ func (r *SQLiteExpenseRepository) fetchExpenses(ctx context.Context, query strin
 
 	var expenses []expense.Expense
 	for rows.Next() {
-		var idStr, categoryIDStr, descriptionStr string
-		var amountFloat float64
+		var idStr, categoryIDStr, descriptionStr, currencyStr string
+		var amountCents int64
 		var spentAt time.Time
 		var isPaidInt int
 		var paidAt sql.NullTime
 
-		if err := rows.Scan(&idStr, &categoryIDStr, &amountFloat, &descriptionStr, &spentAt, &isPaidInt, &paidAt); err != nil {
+		if err := rows.Scan(&idStr, &categoryIDStr, &amountCents, &descriptionStr, &spentAt, &isPaidInt, &paidAt, &currencyStr); err != nil {
 			return nil, err
 		}
 
-		exp, err := r.mapToExpense(idStr, categoryIDStr, amountFloat, descriptionStr, spentAt, isPaidInt == 1, paidAt)
+		exp, err := r.mapToExpense(idStr, categoryIDStr, amountCents, currencyStr, descriptionStr, spentAt, isPaidInt == 1, paidAt)
 		if err != nil {
 			return nil, err
 		}
@@ -138,25 +148,38 @@ func (r *SQLiteExpenseRepository) fetchExpenses(ctx context.Context, query strin
 	return expenses, nil
 }
 
-func (r *SQLiteExpenseRepository) Total(ctx context.Context, userID identifier.ID, month string) (float64, error) {
+func (r *SQLiteExpenseRepository) Total(ctx context.Context, userID identifier.ID, month string) (money.Money, error) {
 	start, end, err := monthToDateRange(month)
 	if err != nil {
-		return 0, err
+		return money.Money{}, err
 	}
 
 	query := `
-		SELECT COALESCE(SUM(e.amount), 0)
+		SELECT COALESCE(SUM(e.amount), 0), u.currency
 		FROM expenses e
 		JOIN categories c ON e.category_id = c.id
 		JOIN groups g ON c.group_id = g.id
+		JOIN users u ON g.user_id = u.id
 		WHERE g.user_id = ? AND e.spent_at >= ? AND e.spent_at < ?
+		GROUP BY u.currency
 	`
-	var total float64
-	err = r.db.QueryRowContext(ctx, query, userID.String(), start, end).Scan(&total)
+	var totalCents int64
+	var currencyStr string
+	err = r.db.QueryRowContext(ctx, query, userID.String(), start, end).Scan(&totalCents, &currencyStr)
 	if err != nil {
-		return 0, err
+		if errors.Is(err, sql.ErrNoRows) {
+			// If no expenses, we still need currency.
+			// Fallback: fetch currency from user directly.
+			userQuery := `SELECT currency FROM users WHERE id = ?`
+			err = r.db.QueryRowContext(ctx, userQuery, userID.String()).Scan(&currencyStr)
+			if err != nil {
+				return money.Money{}, err
+			}
+			return money.New(0, currencyStr)
+		}
+		return money.Money{}, err
 	}
-	return total, nil
+	return money.New(totalCents, currencyStr)
 }
 
 func (r *SQLiteExpenseRepository) Delete(ctx context.Context, id identifier.ID) error {
@@ -175,7 +198,7 @@ func (r *SQLiteExpenseRepository) Delete(ctx context.Context, id identifier.ID) 
 	return nil
 }
 
-func (r *SQLiteExpenseRepository) mapToExpense(idStr, categoryIDStr string, amountFloat float64, descriptionStr string, spentAt time.Time, isPaid bool, paidAt sql.NullTime) (expense.Expense, error) {
+func (r *SQLiteExpenseRepository) mapToExpense(idStr, categoryIDStr string, amountCents int64, currencyStr string, descriptionStr string, spentAt time.Time, isPaid bool, paidAt sql.NullTime) (expense.Expense, error) {
 	id, err := identifier.ParseID(idStr)
 	if err != nil {
 		return expense.Expense{}, err
@@ -186,7 +209,7 @@ func (r *SQLiteExpenseRepository) mapToExpense(idStr, categoryIDStr string, amou
 		return expense.Expense{}, err
 	}
 
-	amount, err := money.NewFromFloat(amountFloat)
+	amount, err := money.New(amountCents, currencyStr)
 	if err != nil {
 		return expense.Expense{}, err
 	}
