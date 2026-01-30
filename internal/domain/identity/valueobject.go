@@ -1,6 +1,10 @@
 package identity
 
-import "regexp"
+import (
+	"regexp"
+
+	"github.com/Rhymond/go-money"
+)
 
 var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
@@ -102,7 +106,7 @@ func NewCurrencyVO(code string) (CurrencyVO, error) {
 	if code == "" {
 		return CurrencyVO{}, ErrEmptyCurrency
 	}
-	if len(code) != 3 {
+	if money.GetCurrency(code) == nil {
 		return CurrencyVO{}, ErrInvalidCurrency
 	}
 	return CurrencyVO{code: code}, nil
