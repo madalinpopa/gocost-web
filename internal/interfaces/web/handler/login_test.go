@@ -106,11 +106,13 @@ func TestLoginHandler_SubmitLoginForm(t *testing.T) {
 		authMock.On("Login", req.Context(), expectedReq).Return(&usecase.LoginResponse{
 			UserID:   "user-123",
 			Username: "testuser",
+			Currency: "USD",
 		}, nil)
 
 		sessionMock.On("RenewToken", req.Context()).Return(nil)
 		sessionMock.On("SetUserID", req.Context(), "user-123").Return()
 		sessionMock.On("SetUsername", req.Context(), "testuser").Return()
+		sessionMock.On("SetCurrency", req.Context(), "USD").Return()
 
 		handler.SubmitLoginForm(rec, req)
 
