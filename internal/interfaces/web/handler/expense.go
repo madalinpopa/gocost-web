@@ -9,7 +9,6 @@ import (
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/form"
-	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/madalinpopa/gocost-web/ui/templates/components"
 )
@@ -198,7 +197,7 @@ func (h *ExpenseHandler) DeleteExpense(w http.ResponseWriter, r *http.Request) {
 
 func translateExpenseError(err error) (string, bool) {
 	switch {
-	case errors.Is(err, money.ErrNegativeAmount):
+	case errors.Is(err, expense.ErrInvalidAmount):
 		return "Amount cannot be negative.", true
 	case errors.Is(err, expense.ErrExpenseDescriptionTooLong):
 		return "Description is too long.", true

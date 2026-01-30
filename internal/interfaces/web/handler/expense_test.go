@@ -16,7 +16,6 @@ import (
 	"github.com/madalinpopa/gocost-web/internal/domain/expense"
 	"github.com/madalinpopa/gocost-web/internal/domain/tracking"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/respond"
-	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -31,7 +30,7 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
@@ -84,7 +83,7 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
@@ -134,7 +133,7 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
@@ -170,7 +169,7 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
@@ -214,7 +213,7 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
@@ -260,7 +259,7 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
@@ -316,7 +315,7 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
@@ -349,7 +348,7 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
@@ -378,7 +377,7 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 			SpentAt: time.Now(),
 		}, nil)
 
-		expectedErr := money.ErrNegativeAmount
+		expectedErr := expense.ErrInvalidAmount
 		mockExpenseUC.On("Update", req.Context(), userID, mock.Anything).Return(nil, expectedErr)
 
 		// Act
@@ -398,7 +397,7 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
@@ -444,7 +443,7 @@ func TestExpenseHandler_DeleteExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Logger:  logger,
 			Session: mockSession,
 			Errors:  newTestErrors(logger, mockErrorHandler),
@@ -478,7 +477,7 @@ func TestExpenseHandler_DeleteExpense(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Logger:  logger,
 			Session: mockSession,
 			Errors:  newTestErrors(logger, mockErrorHandler),
@@ -516,7 +515,7 @@ func TestExpenseHandler_GetCreateForm(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Logger:  logger,
 			Session: mockSession,
 			Errors:  newTestErrors(logger, mockErrorHandler),
@@ -546,7 +545,7 @@ func TestExpenseHandler_GetCreateForm(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Logger:  logger,
 			Session: mockSession,
 			Errors:  newTestErrors(logger, mockErrorHandler),
@@ -575,7 +574,7 @@ func TestExpenseHandler_GetCreateForm(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Logger:  logger,
 			Session: mockSession,
 			Errors:  newTestErrors(logger, mockErrorHandler),
