@@ -2,6 +2,7 @@ package money
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/Rhymond/go-money"
 )
