@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/madalinpopa/gocost-web/internal/domain/income"
@@ -44,7 +45,7 @@ func (r *SQLiteIncomeRepository) Save(ctx context.Context, i income.Income) erro
 		i.ReceivedAt,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to save income: %w", err)
 	}
 
 	return nil
@@ -69,7 +70,7 @@ func (r *SQLiteIncomeRepository) FindByID(ctx context.Context, id identifier.ID)
 		if errors.Is(err, sql.ErrNoRows) {
 			return income.Income{}, income.ErrIncomeNotFound
 		}
-		return income.Income{}, err
+		return income.Income{}, fmt.Errorf("failed to find income by id: %w", err)
 	}
 
 	return r.mapToIncome(idStr, userIDStr, amountCents, currencyStr, source, receivedAt)
@@ -86,7 +87,7 @@ func (r *SQLiteIncomeRepository) FindByUserID(ctx context.Context, userID identi
 
 	rows, err := r.db.QueryContext(ctx, query, userID.String())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to query incomes by user: %w", err)
 	}
 	defer rows.Close()
 
@@ -98,18 +99,18 @@ func (r *SQLiteIncomeRepository) FindByUserID(ctx context.Context, userID identi
 		var receivedAt time.Time
 
 		if err := rows.Scan(&idStr, &userIDStr, &amountCents, &source, &receivedAt, &currencyStr); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan income row: %w", err)
 		}
 
 		inc, err := r.mapToIncome(idStr, userIDStr, amountCents, currencyStr, source, receivedAt)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to map income: %w", err)
 		}
 		incomes = append(incomes, inc)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error iterating incomes: %w", err)
 	}
 
 	return incomes, nil
@@ -118,7 +119,7 @@ func (r *SQLiteIncomeRepository) FindByUserID(ctx context.Context, userID identi
 func (r *SQLiteIncomeRepository) FindByUserIDAndMonth(ctx context.Context, userID identifier.ID, month string) ([]income.Income, error) {
 	start, end, err := monthToDateRange(month)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to parse month: %w", err)
 	}
 
 	query := `
@@ -131,7 +132,7 @@ func (r *SQLiteIncomeRepository) FindByUserIDAndMonth(ctx context.Context, userI
 
 	rows, err := r.db.QueryContext(ctx, query, userID.String(), start, end)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to query incomes by month: %w", err)
 	}
 	defer rows.Close()
 
@@ -143,18 +144,18 @@ func (r *SQLiteIncomeRepository) FindByUserIDAndMonth(ctx context.Context, userI
 		var receivedAt time.Time
 
 		if err := rows.Scan(&idStr, &userIDStr, &amountCents, &source, &receivedAt, &currencyStr); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan income row: %w", err)
 		}
 
 		inc, err := r.mapToIncome(idStr, userIDStr, amountCents, currencyStr, source, receivedAt)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to map income: %w", err)
 		}
 		incomes = append(incomes, inc)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error iterating incomes: %w", err)
 	}
 
 	return incomes, nil
@@ -163,7 +164,7 @@ func (r *SQLiteIncomeRepository) FindByUserIDAndMonth(ctx context.Context, userI
 func (r *SQLiteIncomeRepository) TotalByUserIDAndMonth(ctx context.Context, userID identifier.ID, month string) (money.Money, error) {
 	start, end, err := monthToDateRange(month)
 	if err != nil {
-		return money.Money{}, err
+		return money.Money{}, fmt.Errorf("failed to parse month: %w", err)
 	}
 
 	query := `
@@ -182,11 +183,11 @@ func (r *SQLiteIncomeRepository) TotalByUserIDAndMonth(ctx context.Context, user
 			userQuery := `SELECT currency FROM users WHERE id = ?`
 			err = r.db.QueryRowContext(ctx, userQuery, userID.String()).Scan(&currencyStr)
 			if err != nil {
-				return money.Money{}, err
+				return money.Money{}, fmt.Errorf("failed to get user currency: %w", err)
 			}
 			return money.New(0, currencyStr)
 		}
-		return money.Money{}, err
+		return money.Money{}, fmt.Errorf("failed to calculate income total: %w", err)
 	}
 
 	return money.New(totalCents, currencyStr)
@@ -196,11 +197,11 @@ func (r *SQLiteIncomeRepository) Delete(ctx context.Context, id identifier.ID) e
 	query := `DELETE FROM incomes WHERE id = ?`
 	result, err := r.db.ExecContext(ctx, query, id.String())
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to delete income: %w", err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get rows affected: %w", err)
 	}
 	if rowsAffected == 0 {
 		return income.ErrIncomeNotFound
