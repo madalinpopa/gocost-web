@@ -15,7 +15,7 @@ type UseCase struct {
 	ExpenseUseCase  ExpenseUseCase
 }
 
-func New(uow *sqlite.SqliteUnitOfWork, logger *slog.Logger, defaultCurrency string) *UseCase {
+func New(uow *sqlite.SqliteUnitOfWork, logger *slog.Logger) *UseCase {
 	// Infra services
 	passwordHasher := security.NewPasswordHasher()
 

@@ -61,7 +61,7 @@ func newApplication(db *sql.DB, logger *slog.Logger, conf *config.Config) *appli
 		Session:  ss,
 	}
 
-	useCases := usecase.New(uow, logger, conf.Currency)
+	useCases := usecase.New(uow, logger)
 	handlers := handler.New(appContext, useCases)
 
 	rr := router.New(mm)
