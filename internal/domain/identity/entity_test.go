@@ -12,17 +12,20 @@ func TestNewUser(t *testing.T) {
 		// Arrange
 		id, _ := identifier.NewID()
 		username, _ := NewUsernameVO("testuser")
-		email, _ := NewEmailVO("test@example.com")
-		password, _ := NewPasswordVO("$2a$12$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ12")
-
-		// Act
-		user := NewUser(id, username, email, password)
-
-		// Assert
-		assert.NotNil(t, user)
-		assert.Equal(t, id, user.ID)
-		assert.Equal(t, username, user.Username)
-		assert.Equal(t, email, user.Email)
-		assert.Equal(t, password, user.Password)
-	})
-}
+				email, _ := NewEmailVO("test@example.com")
+				password, _ := NewPasswordVO("$2a		2$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ12")
+				currency, _ := NewCurrencyVO("USD")
+		
+				// Act
+				user := NewUser(id, username, email, password, currency)
+		
+				// Assert
+				assert.NotNil(t, user)
+				assert.Equal(t, id, user.ID)
+				assert.Equal(t, username, user.Username)
+				assert.Equal(t, email, user.Email)
+				assert.Equal(t, password, user.Password)
+				assert.Equal(t, currency, user.Currency)
+			})
+		}
+		
