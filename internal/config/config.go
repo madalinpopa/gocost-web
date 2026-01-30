@@ -88,7 +88,7 @@ func (c *Config) LoadEnvironments() error {
 
 	c.Currency = viper.GetString("CURRENCY")
 	if c.Currency == "" {
-		c.Currency = "$"
+		c.Currency = "USD"
 	}
 
 	return nil
