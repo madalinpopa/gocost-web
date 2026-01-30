@@ -177,13 +177,14 @@ templ ExpenseItem(expense views.ExpenseView, categoryId string) {
 }
 
 func getProgressBarClass(c views.CategoryView) string {
-	if c.IsOverBudget {
+	switch c.BudgetStatus {
+	case views.BudgetStatusOver:
 		return "bg-rose-500"
+	case views.BudgetStatusEqual:
+		return "bg-orange-500"
+	default:
+		return "bg-emerald-500"
 	}
-	if c.IsNearBudget {
-		return "bg-amber-500"
-	}
-	return "bg-emerald-500"
 }
 
 templ CategoryProgressBar(category views.CategoryView) {
