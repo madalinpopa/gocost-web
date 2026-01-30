@@ -59,10 +59,11 @@ func (u IncomeUseCaseImpl) Create(ctx context.Context, req *CreateIncomeRequest)
 	}
 
 	return &IncomeResponse{
-		ID:         inc.ID.String(),
-		Amount:     inc.Amount.Amount(),
-		Source:     inc.Source.Value(),
-		ReceivedAt: inc.ReceivedAt,
+		ID:          inc.ID.String(),
+		AmountCents: inc.Amount.Cents(),
+		Currency:    inc.Amount.Currency(),
+		Source:      inc.Source.Value(),
+		ReceivedAt:  inc.ReceivedAt,
 	}, nil
 }
 
@@ -111,10 +112,11 @@ func (u IncomeUseCaseImpl) Update(ctx context.Context, req *UpdateIncomeRequest)
 	}
 
 	return &IncomeResponse{
-		ID:         updatedInc.ID.String(),
-		Amount:     updatedInc.Amount.Amount(),
-		Source:     updatedInc.Source.Value(),
-		ReceivedAt: updatedInc.ReceivedAt,
+		ID:          updatedInc.ID.String(),
+		AmountCents: updatedInc.Amount.Cents(),
+		Currency:    updatedInc.Amount.Currency(),
+		Source:      updatedInc.Source.Value(),
+		ReceivedAt:  updatedInc.ReceivedAt,
 	}, nil
 }
 
@@ -164,10 +166,11 @@ func (u IncomeUseCaseImpl) Get(ctx context.Context, userID string, id string) (*
 	}
 
 	return &IncomeResponse{
-		ID:         inc.ID.String(),
-		Amount:     inc.Amount.Amount(),
-		Source:     inc.Source.Value(),
-		ReceivedAt: inc.ReceivedAt,
+		ID:          inc.ID.String(),
+		AmountCents: inc.Amount.Cents(),
+		Currency:    inc.Amount.Currency(),
+		Source:      inc.Source.Value(),
+		ReceivedAt:  inc.ReceivedAt,
 	}, nil
 }
 
@@ -186,10 +189,11 @@ func (u IncomeUseCaseImpl) List(ctx context.Context, userID string) ([]*IncomeRe
 	responses := make([]*IncomeResponse, len(incomes))
 	for i, inc := range incomes {
 		responses[i] = &IncomeResponse{
-			ID:         inc.ID.String(),
-			Amount:     inc.Amount.Amount(),
-			Source:     inc.Source.Value(),
-			ReceivedAt: inc.ReceivedAt,
+			ID:          inc.ID.String(),
+			AmountCents: inc.Amount.Cents(),
+			Currency:    inc.Amount.Currency(),
+			Source:      inc.Source.Value(),
+			ReceivedAt:  inc.ReceivedAt,
 		}
 	}
 
@@ -211,10 +215,11 @@ func (u IncomeUseCaseImpl) ListByMonth(ctx context.Context, userID string, month
 	responses := make([]*IncomeResponse, 0, len(incomes))
 	for _, inc := range incomes {
 		responses = append(responses, &IncomeResponse{
-			ID:         inc.ID.String(),
-			Amount:     inc.Amount.Amount(),
-			Source:     inc.Source.Value(),
-			ReceivedAt: inc.ReceivedAt,
+			ID:          inc.ID.String(),
+			AmountCents: inc.Amount.Cents(),
+			Currency:    inc.Amount.Currency(),
+			Source:      inc.Source.Value(),
+			ReceivedAt:  inc.ReceivedAt,
 		})
 	}
 
