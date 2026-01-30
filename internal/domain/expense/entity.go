@@ -19,7 +19,8 @@ type Expense struct {
 }
 
 func NewExpense(id ID, categoryID ID, amount money.Money, description ExpenseDescriptionVO, spentAt time.Time, payment PaymentStatus) (*Expense, error) {
-	if amount.IsZero() || !amount.IsPositive() {
+	isPositive, err := amount.IsPositive()
+	if err != nil || !isPositive {
 		return nil, ErrInvalidAmount
 	}
 
