@@ -43,7 +43,10 @@ func TestHomeHandler_ShowHomePage(t *testing.T) {
 		mockSession.On("IsAuthenticated", req.Context()).Return(true)
 		mockSession.On("GetCurrency", req.Context()).Return("USD")
 
-		mockDashboardUC.On("Get", req.Context(), userID, "2023-10").Return(&usecase.DashboardResponse{}, nil)
+		mockDashboardUC.On("Get", req.Context(), &usecase.DashboardRequest{
+			UserID: userID,
+			Month:  "2023-10",
+		}).Return(&usecase.DashboardResponse{}, nil)
 
 		// Act
 		defer func() {
@@ -83,7 +86,10 @@ func TestHomeHandler_GetDashboardGroups(t *testing.T) {
 		mockSession.On("GetUserID", req.Context()).Return(userID)
 		mockSession.On("GetCurrency", req.Context()).Return("USD")
 
-		mockDashboardUC.On("Get", req.Context(), userID, "2023-10").Return(&usecase.DashboardResponse{}, nil)
+		mockDashboardUC.On("Get", req.Context(), &usecase.DashboardRequest{
+			UserID: userID,
+			Month:  "2023-10",
+		}).Return(&usecase.DashboardResponse{}, nil)
 
 		// Act
 		handler.GetDashboardGroups(rec, req)
