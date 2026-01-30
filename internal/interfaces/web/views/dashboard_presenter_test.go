@@ -118,3 +118,28 @@ func TestDashboardPresenter_Present_TotalBudgetedStatus(t *testing.T) {
 		assert.Equal(t, BudgetStatusOver, view.TotalBudgetedStatus)
 	})
 }
+
+func TestDashboardPresenter_Present_TotalBudgetedSubtractsPaidExpensesOnly(t *testing.T) {
+	presenter := NewDashboardPresenter("$")
+	date, _ := time.Parse("2006-01", "2024-01")
+
+	groups := []*usecase.GroupResponse{
+		{
+			ID: "g1",
+			Categories: []usecase.CategoryResponse{
+				{ID: "c1", Name: "Food", StartMonth: "2024-01", Budget: 120.0},
+				{ID: "c2", Name: "Rent", StartMonth: "2024-01", Budget: 80.0},
+			},
+		},
+	}
+
+	paidAt := time.Now()
+	expenses := []*usecase.ExpenseResponse{
+		{CategoryID: "c1", Amount: 30.0, IsPaid: true, PaidAt: &paidAt, SpentAt: date},
+		{CategoryID: "c2", Amount: 20.0, IsPaid: false, SpentAt: date},
+	}
+
+	view := presenter.Present(500, 50, groups, expenses, date)
+
+	assert.Equal(t, 170.0, view.TotalBudgeted)
+}
