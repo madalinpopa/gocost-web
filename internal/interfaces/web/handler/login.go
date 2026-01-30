@@ -82,6 +82,7 @@ func (lh LoginHandler) SubmitLoginForm(w http.ResponseWriter, r *http.Request) {
 
 	lh.app.Session.SetUserID(r.Context(), resp.UserID)
 	lh.app.Session.SetUsername(r.Context(), resp.Username)
+	lh.app.Session.SetCurrency(r.Context(), resp.Currency)
 
 	lh.app.Htmx.Redirect(w, "/home")
 }
