@@ -6,7 +6,7 @@ services:
     environment:
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost}
       DOMAIN: ${DOMAIN:-localhost}
-      CURRENCY: ${CURRENCY:-$}
+      CURRENCY: ${CURRENCY:-USD}
       DB_PATH: /app/data/data.sqlite
     volumes:
       - type: volume
