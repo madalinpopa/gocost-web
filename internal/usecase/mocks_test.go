@@ -113,6 +113,19 @@ func (m *MockIncomeRepository) FindByUserID(ctx context.Context, userID income.I
 	return args.Get(0).([]income.Income), args.Error(1)
 }
 
+func (m *MockIncomeRepository) FindByUserIDAndMonth(ctx context.Context, userID income.ID, month string) ([]income.Income, error) {
+	args := m.Called(ctx, userID, month)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]income.Income), args.Error(1)
+}
+
+func (m *MockIncomeRepository) TotalByUserIDAndMonth(ctx context.Context, userID income.ID, month string) (money.Money, error) {
+	args := m.Called(ctx, userID, month)
+	return args.Get(0).(money.Money), args.Error(1)
+}
+
 func (m *MockIncomeRepository) Delete(ctx context.Context, id income.ID) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
@@ -135,6 +148,14 @@ func (m *MockGroupRepository) FindByID(ctx context.Context, id tracking.ID) (tra
 
 func (m *MockGroupRepository) FindByUserID(ctx context.Context, userID tracking.ID) ([]tracking.Group, error) {
 	args := m.Called(ctx, userID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]tracking.Group), args.Error(1)
+}
+
+func (m *MockGroupRepository) FindByUserIDAndMonth(ctx context.Context, userID tracking.ID, month string) ([]tracking.Group, error) {
+	args := m.Called(ctx, userID, month)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -185,6 +206,14 @@ func (m *MockExpenseRepository) FindByUserIDAndMonth(ctx context.Context, userID
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]expense.Expense), args.Error(1)
+}
+
+func (m *MockExpenseRepository) TotalsByCategoryAndMonth(ctx context.Context, userID expense.ID, month string) ([]expense.CategoryTotals, error) {
+	args := m.Called(ctx, userID, month)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]expense.CategoryTotals), args.Error(1)
 }
 
 func (m *MockExpenseRepository) Delete(ctx context.Context, id expense.ID) error {
