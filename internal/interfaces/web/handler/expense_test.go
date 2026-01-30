@@ -53,16 +53,19 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 
 		userID := "user-123"
 		mockSession.On("GetUserID", req.Context()).Return(userID)
+		mockSession.On("GetCurrency", req.Context()).Return("USD")
 
 		expectedSpentAt, _ := time.Parse("2006-01", "2023-10")
 
-		mockExpenseUC.On("Create", req.Context(), userID, mock.MatchedBy(func(r *usecase.CreateExpenseRequest) bool {
+		mockExpenseUC.On("Create", req.Context(), mock.MatchedBy(func(r *usecase.CreateExpenseRequest) bool {
 			return r.CategoryID == "cat-123" &&
 				r.Amount == 10.50 &&
 				r.Description == "Lunch" &&
 				r.SpentAt.Equal(expectedSpentAt) &&
 				r.IsPaid == false &&
-				r.PaidAt == nil
+				r.PaidAt == nil &&
+				r.UserID == userID &&
+				r.Currency == "USD"
 		})).Return(&usecase.ExpenseResponse{ID: "exp-1"}, nil)
 
 		// Act
@@ -106,13 +109,16 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 
 		userID := "user-123"
 		mockSession.On("GetUserID", req.Context()).Return(userID)
+		mockSession.On("GetCurrency", req.Context()).Return("USD")
 
 		expectedSpentAt, _ := time.Parse("2006-01", "2023-10")
 
-		mockExpenseUC.On("Create", req.Context(), userID, mock.MatchedBy(func(r *usecase.CreateExpenseRequest) bool {
+		mockExpenseUC.On("Create", req.Context(), mock.MatchedBy(func(r *usecase.CreateExpenseRequest) bool {
 			return r.IsPaid == true &&
 				r.PaidAt != nil &&
-				r.SpentAt.Equal(expectedSpentAt)
+				r.SpentAt.Equal(expectedSpentAt) &&
+				r.UserID == userID &&
+				r.Currency == "USD"
 		})).Return(&usecase.ExpenseResponse{ID: "exp-2"}, nil)
 
 		// Act
@@ -192,9 +198,10 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 
 		userID := "user-123"
 		mockSession.On("GetUserID", req.Context()).Return(userID)
+		mockSession.On("GetCurrency", req.Context()).Return("USD")
 
 		expectedErr := tracking.ErrCategoryNotFound
-		mockExpenseUC.On("Create", req.Context(), userID, mock.Anything).Return(nil, expectedErr)
+		mockExpenseUC.On("Create", req.Context(), mock.Anything).Return(nil, expectedErr)
 
 		// Act
 		handler.CreateExpense(rec, req)
@@ -236,9 +243,10 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 
 		userID := "user-123"
 		mockSession.On("GetUserID", req.Context()).Return(userID)
+		mockSession.On("GetCurrency", req.Context()).Return("USD")
 
 		expectedErr := errors.New("db error")
-		mockExpenseUC.On("Create", req.Context(), userID, mock.Anything).Return(nil, expectedErr)
+		mockExpenseUC.On("Create", req.Context(), mock.Anything).Return(nil, expectedErr)
 
 		// Act
 		handler.CreateExpense(rec, req)
@@ -282,6 +290,7 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 
 		userID := "user-123"
 		mockSession.On("GetUserID", req.Context()).Return(userID)
+		mockSession.On("GetCurrency", req.Context()).Return("USD")
 
 		expectedSpentAt, _ := time.Parse("2006-01-02", "2023-10-28")
 		mockExpenseUC.On("Get", req.Context(), userID, "exp-123").Return(&usecase.ExpenseResponse{
@@ -289,12 +298,14 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 			SpentAt: expectedSpentAt,
 		}, nil)
 
-		mockExpenseUC.On("Update", req.Context(), userID, mock.MatchedBy(func(r *usecase.UpdateExpenseRequest) bool {
+		mockExpenseUC.On("Update", req.Context(), mock.MatchedBy(func(r *usecase.UpdateExpenseRequest) bool {
 			return r.ID == "exp-123" &&
 				r.CategoryID == "cat-123" &&
 				r.Amount == 20.00 &&
 				r.Description == "Dinner" &&
-				r.SpentAt.Equal(expectedSpentAt)
+				r.SpentAt.Equal(expectedSpentAt) &&
+				r.UserID == userID &&
+				r.Currency == "USD"
 		})).Return(&usecase.ExpenseResponse{ID: "exp-123"}, nil)
 
 		// Act
@@ -371,6 +382,7 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 
 		userID := "user-123"
 		mockSession.On("GetUserID", req.Context()).Return(userID)
+		mockSession.On("GetCurrency", req.Context()).Return("USD")
 
 		mockExpenseUC.On("Get", req.Context(), userID, "exp-123").Return(&usecase.ExpenseResponse{
 			ID:      "exp-123",
@@ -378,7 +390,7 @@ func TestExpenseHandler_EditExpense(t *testing.T) {
 		}, nil)
 
 		expectedErr := expense.ErrInvalidAmount
-		mockExpenseUC.On("Update", req.Context(), userID, mock.Anything).Return(nil, expectedErr)
+		mockExpenseUC.On("Update", req.Context(), mock.Anything).Return(nil, expectedErr)
 
 		// Act
 		handler.EditExpense(rec, req)
