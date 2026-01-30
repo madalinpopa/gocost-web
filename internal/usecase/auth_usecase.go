@@ -16,16 +16,18 @@ var ErrInvalidCredentials = errors.New("invalid credentials")
 const minPasswordLength = 8
 
 type AuthUseCaseImpl struct {
-	uow    domain.UnitOfWork
-	logger *slog.Logger
-	hasher security.PasswordHasher
+	uow             domain.UnitOfWork
+	logger          *slog.Logger
+	hasher          security.PasswordHasher
+	defaultCurrency string
 }
 
-func NewAuthUseCase(uow domain.UnitOfWork, logger *slog.Logger, h security.PasswordHasher) AuthUseCaseImpl {
+func NewAuthUseCase(uow domain.UnitOfWork, logger *slog.Logger, h security.PasswordHasher, defaultCurrency string) AuthUseCaseImpl {
 	return AuthUseCaseImpl{
-		uow:    uow,
-		logger: logger,
-		hasher: h,
+		uow:             uow,
+		logger:          logger,
+		hasher:          h,
+		defaultCurrency: defaultCurrency,
 	}
 }
 
@@ -83,7 +85,12 @@ func (u AuthUseCaseImpl) Register(ctx context.Context, req *RegisterUserRequest)
 		return nil, err
 	}
 
-	user := identity.NewUser(id, username, email, password)
+	currency := req.Currency
+	if currency == "" {
+		currency = u.defaultCurrency
+	}
+
+	user := identity.NewUser(id, username, email, password, currency)
 	if err := repo.Save(ctx, *user); err != nil {
 		return nil, err
 	}
