@@ -21,7 +21,7 @@ var rootCmd = &cobra.Command{
 	Long: `GoCost is a simple and efficient cost tracking application built with Go.
 For more information, visit https://gocost.app`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		conf = config.New().WithDatabaseDsn(dsn)
+		conf = config.NewWithLogger(logger).WithDatabaseDsn(dsn)
 		conf.Version = version
 
 		err := conf.LoadEnvironments()
