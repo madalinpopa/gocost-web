@@ -66,7 +66,13 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 
 	isRecurrent := categoryForm.Type == "recurrent"
 
+	userID := h.app.Session.GetUserID(r.Context())
+	currency := h.app.Session.GetCurrency(r.Context())
+
 	req := &usecase.CreateCategoryRequest{
+		GroupID:     categoryForm.GroupID,
+		UserID:      userID,
+		Currency:    currency,
 		Name:        categoryForm.Name,
 		Description: categoryForm.Description,
 		IsRecurrent: isRecurrent,
@@ -75,8 +81,7 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 		Budget:      categoryForm.ParsedBudget(),
 	}
 
-	userID := h.app.Session.GetUserID(r.Context())
-	_, err := h.category.Create(r.Context(), userID, categoryForm.GroupID, req)
+	_, err := h.category.Create(r.Context(), req)
 	if err != nil {
 		errMessage, isUserFacing := translateCategoryError(err)
 		categoryForm.AddNonFieldError(errMessage)
@@ -115,8 +120,14 @@ func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request)
 
 	isRecurrent := categoryForm.Type == "recurrent"
 
+	userID := h.app.Session.GetUserID(r.Context())
+	currency := h.app.Session.GetCurrency(r.Context())
+
 	req := &usecase.UpdateCategoryRequest{
 		ID:           categoryForm.ID,
+		GroupID:      categoryForm.GroupID,
+		UserID:       userID,
+		Currency:     currency,
 		Name:         categoryForm.Name,
 		Description:  categoryForm.Description,
 		IsRecurrent:  isRecurrent,
@@ -126,8 +137,7 @@ func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request)
 		Budget:       categoryForm.ParsedBudget(),
 	}
 
-	userID := h.app.Session.GetUserID(r.Context())
-	_, err := h.category.Update(r.Context(), userID, categoryForm.GroupID, req)
+	_, err := h.category.Update(r.Context(), req)
 	if err != nil {
 		errMessage, isUserFacing := translateCategoryError(err)
 		categoryForm.AddNonFieldError(errMessage)
