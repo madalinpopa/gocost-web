@@ -42,3 +42,7 @@ type ExpenseUseCase interface {
 	ListByMonth(ctx context.Context, userID string, month string) ([]*ExpenseResponse, error)
 	Total(ctx context.Context, userID string, month string) (float64, error)
 }
+
+type DashboardUseCase interface {
+	Get(ctx context.Context, userID string, month string) (*DashboardResponse, error)
+}
