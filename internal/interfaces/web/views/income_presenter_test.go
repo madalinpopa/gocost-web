@@ -27,7 +27,7 @@ func TestIncomeListPresenter_Present_FormatsIncome(t *testing.T) {
 	assert.Equal(t, "inc-1", views[0].ID)
 	assert.Equal(t, "Salary", views[0].Source)
 	assert.Equal(t, "2024-02-03", views[0].ReceivedAt)
-	assert.Equal(t, "$100.50", views[0].AmountDisplay)
+	assert.Equal(t, "$ 100.50", views[0].AmountDisplay)
 }
 
 func TestIncomeListPresenter_Present_SkipsNil(t *testing.T) {
