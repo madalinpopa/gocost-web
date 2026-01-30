@@ -16,12 +16,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func newTestIncomeUseCase(repo *MockIncomeRepository) IncomeUseCaseImpl {
+func newTestIncomeUseCase(repo *MockIncomeRepository, userRepo *MockUserRepository) IncomeUseCaseImpl {
 	if repo == nil {
 		repo = &MockIncomeRepository{}
 	}
+	if userRepo == nil {
+		userRepo = &MockUserRepository{}
+	}
 	return NewIncomeUseCase(
-		&MockUnitOfWork{IncomeRepo: repo},
+		&MockUnitOfWork{IncomeRepo: repo, UserRepo: userRepo},
 		slog.New(slog.NewTextHandler(io.Discard, nil)),
 	)
 }
@@ -32,7 +35,7 @@ func newTestIncome(t *testing.T, userID identifier.ID) *income.Income {
 	id, err := identifier.NewID()
 	require.NoError(t, err)
 
-	amount, err := money.NewFromFloat(100.50)
+	amount, err := money.NewFromFloat(100.50, "USD")
 	require.NoError(t, err)
 
 	source, err := income.NewSourceVO("Salary")
@@ -47,49 +50,57 @@ func newTestIncome(t *testing.T, userID identifier.ID) *income.Income {
 func TestIncomeUseCase_Create(t *testing.T) {
 	validUserID, _ := identifier.NewID()
 	validReq := &CreateIncomeRequest{
+		UserID:     validUserID.String(),
+		Currency:   "USD",
 		Amount:     100.50,
 		Source:     "Salary",
 		ReceivedAt: time.Now(),
 	}
 
 	t.Run("returns error for nil request", func(t *testing.T) {
-		usecase := newTestIncomeUseCase(nil)
-		resp, err := usecase.Create(context.Background(), validUserID.String(), nil)
+		usecase := newTestIncomeUseCase(nil, nil)
+		resp, err := usecase.Create(context.Background(), nil)
 		assert.Nil(t, resp)
 		assert.EqualError(t, err, "request cannot be nil")
 	})
 
 	t.Run("returns error for invalid user ID", func(t *testing.T) {
-		usecase := newTestIncomeUseCase(nil)
-		resp, err := usecase.Create(context.Background(), "invalid-id", validReq)
+		usecase := newTestIncomeUseCase(nil, nil)
+		req := *validReq
+		req.UserID = "invalid-id"
+		resp, err := usecase.Create(context.Background(), &req)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, identifier.ErrInvalidID)
 	})
 
 	t.Run("returns error for invalid amount", func(t *testing.T) {
-		usecase := newTestIncomeUseCase(nil)
+		usecase := newTestIncomeUseCase(nil, nil)
 		req := &CreateIncomeRequest{
+			UserID:     validUserID.String(),
+			Currency:   "USD",
 			Amount:     -10.0,
 			Source:     "Salary",
 			ReceivedAt: time.Now(),
 		}
-		resp, err := usecase.Create(context.Background(), validUserID.String(), req)
+		resp, err := usecase.Create(context.Background(), req)
 		assert.Nil(t, resp)
-		assert.ErrorIs(t, err, money.ErrNegativeAmount)
+		assert.ErrorIs(t, err, income.ErrInvalidAmount)
 	})
 
 	t.Run("saves income with empty source and returns response", func(t *testing.T) {
 		repo := &MockIncomeRepository{}
 		repo.On("Save", mock.Anything, mock.Anything).Return(nil)
 
-		usecase := newTestIncomeUseCase(repo)
+		usecase := newTestIncomeUseCase(repo, nil)
 
 		req := &CreateIncomeRequest{
+			UserID:     validUserID.String(),
+			Currency:   "USD",
 			Amount:     100.0,
 			Source:     "",
 			ReceivedAt: time.Now(),
 		}
-		resp, err := usecase.Create(context.Background(), validUserID.String(), req)
+		resp, err := usecase.Create(context.Background(), req)
 
 		require.NoError(t, err)
 		require.NotNil(t, resp)
@@ -101,9 +112,9 @@ func TestIncomeUseCase_Create(t *testing.T) {
 		repo := &MockIncomeRepository{}
 		repo.On("Save", mock.Anything, mock.Anything).Return(expectedErr)
 
-		usecase := newTestIncomeUseCase(repo)
+		usecase := newTestIncomeUseCase(repo, nil)
 
-		resp, err := usecase.Create(context.Background(), validUserID.String(), validReq)
+		resp, err := usecase.Create(context.Background(), validReq)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, expectedErr)
 	})
@@ -115,18 +126,21 @@ func TestIncomeUseCase_Create(t *testing.T) {
 			savedIncome = args.Get(1).(income.Income)
 		})
 
-		usecase := newTestIncomeUseCase(repo)
+		usecase := newTestIncomeUseCase(repo, nil)
 
-		resp, err := usecase.Create(context.Background(), validUserID.String(), validReq)
+		resp, err := usecase.Create(context.Background(), validReq)
 
 		require.NoError(t, err)
 		require.NotNil(t, resp)
-		assert.Equal(t, validReq.Amount, resp.Amount)
+		expectedAmount, err := money.NewFromFloat(validReq.Amount, validReq.Currency)
+		require.NoError(t, err)
+		assert.Equal(t, expectedAmount.Cents(), resp.AmountCents)
+		assert.Equal(t, validReq.Currency, resp.Currency)
 		assert.Equal(t, validReq.Source, resp.Source)
 		assert.Equal(t, validReq.ReceivedAt, resp.ReceivedAt)
 		assert.NotEmpty(t, resp.ID)
 
-		assert.Equal(t, validReq.Amount, savedIncome.Amount.Amount())
+		assert.Equal(t, expectedAmount.Cents(), savedIncome.Amount.Cents())
 		assert.Equal(t, validReq.Source, savedIncome.Source.Value())
 		assert.Equal(t, validReq.ReceivedAt, savedIncome.ReceivedAt)
 		assert.Equal(t, validUserID, savedIncome.UserID)
@@ -138,22 +152,24 @@ func TestIncomeUseCase_Update(t *testing.T) {
 	existingIncome := newTestIncome(t, validUserID)
 	validReq := &UpdateIncomeRequest{
 		ID:         existingIncome.ID.String(),
+		UserID:     validUserID.String(),
+		Currency:   "USD",
 		Amount:     200.0,
 		Source:     "Bonus",
 		ReceivedAt: time.Now(),
 	}
 
 	t.Run("returns error for nil request", func(t *testing.T) {
-		usecase := newTestIncomeUseCase(nil)
-		resp, err := usecase.Update(context.Background(), validUserID.String(), nil)
+		usecase := newTestIncomeUseCase(nil, nil)
+		resp, err := usecase.Update(context.Background(), nil)
 		assert.Nil(t, resp)
 		assert.EqualError(t, err, "request cannot be nil")
 	})
 
 	t.Run("returns error for invalid income ID", func(t *testing.T) {
-		usecase := newTestIncomeUseCase(nil)
-		req := &UpdateIncomeRequest{ID: "invalid"}
-		resp, err := usecase.Update(context.Background(), validUserID.String(), req)
+		usecase := newTestIncomeUseCase(nil, nil)
+		req := &UpdateIncomeRequest{ID: "invalid", UserID: validUserID.String(), Currency: "USD"}
+		resp, err := usecase.Update(context.Background(), req)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, identifier.ErrInvalidID)
 	})
@@ -163,8 +179,8 @@ func TestIncomeUseCase_Update(t *testing.T) {
 		repo := &MockIncomeRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(income.Income{}, expectedErr)
 
-		usecase := newTestIncomeUseCase(repo)
-		resp, err := usecase.Update(context.Background(), validUserID.String(), validReq)
+		usecase := newTestIncomeUseCase(repo, nil)
+		resp, err := usecase.Update(context.Background(), validReq)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, expectedErr)
 	})
@@ -175,12 +191,12 @@ func TestIncomeUseCase_Update(t *testing.T) {
 		repo := &MockIncomeRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*otherUserIncome, nil)
 
-		usecase := newTestIncomeUseCase(repo)
+		usecase := newTestIncomeUseCase(repo, nil)
 
 		req := &UpdateIncomeRequest{
-			ID: otherUserIncome.ID.String(), Amount: 100, Source: "Test", ReceivedAt: time.Now(),
+			ID: otherUserIncome.ID.String(), UserID: validUserID.String(), Currency: "USD", Amount: 100, Source: "Test", ReceivedAt: time.Now(),
 		}
-		resp, err := usecase.Update(context.Background(), validUserID.String(), req) // validUserID != otherUserID
+		resp, err := usecase.Update(context.Background(), req) // validUserID != otherUserID
 
 		assert.Nil(t, resp)
 		assert.EqualError(t, err, "unauthorized")
@@ -194,17 +210,20 @@ func TestIncomeUseCase_Update(t *testing.T) {
 			savedIncome = args.Get(1).(income.Income)
 		})
 
-		usecase := newTestIncomeUseCase(repo)
+		usecase := newTestIncomeUseCase(repo, nil)
 
-		resp, err := usecase.Update(context.Background(), validUserID.String(), validReq)
+		resp, err := usecase.Update(context.Background(), validReq)
 
 		require.NoError(t, err)
 		require.NotNil(t, resp)
-		assert.Equal(t, validReq.Amount, resp.Amount)
+		expectedAmount, err := money.NewFromFloat(validReq.Amount, validReq.Currency)
+		require.NoError(t, err)
+		assert.Equal(t, expectedAmount.Cents(), resp.AmountCents)
+		assert.Equal(t, validReq.Currency, resp.Currency)
 		assert.Equal(t, validReq.Source, resp.Source)
 		assert.Equal(t, existingIncome.ID.String(), resp.ID)
 
-		assert.Equal(t, validReq.Amount, savedIncome.Amount.Amount())
+		assert.Equal(t, expectedAmount.Cents(), savedIncome.Amount.Cents())
 		assert.Equal(t, validReq.Source, savedIncome.Source.Value())
 	})
 }
@@ -214,7 +233,7 @@ func TestIncomeUseCase_Delete(t *testing.T) {
 	existingIncome := newTestIncome(t, validUserID)
 
 	t.Run("returns error for invalid income ID", func(t *testing.T) {
-		usecase := newTestIncomeUseCase(nil)
+		usecase := newTestIncomeUseCase(nil, nil)
 		err := usecase.Delete(context.Background(), validUserID.String(), "invalid")
 		assert.ErrorIs(t, err, identifier.ErrInvalidID)
 	})
@@ -224,7 +243,7 @@ func TestIncomeUseCase_Delete(t *testing.T) {
 		repo := &MockIncomeRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(income.Income{}, expectedErr)
 
-		usecase := newTestIncomeUseCase(repo)
+		usecase := newTestIncomeUseCase(repo, nil)
 		err := usecase.Delete(context.Background(), validUserID.String(), existingIncome.ID.String())
 		assert.ErrorIs(t, err, expectedErr)
 	})
@@ -235,7 +254,7 @@ func TestIncomeUseCase_Delete(t *testing.T) {
 		repo := &MockIncomeRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*otherUserIncome, nil)
 
-		usecase := newTestIncomeUseCase(repo)
+		usecase := newTestIncomeUseCase(repo, nil)
 		err := usecase.Delete(context.Background(), validUserID.String(), otherUserIncome.ID.String())
 		assert.EqualError(t, err, "unauthorized")
 	})
@@ -248,7 +267,7 @@ func TestIncomeUseCase_Delete(t *testing.T) {
 			deletedID = args.Get(1).(identifier.ID)
 		})
 
-		usecase := newTestIncomeUseCase(repo)
+		usecase := newTestIncomeUseCase(repo, nil)
 
 		err := usecase.Delete(context.Background(), validUserID.String(), existingIncome.ID.String())
 		require.NoError(t, err)
@@ -264,12 +283,13 @@ func TestIncomeUseCase_Get(t *testing.T) {
 		repo := &MockIncomeRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*existingIncome, nil)
 
-		usecase := newTestIncomeUseCase(repo)
+		usecase := newTestIncomeUseCase(repo, nil)
 
 		resp, err := usecase.Get(context.Background(), validUserID.String(), existingIncome.ID.String())
 		require.NoError(t, err)
 		assert.Equal(t, existingIncome.ID.String(), resp.ID)
-		assert.Equal(t, existingIncome.Amount.Amount(), resp.Amount)
+		assert.Equal(t, existingIncome.Amount.Cents(), resp.AmountCents)
+		assert.Equal(t, existingIncome.Amount.Currency(), resp.Currency)
 	})
 
 	t.Run("returns unauthorized for different user", func(t *testing.T) {
@@ -277,7 +297,7 @@ func TestIncomeUseCase_Get(t *testing.T) {
 		repo := &MockIncomeRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*existingIncome, nil)
 
-		usecase := newTestIncomeUseCase(repo)
+		usecase := newTestIncomeUseCase(repo, nil)
 
 		resp, err := usecase.Get(context.Background(), otherUserID.String(), existingIncome.ID.String())
 		assert.Nil(t, resp)
@@ -294,7 +314,7 @@ func TestIncomeUseCase_List(t *testing.T) {
 		repo := &MockIncomeRepository{}
 		repo.On("FindByUserID", mock.Anything, mock.Anything).Return([]income.Income{*inc1, *inc2}, nil)
 
-		usecase := newTestIncomeUseCase(repo)
+		usecase := newTestIncomeUseCase(repo, nil)
 
 		resps, err := usecase.List(context.Background(), validUserID.String())
 		require.NoError(t, err)
@@ -307,7 +327,7 @@ func TestIncomeUseCase_List(t *testing.T) {
 		repo := &MockIncomeRepository{}
 		repo.On("FindByUserID", mock.Anything, mock.Anything).Return([]income.Income{}, nil)
 
-		usecase := newTestIncomeUseCase(repo)
+		usecase := newTestIncomeUseCase(repo, nil)
 
 		resps, err := usecase.List(context.Background(), validUserID.String())
 
@@ -343,19 +363,17 @@ func TestIncomeUseCase_Total(t *testing.T) {
 
 		repo := &MockIncomeRepository{}
 
-		// We expect FindByUserID to be called and return all incomes
+		expectedTotalMoney, err := money.NewFromFloat(inc1.Amount.Amount()+inc2.Amount.Amount(), "USD")
+		require.NoError(t, err)
+		repo.On("TotalByUserIDAndMonth", mock.Anything, validUserID, "2023-10").Return(expectedTotalMoney, nil)
 
-		repo.On("FindByUserID", mock.Anything, validUserID).Return([]income.Income{*inc1, *inc2, *inc3}, nil)
-
-		usecase := newTestIncomeUseCase(repo)
+		usecase := newTestIncomeUseCase(repo, nil)
 
 		total, err := usecase.Total(context.Background(), validUserID.String(), "2023-10")
 
 		require.NoError(t, err)
 
-		expectedTotal := inc1.Amount.Amount() + inc2.Amount.Amount()
-
-		assert.Equal(t, expectedTotal, total)
+		assert.Equal(t, expectedTotalMoney.Amount(), total)
 
 	})
 
@@ -363,9 +381,11 @@ func TestIncomeUseCase_Total(t *testing.T) {
 
 		repo := &MockIncomeRepository{}
 
-		repo.On("FindByUserID", mock.Anything, validUserID).Return([]income.Income{*inc1, *inc2, *inc3}, nil)
+		zeroMoney, err := money.New(0, "USD")
+		require.NoError(t, err)
+		repo.On("TotalByUserIDAndMonth", mock.Anything, validUserID, "2023-12").Return(zeroMoney, nil)
 
-		usecase := newTestIncomeUseCase(repo)
+		usecase := newTestIncomeUseCase(repo, nil)
 
 		total, err := usecase.Total(context.Background(), validUserID.String(), "2023-12")
 
@@ -377,11 +397,14 @@ func TestIncomeUseCase_Total(t *testing.T) {
 
 	t.Run("returns error for invalid date format", func(t *testing.T) {
 
-		usecase := newTestIncomeUseCase(nil)
+		expectedErr := errors.New("invalid month")
+		repo := &MockIncomeRepository{}
+		repo.On("TotalByUserIDAndMonth", mock.Anything, validUserID, "invalid-date").Return(money.Money{}, expectedErr)
+
+		usecase := newTestIncomeUseCase(repo, nil)
 
 		_, err := usecase.Total(context.Background(), validUserID.String(), "invalid-date")
-
-		assert.Error(t, err)
+		assert.ErrorIs(t, err, expectedErr)
 
 	})
 

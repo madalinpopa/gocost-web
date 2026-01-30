@@ -2,10 +2,14 @@ package config
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
+	"github.com/madalinpopa/gocost-web/internal/platform/money"
 	"github.com/spf13/viper"
 )
+
+const defaultCurrency = "USD"
 
 type Config struct {
 	// Version specifies the application version
@@ -29,12 +33,22 @@ type Config struct {
 	// Currency specifies the currency symbol
 	Currency string
 
+	// logger is used for config-level logging.
+	logger *slog.Logger
+
 	// environment specifies the application Environment
 	environment string
 }
 
 func New() *Config {
-	return &Config{AllowedHosts: make([]string, 0)}
+	return NewWithLogger(nil)
+}
+
+func NewWithLogger(logger *slog.Logger) *Config {
+	return &Config{
+		AllowedHosts: make([]string, 0),
+		logger:       logger,
+	}
 }
 
 func (c *Config) WithEnvironment(env string) *Config {
@@ -86,14 +100,28 @@ func (c *Config) LoadEnvironments() error {
 	}
 	c.Domain = viper.GetString("DOMAIN")
 
-	c.Currency = viper.GetString("CURRENCY")
-	if c.Currency == "" {
-		c.Currency = "$"
-	}
+	c.Currency = c.currencyCodeOrDefault(viper.GetString("CURRENCY"))
 
 	return nil
 }
 
 func (c *Config) GetEnvironment() string {
 	return c.environment
+}
+
+func (c *Config) currencyCodeOrDefault(value string) string {
+	currency, err := money.New(0, value)
+	if err != nil {
+		c.loggerOrDefault().Error("invalid currency code; using default", "currency", value, "err", err)
+		return defaultCurrency
+	}
+
+	return currency.Currency()
+}
+
+func (c *Config) loggerOrDefault() *slog.Logger {
+	if c.logger == nil {
+		return slog.Default()
+	}
+	return c.logger
 }

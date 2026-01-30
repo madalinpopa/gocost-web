@@ -38,7 +38,7 @@ func (r *SQLiteTrackingRepository) Save(ctx context.Context, group tracking.Grou
 		group.Order.Value(),
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to save group: %w", err)
 	}
 
 	categoryQuery := `
@@ -72,7 +72,7 @@ func (r *SQLiteTrackingRepository) Save(ctx context.Context, group tracking.Grou
 			category.Budget.Cents(),
 		)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to save category: %w", err)
 		}
 	}
 
@@ -89,7 +89,7 @@ func (r *SQLiteTrackingRepository) FindByID(ctx context.Context, id tracking.ID)
 		if errors.Is(err, sql.ErrNoRows) {
 			return tracking.Group{}, tracking.ErrGroupNotFound
 		}
-		return tracking.Group{}, err
+		return tracking.Group{}, fmt.Errorf("failed to find group by id: %w", err)
 	}
 
 	group, err := r.mapToGroup(idStr, userIDStr, nameStr, descriptionStr, orderInt)
@@ -155,23 +155,111 @@ func (r *SQLiteTrackingRepository) FindByUserID(ctx context.Context, userID trac
 	categoryQuery := buildCategoriesByGroupIDsQuery(len(groupIDs))
 	categoryRows, err := r.db.QueryContext(ctx, categoryQuery, groupIDs...)
 	if err != nil {
+		return nil, fmt.Errorf("failed to query categories: %w", err)
+	}
+	defer categoryRows.Close()
+
+	for categoryRows.Next() {
+		var (
+			idStr, groupIDStr, nameStr, descriptionStr, startMonthStr, currencyStr string
+			isRecurrentInt                                                         int
+			budgetCents                                                            int64
+			endMonth                                                               sql.NullString
+		)
+
+		if err := categoryRows.Scan(&idStr, &groupIDStr, &nameStr, &descriptionStr, &isRecurrentInt, &startMonthStr, &endMonth, &budgetCents, &currencyStr); err != nil {
+			return nil, err
+		}
+
+		category, err := r.mapToCategory(idStr, groupIDStr, nameStr, descriptionStr, isRecurrentInt == 1, startMonthStr, endMonth, budgetCents, currencyStr)
+		if err != nil {
+			return nil, err
+		}
+
+		group, ok := groupByID[groupIDStr]
+		if !ok {
+			return nil, tracking.ErrGroupNotFound
+		}
+
+		if err := group.AddCategory(category); err != nil {
+			return nil, err
+		}
+	}
+
+	if err := categoryRows.Err(); err != nil {
+		return nil, err
+	}
+
+	result := make([]tracking.Group, 0, len(groups))
+	for _, group := range groups {
+		result = append(result, *group)
+	}
+
+	return result, nil
+}
+
+func (r *SQLiteTrackingRepository) FindByUserIDAndMonth(ctx context.Context, userID tracking.ID, month string) ([]tracking.Group, error) {
+	groupQuery := `SELECT id, user_id, name, description, display_order FROM groups WHERE user_id = ? ORDER BY display_order, name`
+
+	rows, err := r.db.QueryContext(ctx, groupQuery, userID.String())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	groups := make([]*tracking.Group, 0)
+	groupByID := make(map[string]*tracking.Group)
+
+	for rows.Next() {
+		var idStr, userIDStr, nameStr, descriptionStr string
+		var orderInt int
+		if err := rows.Scan(&idStr, &userIDStr, &nameStr, &descriptionStr, &orderInt); err != nil {
+			return nil, err
+		}
+
+		group, err := r.mapToGroup(idStr, userIDStr, nameStr, descriptionStr, orderInt)
+		if err != nil {
+			return nil, err
+		}
+
+		groupByID[group.ID.String()] = group
+		groups = append(groups, group)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if len(groups) == 0 {
+		return []tracking.Group{}, nil
+	}
+
+	groupIDs := make([]any, 0, len(groups))
+	for _, group := range groups {
+		groupIDs = append(groupIDs, group.ID.String())
+	}
+
+	categoryQuery := buildCategoriesByGroupIDsAndMonthQuery(len(groupIDs))
+	args := append(groupIDs, month, month, month)
+	categoryRows, err := r.db.QueryContext(ctx, categoryQuery, args...)
+	if err != nil {
 		return nil, err
 	}
 	defer categoryRows.Close()
 
 	for categoryRows.Next() {
 		var (
-			idStr, groupIDStr, nameStr, descriptionStr, startMonthStr string
-			isRecurrentInt                                            int
-			budgetCents                                               int64
-			endMonth                                                  sql.NullString
+			idStr, groupIDStr, nameStr, descriptionStr, startMonthStr, currencyStr string
+			isRecurrentInt                                                         int
+			budgetCents                                                            int64
+			endMonth                                                               sql.NullString
 		)
 
-		if err := categoryRows.Scan(&idStr, &groupIDStr, &nameStr, &descriptionStr, &isRecurrentInt, &startMonthStr, &endMonth, &budgetCents); err != nil {
+		if err := categoryRows.Scan(&idStr, &groupIDStr, &nameStr, &descriptionStr, &isRecurrentInt, &startMonthStr, &endMonth, &budgetCents, &currencyStr); err != nil {
 			return nil, err
 		}
 
-		category, err := r.mapToCategory(idStr, groupIDStr, nameStr, descriptionStr, isRecurrentInt == 1, startMonthStr, endMonth, budgetCents)
+		category, err := r.mapToCategory(idStr, groupIDStr, nameStr, descriptionStr, isRecurrentInt == 1, startMonthStr, endMonth, budgetCents, currencyStr)
 		if err != nil {
 			return nil, err
 		}
@@ -238,11 +326,11 @@ func (r *SQLiteTrackingRepository) Delete(ctx context.Context, id tracking.ID) e
 	query := `DELETE FROM groups WHERE id = ?`
 	result, err := r.db.ExecContext(ctx, query, id.String())
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to delete group: %w", err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get rows affected: %w", err)
 	}
 	if rowsAffected == 0 {
 		return tracking.ErrGroupNotFound
@@ -254,11 +342,11 @@ func (r *SQLiteTrackingRepository) DeleteCategory(ctx context.Context, id tracki
 	query := `DELETE FROM categories WHERE id = ?`
 	result, err := r.db.ExecContext(ctx, query, id.String())
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to delete category: %w", err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get rows affected: %w", err)
 	}
 	if rowsAffected == 0 {
 		return tracking.ErrCategoryNotFound
@@ -268,39 +356,41 @@ func (r *SQLiteTrackingRepository) DeleteCategory(ctx context.Context, id tracki
 
 func (r *SQLiteTrackingRepository) findCategoriesByGroupID(ctx context.Context, groupID string) ([]*tracking.Category, error) {
 	query := `
-		SELECT id, group_id, name, description, is_recurrent, start_month, end_month, budget
-		FROM categories
-		WHERE group_id = ?
-		ORDER BY name
+		SELECT c.id, c.group_id, c.name, c.description, c.is_recurrent, c.start_month, c.end_month, c.budget, u.currency
+		FROM categories c
+		JOIN groups g ON c.group_id = g.id
+		JOIN users u ON g.user_id = u.id
+		WHERE c.group_id = ?
+		ORDER BY c.name
 	`
 	rows, err := r.db.QueryContext(ctx, query, groupID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to query categories by group: %w", err)
 	}
 	defer rows.Close()
 
 	var categories []*tracking.Category
 	for rows.Next() {
 		var (
-			idStr, groupIDStr, nameStr, descriptionStr, startMonthStr string
-			isRecurrentInt                                            int
-			budgetCents                                               int64
-			endMonth                                                  sql.NullString
+			idStr, groupIDStr, nameStr, descriptionStr, startMonthStr, currencyStr string
+			isRecurrentInt                                                         int
+			budgetCents                                                            int64
+			endMonth                                                               sql.NullString
 		)
 
-		if err := rows.Scan(&idStr, &groupIDStr, &nameStr, &descriptionStr, &isRecurrentInt, &startMonthStr, &endMonth, &budgetCents); err != nil {
-			return nil, err
+		if err := rows.Scan(&idStr, &groupIDStr, &nameStr, &descriptionStr, &isRecurrentInt, &startMonthStr, &endMonth, &budgetCents, &currencyStr); err != nil {
+			return nil, fmt.Errorf("failed to scan category row: %w", err)
 		}
 
-		category, err := r.mapToCategory(idStr, groupIDStr, nameStr, descriptionStr, isRecurrentInt == 1, startMonthStr, endMonth, budgetCents)
+		category, err := r.mapToCategory(idStr, groupIDStr, nameStr, descriptionStr, isRecurrentInt == 1, startMonthStr, endMonth, budgetCents, currencyStr)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to map category: %w", err)
 		}
 		categories = append(categories, category)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error iterating categories: %w", err)
 	}
 
 	return categories, nil
@@ -335,7 +425,7 @@ func (r *SQLiteTrackingRepository) mapToGroup(idStr, userIDStr, nameStr, descrip
 	return tracking.NewGroup(id, userID, name, description, order), nil
 }
 
-func (r *SQLiteTrackingRepository) mapToCategory(idStr, groupIDStr, nameStr, descriptionStr string, isRecurrent bool, startMonthStr string, endMonth sql.NullString, budgetCents int64) (*tracking.Category, error) {
+func (r *SQLiteTrackingRepository) mapToCategory(idStr, groupIDStr, nameStr, descriptionStr string, isRecurrent bool, startMonthStr string, endMonth sql.NullString, budgetCents int64, currencyStr string) (*tracking.Category, error) {
 	id, err := identifier.ParseID(idStr)
 	if err != nil {
 		return nil, err
@@ -369,7 +459,7 @@ func (r *SQLiteTrackingRepository) mapToCategory(idStr, groupIDStr, nameStr, des
 		}
 	}
 
-	budget, err := money.New(budgetCents)
+	budget, err := money.New(budgetCents, currencyStr)
 	if err != nil {
 		return nil, err
 	}
@@ -381,9 +471,27 @@ func buildCategoriesByGroupIDsQuery(count int) string {
 	placeholders := strings.Repeat("?,", count)
 	placeholders = strings.TrimSuffix(placeholders, ",")
 	return fmt.Sprintf(`
-		SELECT id, group_id, name, description, is_recurrent, start_month, end_month, budget
-		FROM categories
-		WHERE group_id IN (%s)
-		ORDER BY group_id, name
+		SELECT c.id, c.group_id, c.name, c.description, c.is_recurrent, c.start_month, c.end_month, c.budget, u.currency
+		FROM categories c
+		JOIN groups g ON c.group_id = g.id
+		JOIN users u ON g.user_id = u.id
+		WHERE c.group_id IN (%s)
+		ORDER BY c.group_id, c.name
+	`, placeholders)
+}
+
+func buildCategoriesByGroupIDsAndMonthQuery(count int) string {
+	placeholders := strings.Repeat("?,", count)
+	placeholders = strings.TrimSuffix(placeholders, ",")
+	return fmt.Sprintf(`
+		SELECT c.id, c.group_id, c.name, c.description, c.is_recurrent, c.start_month, c.end_month, c.budget, u.currency
+		FROM categories c
+		JOIN groups g ON c.group_id = g.id
+		JOIN users u ON g.user_id = u.id
+		WHERE c.group_id IN (%s) AND (
+			(c.is_recurrent = 1 AND c.start_month <= ? AND (c.end_month IS NULL OR c.end_month = '' OR c.end_month >= ?))
+			OR (c.is_recurrent = 0 AND c.start_month = ?)
+		)
+		ORDER BY c.group_id, c.name
 	`, placeholders)
 }

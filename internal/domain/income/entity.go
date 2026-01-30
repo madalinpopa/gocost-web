@@ -18,7 +18,8 @@ type Income struct {
 }
 
 func NewIncome(id ID, userID ID, amount money.Money, source SourceVO, receivedAt time.Time) (*Income, error) {
-	if amount.IsZero() || !amount.IsPositive() {
+	isPositive, err := amount.IsPositive()
+	if err != nil || !isPositive {
 		return nil, ErrInvalidAmount
 	}
 

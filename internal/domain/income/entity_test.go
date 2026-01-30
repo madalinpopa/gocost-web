@@ -14,7 +14,7 @@ func TestNewIncome(t *testing.T) {
 		// Arrange
 		id, _ := identifier.NewID()
 		userID, _ := identifier.NewID()
-		amount, _ := money.New(1000)
+		amount, _ := money.New(1000, "USD")
 		source, _ := NewSourceVO("Salary")
 		receivedAt := time.Now()
 
@@ -35,7 +35,7 @@ func TestNewIncome(t *testing.T) {
 		// Arrange
 		id, _ := identifier.NewID()
 		userID, _ := identifier.NewID()
-		amount, _ := money.New(0) // Zero amount
+		amount, _ := money.New(0, "USD") // Zero amount
 		source, _ := NewSourceVO("Salary")
 		receivedAt := time.Now()
 
@@ -50,7 +50,7 @@ func TestNewIncome(t *testing.T) {
 	t.Run("empty source is allowed", func(t *testing.T) {
 		id, _ := identifier.NewID()
 		userID, _ := identifier.NewID()
-		amount, _ := money.New(1000)
+		amount, _ := money.New(1000, "USD")
 		receivedAt := time.Now()
 		source, _ := NewSourceVO("")
 

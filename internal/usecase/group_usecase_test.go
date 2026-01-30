@@ -46,20 +46,23 @@ func newTestGroup(t *testing.T, userID identifier.ID) *tracking.Group {
 func TestGroupUseCase_Create(t *testing.T) {
 	validUserID, _ := identifier.NewID()
 	validReq := &CreateGroupRequest{
+		UserID:      validUserID.String(),
 		Name:        "Test Group",
 		Description: "Test Description",
 	}
 
 	t.Run("returns error for nil request", func(t *testing.T) {
 		usecase := newTestGroupUseCase(nil)
-		resp, err := usecase.Create(context.Background(), validUserID.String(), nil)
+		resp, err := usecase.Create(context.Background(), nil)
 		assert.Nil(t, resp)
 		assert.EqualError(t, err, "request cannot be nil")
 	})
 
 	t.Run("returns error for invalid user ID", func(t *testing.T) {
 		usecase := newTestGroupUseCase(nil)
-		resp, err := usecase.Create(context.Background(), "invalid-id", validReq)
+		req := *validReq
+		req.UserID = "invalid-id"
+		resp, err := usecase.Create(context.Background(), &req)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, identifier.ErrInvalidID)
 	})
@@ -67,10 +70,11 @@ func TestGroupUseCase_Create(t *testing.T) {
 	t.Run("returns error for invalid name", func(t *testing.T) {
 		usecase := newTestGroupUseCase(nil)
 		req := &CreateGroupRequest{
+			UserID:      validUserID.String(),
 			Name:        "",
 			Description: "Test Description",
 		}
-		resp, err := usecase.Create(context.Background(), validUserID.String(), req)
+		resp, err := usecase.Create(context.Background(), req)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, tracking.ErrEmptyName)
 	})
@@ -84,7 +88,7 @@ func TestGroupUseCase_Create(t *testing.T) {
 
 		usecase := newTestGroupUseCase(repo)
 
-		resp, err := usecase.Create(context.Background(), validUserID.String(), validReq)
+		resp, err := usecase.Create(context.Background(), validReq)
 
 		require.NoError(t, err)
 		require.NotNil(t, resp)
@@ -103,21 +107,22 @@ func TestGroupUseCase_Update(t *testing.T) {
 	existingGroup := newTestGroup(t, validUserID)
 	validReq := &UpdateGroupRequest{
 		ID:          existingGroup.ID.String(),
+		UserID:      validUserID.String(),
 		Name:        "Updated Group",
 		Description: "Updated Description",
 	}
 
 	t.Run("returns error for nil request", func(t *testing.T) {
 		usecase := newTestGroupUseCase(nil)
-		resp, err := usecase.Update(context.Background(), validUserID.String(), nil)
+		resp, err := usecase.Update(context.Background(), nil)
 		assert.Nil(t, resp)
 		assert.EqualError(t, err, "request cannot be nil")
 	})
 
 	t.Run("returns error for invalid group ID", func(t *testing.T) {
 		usecase := newTestGroupUseCase(nil)
-		req := &UpdateGroupRequest{ID: "invalid"}
-		resp, err := usecase.Update(context.Background(), validUserID.String(), req)
+		req := &UpdateGroupRequest{ID: "invalid", UserID: validUserID.String()}
+		resp, err := usecase.Update(context.Background(), req)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, identifier.ErrInvalidID)
 	})
@@ -128,7 +133,7 @@ func TestGroupUseCase_Update(t *testing.T) {
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(tracking.Group{}, expectedErr)
 
 		usecase := newTestGroupUseCase(repo)
-		resp, err := usecase.Update(context.Background(), validUserID.String(), validReq)
+		resp, err := usecase.Update(context.Background(), validReq)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, expectedErr)
 	})
@@ -141,8 +146,8 @@ func TestGroupUseCase_Update(t *testing.T) {
 
 		usecase := newTestGroupUseCase(repo)
 
-		req := &UpdateGroupRequest{ID: otherUserGroup.ID.String(), Name: "Test", Description: "Test"}
-		resp, err := usecase.Update(context.Background(), validUserID.String(), req)
+		req := &UpdateGroupRequest{ID: otherUserGroup.ID.String(), UserID: validUserID.String(), Name: "Test", Description: "Test"}
+		resp, err := usecase.Update(context.Background(), req)
 
 		assert.Nil(t, resp)
 		assert.EqualError(t, err, "unauthorized")
@@ -158,7 +163,7 @@ func TestGroupUseCase_Update(t *testing.T) {
 
 		usecase := newTestGroupUseCase(repo)
 
-		resp, err := usecase.Update(context.Background(), validUserID.String(), validReq)
+		resp, err := usecase.Update(context.Background(), validReq)
 
 		require.NoError(t, err)
 		require.NotNil(t, resp)
@@ -285,7 +290,7 @@ func TestGroupUseCase_List_Mapping(t *testing.T) {
 	catName, _ := tracking.NewNameVO("Test Category")
 	catDesc, _ := tracking.NewDescriptionVO("Test Desc")
 	startMonth, _ := tracking.ParseMonth("2023-01")
-	budget, _ := money.NewFromFloat(123.45)
+	budget, _ := money.NewFromFloat(123.45, "USD")
 
 	category, _ := tracking.NewCategory(
 		catID,

@@ -15,6 +15,10 @@ import (
 // sqliteDriver specifies the driver name for connecting to SQLite database
 const sqliteDriver = "sqlite3"
 
+// maxOpenConns limits concurrent connections to 1 for SQLite to prevent "database is locked" errors.
+// SQLite supports only one writer at a time due to its file-based architecture.
+const maxOpenConns = 1
+
 // NewDatabaseConnection opens an SQLite database using provided DSN and verifies the connection.
 func NewDatabaseConnection(ctx context.Context, dsn string) (*sql.DB, error) {
 	if dsn == "" {
@@ -29,36 +33,32 @@ func NewDatabaseConnection(ctx context.Context, dsn string) (*sql.DB, error) {
 	options := fmt.Sprintf("%s%s_busy_timeout=5000&_journal_mode=wal&_foreign_keys=1", dsn, separator)
 	db, err := sql.Open(sqliteDriver, options)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
-	// Important: SQLite supports only one writer at a time.
-	// Setting MaxOpenConns to 1 avoids "database is locked" errors during concurrent writes.
-	db.SetMaxOpenConns(1)
+	db.SetMaxOpenConns(maxOpenConns)
 
 	if err = db.PingContext(ctx); err != nil {
-		if db != nil {
-			_ = db.Close()
-		}
-		return nil, err
+		_ = db.Close()
+		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
 	// Enable database optimization
 	_, err = db.ExecContext(ctx, "PRAGMA synchronous=NORMAL;")
 	if err != nil {
 		_ = db.Close()
-		return nil, err
+		return nil, fmt.Errorf("failed to set synchronous pragma: %w", err)
 	}
 	_, err = db.ExecContext(ctx, "PRAGMA temp_store = memory;")
 	if err != nil {
 		_ = db.Close()
-		return nil, err
+		return nil, fmt.Errorf("failed to set temp_store pragma: %w", err)
 	}
 	// Note: 30GB mmap limit is an upper bound, not an immediate allocation.
 	_, err = db.ExecContext(ctx, "PRAGMA mmap_size=30000000000;")
 	if err != nil {
 		_ = db.Close()
-		return nil, err
+		return nil, fmt.Errorf("failed to set mmap_size pragma: %w", err)
 	}
 
 	return db, nil

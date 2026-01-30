@@ -39,7 +39,7 @@ func New(app HandlerContext, uc *usecase.UseCase) Handlers {
 			RegisterHandler: NewRegisterHandler(app, uc.AuthUseCase),
 		},
 		Private: PrivateHandlers{
-			HomeHandler:     NewHomeHandler(app, uc.IncomeUseCase, uc.ExpenseUseCase, uc.GroupUseCase, uc.CategoryUseCase),
+			HomeHandler:     NewHomeHandler(app, uc.DashboardUseCase),
 			IncomeHandler:   NewIncomeHandler(app, uc.IncomeUseCase, uc.ExpenseUseCase),
 			GroupHandler:    NewGroupHandler(app, uc.GroupUseCase),
 			CategoryHandler: NewCategoryHandler(app, uc.CategoryUseCase),

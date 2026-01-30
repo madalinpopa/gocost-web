@@ -1,4 +1,4 @@
-export CURRENCY="$"
+export CURRENCY="USD"
 export VERSION="latest"
 export DOMAIN="localhost"
 export ALLOWED_HOSTS="localhost"

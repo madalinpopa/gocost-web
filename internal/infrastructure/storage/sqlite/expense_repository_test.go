@@ -108,7 +108,7 @@ func TestSQLiteExpenseRepository(t *testing.T) {
 		exp := createRandomExpense(t, category.ID)
 		require.NoError(t, repo.Save(ctx, *exp))
 
-		newAmount, _ := money.New(2000)
+		newAmount, _ := money.New(2000, "USD")
 		newDesc, _ := expense.NewExpenseDescriptionVO("Dinner")
 		paidAt := time.Now()
 		payment, err := expense.NewPaidStatus(paidAt)
@@ -179,14 +179,22 @@ func TestSQLiteExpenseRepository(t *testing.T) {
 
 		total, err := repo.Total(ctx, user.ID, "2023-10")
 		assert.NoError(t, err)
-		assert.Equal(t, exp1.Amount.Amount()+exp2.Amount.Amount(), total)
+		
+		expectedTotal, _ := exp1.Amount.Add(exp2.Amount)
+		isEqual, err := expectedTotal.Equals(total)
+	assert.NoError(t, err)
+	assert.True(t, isEqual)
 
 		totalNov, err := repo.Total(ctx, user.ID, "2023-11")
 		assert.NoError(t, err)
-		assert.Equal(t, exp3.Amount.Amount(), totalNov)
+		isEqual, err = exp3.Amount.Equals(totalNov)
+	assert.NoError(t, err)
+	assert.True(t, isEqual)
 
 		totalDec, err := repo.Total(ctx, user.ID, "2023-12")
 		assert.NoError(t, err)
-		assert.Equal(t, 0.0, totalDec)
+		isZero, err := totalDec.IsZero()
+	assert.NoError(t, err)
+	assert.True(t, isZero)
 	})
 }

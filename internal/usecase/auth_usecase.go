@@ -83,7 +83,12 @@ func (u AuthUseCaseImpl) Register(ctx context.Context, req *RegisterUserRequest)
 		return nil, err
 	}
 
-	user := identity.NewUser(id, username, email, password)
+	currency, err := identity.NewCurrencyVO(req.Currency)
+	if err != nil {
+		return nil, err
+	}
+
+	user := identity.NewUser(id, username, email, password, currency)
 	if err := repo.Save(ctx, *user); err != nil {
 		return nil, err
 	}
@@ -92,6 +97,7 @@ func (u AuthUseCaseImpl) Register(ctx context.Context, req *RegisterUserRequest)
 		ID:       user.ID.String(),
 		Email:    user.Email.Value(),
 		Username: user.Username.Value(),
+		Currency: user.Currency.Value(),
 	}, nil
 }
 
@@ -139,5 +145,6 @@ func (u AuthUseCaseImpl) Login(ctx context.Context, req *LoginRequest) (*LoginRe
 		Username: user.Username.Value(),
 		FullName: "",
 		Role:     "",
+		Currency: user.Currency.Value(),
 	}, nil
 }

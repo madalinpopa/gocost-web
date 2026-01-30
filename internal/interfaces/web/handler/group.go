@@ -50,12 +50,13 @@ func (h *GroupHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
 	userID := h.app.Session.GetUserID(r.Context())
 
 	req := &usecase.CreateGroupRequest{
+		UserID:      userID,
 		Name:        groupForm.Name,
 		Description: groupForm.Description,
 		Order:       groupForm.Order,
 	}
 
-	_, err := h.group.Create(r.Context(), userID, req)
+	_, err := h.group.Create(r.Context(), req)
 	if err != nil {
 		errMessage, isUserFacing := translateGroupError(err)
 		groupForm.AddNonFieldError(errMessage)
@@ -96,12 +97,13 @@ func (h *GroupHandler) UpdateGroup(w http.ResponseWriter, r *http.Request) {
 
 	req := &usecase.UpdateGroupRequest{
 		ID:          groupForm.ID,
+		UserID:      userID,
 		Name:        groupForm.Name,
 		Description: groupForm.Description,
 		Order:       groupForm.Order,
 	}
 
-	_, err := h.group.Update(r.Context(), userID, req)
+	_, err := h.group.Update(r.Context(), req)
 	if err != nil {
 		errMessage, isUserFacing := translateGroupError(err)
 		groupForm.AddNonFieldError(errMessage)

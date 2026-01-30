@@ -16,15 +16,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func newTestExpenseUseCase(trackingRepo *MockGroupRepository, expenseRepo *MockExpenseRepository) ExpenseUseCaseImpl {
+func newTestExpenseUseCase(trackingRepo *MockGroupRepository, expenseRepo *MockExpenseRepository, userRepo *MockUserRepository) ExpenseUseCaseImpl {
 	if trackingRepo == nil {
 		trackingRepo = &MockGroupRepository{}
 	}
 	if expenseRepo == nil {
 		expenseRepo = &MockExpenseRepository{}
 	}
+	if userRepo == nil {
+		userRepo = &MockUserRepository{}
+	}
 	return NewExpenseUseCase(
-		&MockUnitOfWork{TrackingRepo: trackingRepo, ExpenseRepo: expenseRepo},
+		&MockUnitOfWork{TrackingRepo: trackingRepo, ExpenseRepo: expenseRepo, UserRepo: userRepo},
 		slog.New(slog.NewTextHandler(io.Discard, nil)),
 	)
 }
@@ -32,7 +35,7 @@ func newTestExpenseUseCase(trackingRepo *MockGroupRepository, expenseRepo *MockE
 func newTestExpense(t *testing.T, categoryID identifier.ID) *expense.Expense {
 	t.Helper()
 	id, _ := identifier.NewID()
-	amount, _ := money.NewFromFloat(100.0)
+	amount, _ := money.NewFromFloat(100.0, "USD")
 	desc, _ := expense.NewExpenseDescriptionVO("Test Expense")
 	payment := expense.NewUnpaidStatus()
 
@@ -53,6 +56,8 @@ func TestExpenseUseCase_Create(t *testing.T) {
 	_, _ = group.CreateCategory(catID, name, desc, false, startMonth, tracking.Month{}, money.Money{})
 
 	validReq := &CreateExpenseRequest{
+		UserID:      validUserID.String(),
+		Currency:    "USD",
 		CategoryID:  catID.String(),
 		Amount:      50.0,
 		Description: "Lunch",
@@ -61,15 +66,17 @@ func TestExpenseUseCase_Create(t *testing.T) {
 	}
 
 	t.Run("returns error for nil request", func(t *testing.T) {
-		usecase := newTestExpenseUseCase(nil, nil)
-		resp, err := usecase.Create(context.Background(), validUserID.String(), nil)
+		usecase := newTestExpenseUseCase(nil, nil, nil)
+		resp, err := usecase.Create(context.Background(), nil)
 		assert.Nil(t, resp)
 		assert.EqualError(t, err, "request cannot be nil")
 	})
 
 	t.Run("returns error for invalid user ID", func(t *testing.T) {
-		usecase := newTestExpenseUseCase(nil, nil)
-		resp, err := usecase.Create(context.Background(), "invalid", validReq)
+		usecase := newTestExpenseUseCase(nil, nil, nil)
+		req := *validReq
+		req.UserID = "invalid"
+		resp, err := usecase.Create(context.Background(), &req)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, identifier.ErrInvalidID)
 	})
@@ -78,8 +85,8 @@ func TestExpenseUseCase_Create(t *testing.T) {
 		repo := &MockGroupRepository{}
 		repo.On("FindGroupByCategoryID", mock.Anything, mock.Anything).Return(tracking.Group{}, tracking.ErrGroupNotFound)
 
-		usecase := newTestExpenseUseCase(repo, nil)
-		resp, err := usecase.Create(context.Background(), validUserID.String(), validReq)
+		usecase := newTestExpenseUseCase(repo, nil, nil)
+		resp, err := usecase.Create(context.Background(), validReq)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, tracking.ErrGroupNotFound)
 	})
@@ -90,8 +97,8 @@ func TestExpenseUseCase_Create(t *testing.T) {
 		repo := &MockGroupRepository{}
 		repo.On("FindGroupByCategoryID", mock.Anything, mock.Anything).Return(*otherGroup, nil)
 
-		usecase := newTestExpenseUseCase(repo, nil)
-		resp, err := usecase.Create(context.Background(), validUserID.String(), validReq)
+		usecase := newTestExpenseUseCase(repo, nil, nil)
+		resp, err := usecase.Create(context.Background(), validReq)
 		assert.Nil(t, resp)
 		assert.EqualError(t, err, "unauthorized")
 	})
@@ -106,16 +113,19 @@ func TestExpenseUseCase_Create(t *testing.T) {
 			savedExpense = args.Get(1).(expense.Expense)
 		})
 
-		usecase := newTestExpenseUseCase(groupRepo, expenseRepo)
+		usecase := newTestExpenseUseCase(groupRepo, expenseRepo, nil)
 
-		resp, err := usecase.Create(context.Background(), validUserID.String(), validReq)
+		resp, err := usecase.Create(context.Background(), validReq)
 		require.NoError(t, err)
 		assert.NotNil(t, resp)
-		assert.Equal(t, validReq.Amount, resp.Amount)
+		expectedAmount, err := money.NewFromFloat(validReq.Amount, validReq.Currency)
+		require.NoError(t, err)
+		assert.Equal(t, expectedAmount.Cents(), resp.AmountCents)
+		assert.Equal(t, validReq.Currency, resp.Currency)
 		assert.Equal(t, validReq.Description, resp.Description)
 		assert.Equal(t, validReq.CategoryID, resp.CategoryID)
 
-		assert.Equal(t, validReq.Amount, savedExpense.Amount.Amount())
+		assert.Equal(t, expectedAmount.Cents(), savedExpense.Amount.Cents())
 	})
 }
 
@@ -133,6 +143,8 @@ func TestExpenseUseCase_Update(t *testing.T) {
 
 	validReq := &UpdateExpenseRequest{
 		ID:          exp.ID.String(),
+		UserID:      validUserID.String(),
+		Currency:    "USD",
 		CategoryID:  catID.String(),
 		Amount:      75.0,
 		Description: "Updated Lunch",
@@ -147,8 +159,8 @@ func TestExpenseUseCase_Update(t *testing.T) {
 		repo := &MockExpenseRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(expense.Expense{}, expense.ErrExpenseNotFound)
 
-		usecase := newTestExpenseUseCase(nil, repo)
-		resp, err := usecase.Update(context.Background(), validUserID.String(), validReq)
+		usecase := newTestExpenseUseCase(nil, repo, nil)
+		resp, err := usecase.Update(context.Background(), validReq)
 		assert.Nil(t, resp)
 		assert.ErrorIs(t, err, expense.ErrExpenseNotFound)
 	})
@@ -163,9 +175,9 @@ func TestExpenseUseCase_Update(t *testing.T) {
 		groupRepo := &MockGroupRepository{}
 		groupRepo.On("FindGroupByCategoryID", mock.Anything, mock.Anything).Return(*otherGroup, nil)
 
-		usecase := newTestExpenseUseCase(groupRepo, expenseRepo)
+		usecase := newTestExpenseUseCase(groupRepo, expenseRepo, nil)
 
-		resp, err := usecase.Update(context.Background(), validUserID.String(), validReq)
+		resp, err := usecase.Update(context.Background(), validReq)
 		assert.Nil(t, resp)
 		assert.EqualError(t, err, "unauthorized")
 	})
@@ -181,15 +193,18 @@ func TestExpenseUseCase_Update(t *testing.T) {
 		groupRepo := &MockGroupRepository{}
 		groupRepo.On("FindGroupByCategoryID", mock.Anything, mock.Anything).Return(*group, nil)
 
-		usecase := newTestExpenseUseCase(groupRepo, expenseRepo)
+		usecase := newTestExpenseUseCase(groupRepo, expenseRepo, nil)
 
-		resp, err := usecase.Update(context.Background(), validUserID.String(), validReq)
+		resp, err := usecase.Update(context.Background(), validReq)
 		require.NoError(t, err)
-		assert.Equal(t, validReq.Amount, resp.Amount)
+		expectedAmount, err := money.NewFromFloat(validReq.Amount, validReq.Currency)
+		require.NoError(t, err)
+		assert.Equal(t, expectedAmount.Cents(), resp.AmountCents)
+		assert.Equal(t, validReq.Currency, resp.Currency)
 		assert.Equal(t, validReq.Description, resp.Description)
 		assert.True(t, resp.IsPaid)
 
-		assert.Equal(t, validReq.Amount, savedExpense.Amount.Amount())
+		assert.Equal(t, expectedAmount.Cents(), savedExpense.Amount.Cents())
 		assert.Equal(t, validReq.Description, savedExpense.Description.Value())
 	})
 
@@ -207,12 +222,12 @@ func TestExpenseUseCase_Update(t *testing.T) {
 		// Second call with otherCatID
 		groupRepo.On("FindGroupByCategoryID", mock.Anything, otherCatID).Return(*otherGroup, nil)
 
-		usecase := newTestExpenseUseCase(groupRepo, expenseRepo)
+		usecase := newTestExpenseUseCase(groupRepo, expenseRepo, nil)
 
 		req := *validReq
 		req.CategoryID = otherCatID.String()
 
-		resp, err := usecase.Update(context.Background(), validUserID.String(), &req)
+		resp, err := usecase.Update(context.Background(), &req)
 		assert.Nil(t, resp)
 		assert.EqualError(t, err, "unauthorized")
 	})
@@ -241,7 +256,7 @@ func TestExpenseUseCase_Delete(t *testing.T) {
 		groupRepo := &MockGroupRepository{}
 		groupRepo.On("FindGroupByCategoryID", mock.Anything, mock.Anything).Return(*group, nil)
 
-		usecase := newTestExpenseUseCase(groupRepo, expenseRepo)
+		usecase := newTestExpenseUseCase(groupRepo, expenseRepo, nil)
 
 		err := usecase.Delete(context.Background(), validUserID.String(), exp.ID.String())
 		require.NoError(t, err)
@@ -258,7 +273,7 @@ func TestExpenseUseCase_Delete(t *testing.T) {
 		groupRepo := &MockGroupRepository{}
 		groupRepo.On("FindGroupByCategoryID", mock.Anything, mock.Anything).Return(*otherGroup, nil)
 
-		usecase := newTestExpenseUseCase(groupRepo, expenseRepo)
+		usecase := newTestExpenseUseCase(groupRepo, expenseRepo, nil)
 
 		err := usecase.Delete(context.Background(), validUserID.String(), exp.ID.String())
 		assert.EqualError(t, err, "unauthorized")
@@ -284,7 +299,7 @@ func TestExpenseUseCase_Get(t *testing.T) {
 		groupRepo := &MockGroupRepository{}
 		groupRepo.On("FindGroupByCategoryID", mock.Anything, mock.Anything).Return(*group, nil)
 
-		usecase := newTestExpenseUseCase(groupRepo, expenseRepo)
+		usecase := newTestExpenseUseCase(groupRepo, expenseRepo, nil)
 
 		resp, err := usecase.Get(context.Background(), validUserID.String(), exp.ID.String())
 		require.NoError(t, err)
@@ -303,7 +318,7 @@ func TestExpenseUseCase_List(t *testing.T) {
 		expenseRepo := &MockExpenseRepository{}
 		expenseRepo.On("FindByUserID", mock.Anything, mock.Anything).Return([]expense.Expense{*exp1, *exp2}, nil)
 
-		usecase := newTestExpenseUseCase(nil, expenseRepo)
+		usecase := newTestExpenseUseCase(nil, expenseRepo, nil)
 
 		resps, err := usecase.List(context.Background(), validUserID.String())
 		require.NoError(t, err)
@@ -324,7 +339,7 @@ func TestExpenseUseCase_ListByMonth(t *testing.T) {
 			*exp1, *exp2,
 		}, nil)
 
-		usecase := newTestExpenseUseCase(nil, expenseRepo)
+		usecase := newTestExpenseUseCase(nil, expenseRepo, nil)
 
 		resps, err := usecase.ListByMonth(context.Background(), validUserID.String(), "2023-10")
 		require.NoError(t, err)
@@ -337,9 +352,10 @@ func TestExpenseUseCase_Total(t *testing.T) {
 
 	t.Run("returns total amount", func(t *testing.T) {
 		expenseRepo := &MockExpenseRepository{}
-		expenseRepo.On("Total", mock.Anything, validUserID, "2023-10").Return(100.0, nil)
+		m, _ := money.NewFromFloat(100.0, "USD")
+		expenseRepo.On("Total", mock.Anything, validUserID, "2023-10").Return(m, nil)
 
-		usecase := newTestExpenseUseCase(nil, expenseRepo)
+		usecase := newTestExpenseUseCase(nil, expenseRepo, nil)
 
 		total, err := usecase.Total(context.Background(), validUserID.String(), "2023-10")
 		require.NoError(t, err)
@@ -347,7 +363,7 @@ func TestExpenseUseCase_Total(t *testing.T) {
 	})
 
 	t.Run("returns error on invalid user id", func(t *testing.T) {
-		usecase := newTestExpenseUseCase(nil, nil)
+		usecase := newTestExpenseUseCase(nil, nil, nil)
 		_, err := usecase.Total(context.Background(), "invalid", "2023-10")
 		assert.ErrorIs(t, err, identifier.ErrInvalidID)
 	})

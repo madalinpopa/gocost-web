@@ -41,10 +41,19 @@ func (m *mockAuthSessionManager) GetUsername(ctx context.Context) string {
 	return args.String(0)
 }
 
+func (m *mockAuthSessionManager) GetCurrency(ctx context.Context) string {
+	args := m.Called(ctx)
+	return args.String(0)
+}
+
 func (m *mockAuthSessionManager) SetUserID(ctx context.Context, userID string) {
 	m.Called(ctx, userID)
 }
 
 func (m *mockAuthSessionManager) SetUsername(ctx context.Context, username string) {
 	m.Called(ctx, username)
+}
+
+func (m *mockAuthSessionManager) SetCurrency(ctx context.Context, currency string) {
+	m.Called(ctx, currency)
 }

@@ -14,7 +14,7 @@ func TestNewExpense(t *testing.T) {
 		// Arrange
 		id, _ := identifier.NewID()
 		categoryID, _ := identifier.NewID()
-		amount, _ := money.New(5000)
+		amount, _ := money.New(5000, "USD")
 		description, _ := NewExpenseDescriptionVO("Lunch")
 		spentAt := time.Now()
 		payment := NewUnpaidStatus()
@@ -37,7 +37,7 @@ func TestNewExpense(t *testing.T) {
 		// Arrange
 		id, _ := identifier.NewID()
 		categoryID, _ := identifier.NewID()
-		amount, _ := money.New(0)
+		amount, _ := money.New(0, "USD")
 		description, _ := NewExpenseDescriptionVO("Lunch")
 		spentAt := time.Now()
 		payment := NewUnpaidStatus()
@@ -57,11 +57,7 @@ func TestNewExpense(t *testing.T) {
 		description, _ := NewExpenseDescriptionVO("Lunch")
 		spentAt := time.Now()
 		payment := NewUnpaidStatus()
-		// money.New returns error on negative, so we simulate it or just rely on money package
-		// If we force negative amount (if possible) or just rely on IsPositive check
-		// money.New(-100) returns error, so we can't create it easily here without ignoring error
-		// But let's say we have a Money struct that is zero/negative
-		amount := money.Money{} // Zero
+		amount, _ := money.New(-100, "USD")
 		// Act
 		expense, err := NewExpense(id, categoryID, amount, description, spentAt, payment)
 		// Assert

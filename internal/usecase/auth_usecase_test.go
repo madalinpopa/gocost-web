@@ -42,7 +42,10 @@ func newTestUser(t *testing.T, email, username, hash string) identity.User {
 	id, err := identifier.NewID()
 	require.NoError(t, err)
 
-	return *identity.NewUser(id, usernameVO, emailVO, passwordVO)
+	currencyVO, err := identity.NewCurrencyVO("USD")
+	require.NoError(t, err)
+
+	return *identity.NewUser(id, usernameVO, emailVO, passwordVO, currencyVO)
 }
 
 func TestAuthUseCase_Register(t *testing.T) {
@@ -62,6 +65,7 @@ func TestAuthUseCase_Register(t *testing.T) {
 			EmailRequest:    EmailRequest{Email: "invalid-email"},
 			UsernameRequest: UsernameRequest{Username: "validuser"},
 			Password:        "password1",
+			Currency:        "USD",
 		}
 
 		resp, err := usecase.Register(context.Background(), req)
@@ -77,6 +81,7 @@ func TestAuthUseCase_Register(t *testing.T) {
 			EmailRequest:    EmailRequest{Email: "user@example.com"},
 			UsernameRequest: UsernameRequest{Username: "ab"},
 			Password:        "password1",
+			Currency:        "USD",
 		}
 
 		resp, err := usecase.Register(context.Background(), req)
@@ -92,6 +97,7 @@ func TestAuthUseCase_Register(t *testing.T) {
 			EmailRequest:    EmailRequest{Email: "user@example.com"},
 			UsernameRequest: UsernameRequest{Username: "validuser"},
 			Password:        "",
+			Currency:        "USD",
 		}
 
 		resp, err := usecase.Register(context.Background(), req)
@@ -107,6 +113,7 @@ func TestAuthUseCase_Register(t *testing.T) {
 			EmailRequest:    EmailRequest{Email: "user@example.com"},
 			UsernameRequest: UsernameRequest{Username: "validuser"},
 			Password:        "short77",
+			Currency:        "USD",
 		}
 
 		resp, err := usecase.Register(context.Background(), req)
@@ -125,6 +132,7 @@ func TestAuthUseCase_Register(t *testing.T) {
 			EmailRequest:    EmailRequest{Email: "user@example.com"},
 			UsernameRequest: UsernameRequest{Username: "validuser"},
 			Password:        "password1",
+			Currency:        "USD",
 		}
 
 		resp, err := usecase.Register(context.Background(), req)
@@ -144,6 +152,7 @@ func TestAuthUseCase_Register(t *testing.T) {
 			EmailRequest:    EmailRequest{Email: "user@example.com"},
 			UsernameRequest: UsernameRequest{Username: "validuser"},
 			Password:        "password1",
+			Currency:        "USD",
 		}
 
 		resp, err := usecase.Register(context.Background(), req)
@@ -163,6 +172,7 @@ func TestAuthUseCase_Register(t *testing.T) {
 			EmailRequest:    EmailRequest{Email: "user@example.com"},
 			UsernameRequest: UsernameRequest{Username: "validuser"},
 			Password:        "password1",
+			Currency:        "USD",
 		}
 
 		resp, err := usecase.Register(context.Background(), req)
@@ -183,6 +193,7 @@ func TestAuthUseCase_Register(t *testing.T) {
 			EmailRequest:    EmailRequest{Email: "user@example.com"},
 			UsernameRequest: UsernameRequest{Username: "validuser"},
 			Password:        "password1",
+			Currency:        "USD",
 		}
 
 		resp, err := usecase.Register(context.Background(), req)
@@ -204,6 +215,7 @@ func TestAuthUseCase_Register(t *testing.T) {
 			EmailRequest:    EmailRequest{Email: "user@example.com"},
 			UsernameRequest: UsernameRequest{Username: "validuser"},
 			Password:        "password1",
+			Currency:        "USD",
 		}
 
 		resp, err := usecase.Register(context.Background(), req)
@@ -229,6 +241,7 @@ func TestAuthUseCase_Register(t *testing.T) {
 			EmailRequest:    EmailRequest{Email: "user@example.com"},
 			UsernameRequest: UsernameRequest{Username: "validuser"},
 			Password:        "password1",
+			Currency:        "USD",
 		}
 
 		resp, err := usecase.Register(context.Background(), req)
@@ -241,6 +254,7 @@ func TestAuthUseCase_Register(t *testing.T) {
 		assert.NotEqual(t, req.Password, savedUser.Password.Value())
 		assert.Equal(t, req.Email, resp.Email)
 		assert.Equal(t, req.Username, resp.Username)
+		assert.Equal(t, req.Currency, resp.Currency)
 		assert.NotEmpty(t, resp.ID)
 		parsedID, parseErr := identifier.ParseID(resp.ID)
 		require.NoError(t, parseErr)
@@ -402,6 +416,7 @@ func TestAuthUseCase_Login(t *testing.T) {
 		assert.Equal(t, user.ID.String(), resp.UserID)
 		assert.Equal(t, user.Email.Value(), resp.Email)
 		assert.Equal(t, user.Username.Value(), resp.Username)
+		assert.Equal(t, "USD", resp.Currency)
 		assert.Empty(t, resp.FullName)
 		assert.Empty(t, resp.Role)
 	})
@@ -412,6 +427,7 @@ func TestAuthUseCase_Login(t *testing.T) {
 		require.NoError(t, err)
 
 		user := newTestUser(t, "user@example.com", "validuser", hash)
+		
 		repo := &MockUserRepository{}
 		repo.On("FindByUsername", mock.Anything, mock.Anything).Return(user, nil)
 
@@ -429,5 +445,6 @@ func TestAuthUseCase_Login(t *testing.T) {
 		assert.Equal(t, user.ID.String(), resp.UserID)
 		assert.Equal(t, user.Email.Value(), resp.Email)
 		assert.Equal(t, user.Username.Value(), resp.Username)
+		assert.Equal(t, "USD", resp.Currency)
 	})
 }

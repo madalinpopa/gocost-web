@@ -6,12 +6,12 @@ Some features I would like to implement in the coming months.
 *Focus: Completing the essential user loop and personalization.*
 
 ### 1. Money Handling Refactor
-- [ ] **Multi-currency Support:** Replace current money implementation with a robust external library (e.g., `rhymond/go-money` or `govalues/decimal`) to handle multiple currencies and exchange rates correctly.
-- [ ] **Migration:** Update existing monetary values in the database to be compatible with the new library structure if necessary.
+- [x] **Multi-currency Support:** Replace current money implementation with a robust external library (e.g., `rhymond/go-money` or `govalues/decimal`) to handle multiple currencies and exchange rates correctly.
+- [x] **Migration:** Update existing monetary values in the database to be compatible with the new library structure if necessary.
 
 ### 2. User Profile & Settings
 - [ ] **Global Configuration:** Add `DISABLE_REGISTRATION` env var to toggle public sign-ups.
-- [ ] **User Entity Update:** Add `Currency` and `Locale` fields to the `User` entity (Database Migration required).
+- [x] **User Entity Update:** Add `Currency` field to the `User` entity (Database Migration required).
 - [ ] **Profile Page:** Create a settings page where users can:
     - Change their display name/email.
     - Set their preferred currency (overriding global default).
@@ -43,7 +43,7 @@ Some features I would like to implement in the coming months.
 ### 5. Budgeting Features
 - [x] **Category Limits:** Allow users to set a maximum budget per category (e.g., "Groceries: $500/month").
 - [x] **Visual Indicators:** Progress bars on the dashboard showing budget usage (Green/Yellow/Red).
-- [ ] **Balance Display:** Display total amount budgeted vs current balance for the month.
+- [x] **Balance Display:** Display total amount budgeted vs current balance for the month.
 
 ### 6. Recurring Transactions
 - [ ] **Subscriptions:** Mark expenses as "Recurring" (Monthly/Yearly).
@@ -56,7 +56,7 @@ Some features I would like to implement in the coming months.
 
 ### 7. User Interface
 - [x] **Dark Mode:** System-aware theme toggle using Tailwind's `dark:` modifier.
-- [ ] **Mobile Optimization:** Polish touch targets and layout for the "Add Expense" flow on mobile devices.
+- [x] **Mobile Optimization:** Polish touch targets and layout for the "Add Expense" flow on mobile devices.
 
 ### 8. Security & Ops
 - [ ] **Rate Limiting:** Implement middleware to prevent abuse of Auth endpoints.

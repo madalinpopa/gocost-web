@@ -58,6 +58,7 @@ func (rh RegisterHandler) SubmitRegisterForm(w http.ResponseWriter, r *http.Requ
 		EmailRequest:    usecase.EmailRequest{Email: registerForm.Email},
 		UsernameRequest: usecase.UsernameRequest{Username: registerForm.Username},
 		Password:        registerForm.Password,
+		Currency:        rh.app.Config.Currency,
 	}
 
 	// Register the user
@@ -87,6 +88,7 @@ func (rh RegisterHandler) SubmitRegisterForm(w http.ResponseWriter, r *http.Requ
 	// Register the user in the session
 	rh.app.Session.SetUserID(r.Context(), userResponse.ID)
 	rh.app.Session.SetUsername(r.Context(), userResponse.Username)
+	rh.app.Session.SetCurrency(r.Context(), userResponse.Currency)
 
 	// Redirect to admin home
 	rh.app.Htmx.Redirect(w, "/home")

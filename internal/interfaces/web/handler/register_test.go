@@ -24,6 +24,7 @@ import (
 func newTestRegisterHandler(session *MockSessionManager, auth *MockAuthUseCase) RegisterHandler {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	cfg := config.New()
+	cfg.Currency = "USD"
 	templater := web.NewTemplate(logger, cfg)
 	decoder := form.NewDecoder()
 	errHandler := respond.NewErrorHandler(logger)
@@ -108,14 +109,16 @@ func TestRegisterHandler_SubmitRegisterForm(t *testing.T) {
 			EmailRequest:    usecase.EmailRequest{Email: "test@example.com"},
 			UsernameRequest: usecase.UsernameRequest{Username: "testuser"},
 			Password:        "password123",
+			Currency:        "USD", // Default in config.New() -> LoadEnvironments() logic, but let's check config.go
 		}
 
 		auth.On("Register", req.Context(), expectedReq).Return(&usecase.UserResponse{
-			ID: "user-1", Username: "testuser",
+			ID: "user-1", Username: "testuser", Currency: "USD",
 		}, nil)
 		session.On("RenewToken", req.Context()).Return(nil)
 		session.On("SetUserID", req.Context(), "user-1").Return()
 		session.On("SetUsername", req.Context(), "testuser").Return()
+		session.On("SetCurrency", req.Context(), "USD").Return()
 
 		handler.SubmitRegisterForm(rec, req)
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web"
 	"github.com/madalinpopa/gocost-web/internal/interfaces/web/form"
+	"github.com/madalinpopa/gocost-web/internal/interfaces/web/views"
 	"github.com/madalinpopa/gocost-web/internal/usecase"
 	"github.com/madalinpopa/gocost-web/ui/templates/components"
 )
@@ -50,19 +51,22 @@ func (h *IncomeHandler) CreateIncome(w http.ResponseWriter, r *http.Request) {
 
 	date, _ := time.Parse("2006-01-02", incomeForm.CurrentMonth+"-01")
 
-	req := &usecase.CreateIncomeRequest{
-		Amount:     incomeForm.ParsedAmount(),
-		Source:     incomeForm.Description,
-		ReceivedAt: date,
-	}
-
 	userID := h.app.Session.GetUserID(r.Context())
 	if userID == "" {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
+	currency := h.app.Session.GetCurrency(r.Context())
 
-	_, err = h.income.Create(r.Context(), userID, req)
+	req := &usecase.CreateIncomeRequest{
+		UserID:     userID,
+		Currency:   currency,
+		Amount:     incomeForm.ParsedAmount(),
+		Source:     incomeForm.Description,
+		ReceivedAt: date,
+	}
+
+	_, err = h.income.Create(r.Context(), req)
 	if err != nil {
 		h.app.Errors.LogServerError(r, err)
 		return
@@ -86,7 +90,10 @@ func (h *IncomeHandler) ListIncomes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	component := components.IncomeList(incomes, h.app.Config.Currency)
+	currency := h.app.Session.GetCurrency(r.Context())
+	presenter := views.NewIncomeListPresenter(currency)
+	viewIncomes := presenter.Present(incomes)
+	component := components.IncomeList(viewIncomes)
 	h.app.Template.Render(w, r, component, http.StatusOK)
 }
 

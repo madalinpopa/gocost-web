@@ -56,7 +56,7 @@ func TestSQLiteIncomeRepository(t *testing.T) {
 		inc := createRandomIncome(t, user.ID)
 		require.NoError(t, repo.Save(ctx, *inc))
 
-		newAmount, _ := money.New(5000)
+		newAmount, _ := money.New(5000, "USD")
 		newSource, _ := income.NewSourceVO("Bonus")
 
 		// Create a new income instance with updated values but same ID

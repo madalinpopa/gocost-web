@@ -272,7 +272,7 @@ func TestGroup_CreateCategory(t *testing.T) {
 		catName := mustName(t, "Food")
 		catDesc := mustDesc(t, "Food expenses")
 		startMonth, _ := NewMonth(2024, time.January)
-		budget, _ := money.New(500)
+		budget, _ := money.New(500, "USD")
 
 		// Act
 		category, err := group.CreateCategory(catID, catName, catDesc, false, startMonth, Month{}, budget)
@@ -478,7 +478,7 @@ func TestGroup_AddCategory_Overlap(t *testing.T) {
 
 	catName, _ := NewNameVO("Food")
 	catDesc, _ := NewDescriptionVO("Desc")
-	budget, _ := money.New(100)
+	budget, _ := money.New(100, "USD")
 	jan := NewMonthFromTime(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC))
 	feb := NewMonthFromTime(time.Date(2023, 2, 1, 0, 0, 0, 0, time.UTC))
 	mar := NewMonthFromTime(time.Date(2023, 3, 1, 0, 0, 0, 0, time.UTC))

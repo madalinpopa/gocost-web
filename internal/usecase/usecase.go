@@ -8,11 +8,12 @@ import (
 )
 
 type UseCase struct {
-	AuthUseCase     AuthUseCase
-	IncomeUseCase   IncomeUseCase
-	GroupUseCase    GroupUseCase
-	CategoryUseCase CategoryUseCase
-	ExpenseUseCase  ExpenseUseCase
+	AuthUseCase      AuthUseCase
+	IncomeUseCase    IncomeUseCase
+	GroupUseCase     GroupUseCase
+	CategoryUseCase  CategoryUseCase
+	ExpenseUseCase   ExpenseUseCase
+	DashboardUseCase DashboardUseCase
 }
 
 func New(uow *sqlite.SqliteUnitOfWork, logger *slog.Logger) *UseCase {
@@ -25,12 +26,14 @@ func New(uow *sqlite.SqliteUnitOfWork, logger *slog.Logger) *UseCase {
 	groupUseCase := NewGroupUseCase(uow, logger)
 	categoryUseCase := NewCategoryUseCase(uow, logger)
 	expenseUseCase := NewExpenseUseCase(uow, logger)
+	dashboardUseCase := NewDashboardUseCase(uow, logger)
 
 	return &UseCase{
-		AuthUseCase:     authUseCase,
-		IncomeUseCase:   incomeUseCase,
-		GroupUseCase:    groupUseCase,
-		CategoryUseCase: categoryUseCase,
-		ExpenseUseCase:  expenseUseCase,
+		AuthUseCase:      authUseCase,
+		IncomeUseCase:    incomeUseCase,
+		GroupUseCase:     groupUseCase,
+		CategoryUseCase:  categoryUseCase,
+		ExpenseUseCase:   expenseUseCase,
+		DashboardUseCase: dashboardUseCase,
 	}
 }

@@ -59,12 +59,21 @@ func (m *MockSessionManager) GetUsername(ctx context.Context) string {
 	return args.String(0)
 }
 
+func (m *MockSessionManager) GetCurrency(ctx context.Context) string {
+	args := m.Called(ctx)
+	return args.String(0)
+}
+
 func (m *MockSessionManager) SetUserID(ctx context.Context, userID string) {
 	m.Called(ctx, userID)
 }
 
 func (m *MockSessionManager) SetUsername(ctx context.Context, username string) {
 	m.Called(ctx, username)
+}
+
+func (m *MockSessionManager) SetCurrency(ctx context.Context, currency string) {
+	m.Called(ctx, currency)
 }
 
 type MockAuthUseCase struct {
@@ -91,16 +100,16 @@ type MockIncomeUseCase struct {
 	mock.Mock
 }
 
-func (m *MockIncomeUseCase) Create(ctx context.Context, userID string, req *usecase.CreateIncomeRequest) (*usecase.IncomeResponse, error) {
-	args := m.Called(ctx, userID, req)
+func (m *MockIncomeUseCase) Create(ctx context.Context, req *usecase.CreateIncomeRequest) (*usecase.IncomeResponse, error) {
+	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*usecase.IncomeResponse), args.Error(1)
 }
 
-func (m *MockIncomeUseCase) Update(ctx context.Context, userID string, req *usecase.UpdateIncomeRequest) (*usecase.IncomeResponse, error) {
-	args := m.Called(ctx, userID, req)
+func (m *MockIncomeUseCase) Update(ctx context.Context, req *usecase.UpdateIncomeRequest) (*usecase.IncomeResponse, error) {
+	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -145,16 +154,16 @@ type MockGroupUseCase struct {
 	mock.Mock
 }
 
-func (m *MockGroupUseCase) Create(ctx context.Context, userID string, req *usecase.CreateGroupRequest) (*usecase.GroupResponse, error) {
-	args := m.Called(ctx, userID, req)
+func (m *MockGroupUseCase) Create(ctx context.Context, req *usecase.CreateGroupRequest) (*usecase.GroupResponse, error) {
+	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*usecase.GroupResponse), args.Error(1)
 }
 
-func (m *MockGroupUseCase) Update(ctx context.Context, userID string, req *usecase.UpdateGroupRequest) (*usecase.GroupResponse, error) {
-	args := m.Called(ctx, userID, req)
+func (m *MockGroupUseCase) Update(ctx context.Context, req *usecase.UpdateGroupRequest) (*usecase.GroupResponse, error) {
+	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -186,16 +195,16 @@ type MockCategoryUseCase struct {
 	mock.Mock
 }
 
-func (m *MockCategoryUseCase) Create(ctx context.Context, userID string, groupID string, req *usecase.CreateCategoryRequest) (*usecase.CategoryResponse, error) {
-	args := m.Called(ctx, userID, groupID, req)
+func (m *MockCategoryUseCase) Create(ctx context.Context, req *usecase.CreateCategoryRequest) (*usecase.CategoryResponse, error) {
+	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*usecase.CategoryResponse), args.Error(1)
 }
 
-func (m *MockCategoryUseCase) Update(ctx context.Context, userID string, groupID string, req *usecase.UpdateCategoryRequest) (*usecase.CategoryResponse, error) {
-	args := m.Called(ctx, userID, groupID, req)
+func (m *MockCategoryUseCase) Update(ctx context.Context, req *usecase.UpdateCategoryRequest) (*usecase.CategoryResponse, error) {
+	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -227,16 +236,16 @@ type MockExpenseUseCase struct {
 	mock.Mock
 }
 
-func (m *MockExpenseUseCase) Create(ctx context.Context, userID string, req *usecase.CreateExpenseRequest) (*usecase.ExpenseResponse, error) {
-	args := m.Called(ctx, userID, req)
+func (m *MockExpenseUseCase) Create(ctx context.Context, req *usecase.CreateExpenseRequest) (*usecase.ExpenseResponse, error) {
+	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*usecase.ExpenseResponse), args.Error(1)
 }
 
-func (m *MockExpenseUseCase) Update(ctx context.Context, userID string, req *usecase.UpdateExpenseRequest) (*usecase.ExpenseResponse, error) {
-	args := m.Called(ctx, userID, req)
+func (m *MockExpenseUseCase) Update(ctx context.Context, req *usecase.UpdateExpenseRequest) (*usecase.ExpenseResponse, error) {
+	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -275,4 +284,16 @@ func (m *MockExpenseUseCase) ListByMonth(ctx context.Context, userID string, mon
 func (m *MockExpenseUseCase) Total(ctx context.Context, userID string, month string) (float64, error) {
 	args := m.Called(ctx, userID, month)
 	return args.Get(0).(float64), args.Error(1)
+}
+
+type MockDashboardUseCase struct {
+	mock.Mock
+}
+
+func (m *MockDashboardUseCase) Get(ctx context.Context, req *usecase.DashboardRequest) (*usecase.DashboardResponse, error) {
+	args := m.Called(ctx, req)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*usecase.DashboardResponse), args.Error(1)
 }

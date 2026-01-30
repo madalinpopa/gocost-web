@@ -28,7 +28,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
@@ -59,12 +59,16 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		}
 
 		mockSession.On("GetUserID", req.Context()).Return("user-123")
+		mockSession.On("GetCurrency", req.Context()).Return("USD")
 
-		mockCategoryUC.On("Create", req.Context(), "user-123", "group-123", mock.MatchedBy(func(r *usecase.CreateCategoryRequest) bool {
+		mockCategoryUC.On("Create", req.Context(), mock.MatchedBy(func(r *usecase.CreateCategoryRequest) bool {
 			return r.Name == expectedReq.Name &&
 				r.Description == expectedReq.Description &&
 				r.IsRecurrent == expectedReq.IsRecurrent &&
-				r.StartMonth == expectedReq.StartMonth
+				r.StartMonth == expectedReq.StartMonth &&
+				r.UserID == "user-123" &&
+				r.GroupID == "group-123" &&
+				r.Currency == "USD"
 		})).Return(&usecase.CategoryResponse{ID: "cat-1"}, nil)
 
 		// Act
@@ -84,7 +88,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Errors:  newTestErrors(logger, mockErrorHandler),
@@ -121,7 +125,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
@@ -145,7 +149,8 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 
 		expectedErr := tracking.ErrCategoryNameExists
 		mockSession.On("GetUserID", req.Context()).Return("user-123")
-		mockCategoryUC.On("Create", req.Context(), "user-123", "group-123", mock.Anything).Return(nil, expectedErr)
+		mockSession.On("GetCurrency", req.Context()).Return("USD")
+		mockCategoryUC.On("Create", req.Context(), mock.Anything).Return(nil, expectedErr)
 
 		// Act
 		handler.CreateCategory(rec, req)
@@ -166,7 +171,7 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Decoder: form.NewDecoder(),
 			Logger:  logger,
 			Session: mockSession,
@@ -190,7 +195,8 @@ func TestCategoryHandler_CreateCategory(t *testing.T) {
 
 		expectedErr := errors.New("database failure")
 		mockSession.On("GetUserID", req.Context()).Return("user-123")
-		mockCategoryUC.On("Create", req.Context(), "user-123", "group-123", mock.Anything).Return(nil, expectedErr)
+		mockSession.On("GetCurrency", req.Context()).Return("USD")
+		mockCategoryUC.On("Create", req.Context(), mock.Anything).Return(nil, expectedErr)
 
 		// Act
 		handler.CreateCategory(rec, req)
@@ -213,7 +219,7 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Logger:  logger,
 			Session: mockSession,
 			Errors:  newTestErrors(logger, mockErrorHandler),
@@ -248,7 +254,7 @@ func TestCategoryHandler_DeleteCategory(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Logger:  logger,
 			Session: mockSession,
 			Errors:  newTestErrors(logger, mockErrorHandler),
@@ -287,7 +293,7 @@ func TestCategoryHandler_GetCreateForm(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Logger:  logger,
 			Session: mockSession,
 			Errors:  newTestErrors(logger, mockErrorHandler),
@@ -317,7 +323,7 @@ func TestCategoryHandler_GetCreateForm(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Logger:  logger,
 			Session: mockSession,
 			Errors:  newTestErrors(logger, mockErrorHandler),
@@ -346,7 +352,7 @@ func TestCategoryHandler_GetCreateForm(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 		appCtx := HandlerContext{
-			Config:  &config.Config{Currency: "$"},
+			Config:  &config.Config{Currency: "USD"},
 			Logger:  logger,
 			Session: mockSession,
 			Errors:  newTestErrors(logger, mockErrorHandler),
