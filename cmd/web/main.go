@@ -99,6 +99,7 @@ func main() {
 
 func run() error {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
 
 	conf := config.New().
 		WithServerAddr(address, port).
