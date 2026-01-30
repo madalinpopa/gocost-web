@@ -356,9 +356,9 @@ func TestIncomeUseCase_Total(t *testing.T) {
 
 		repo := &MockIncomeRepository{}
 
-		// We expect FindByUserID to be called and return all incomes
-
-		repo.On("FindByUserID", mock.Anything, validUserID).Return([]income.Income{*inc1, *inc2, *inc3}, nil)
+		expectedTotalMoney, err := money.NewFromFloat(inc1.Amount.Amount()+inc2.Amount.Amount(), "USD")
+		require.NoError(t, err)
+		repo.On("TotalByUserIDAndMonth", mock.Anything, validUserID, "2023-10").Return(expectedTotalMoney, nil)
 
 		usecase := newTestIncomeUseCase(repo, nil)
 
@@ -366,9 +366,7 @@ func TestIncomeUseCase_Total(t *testing.T) {
 
 		require.NoError(t, err)
 
-		expectedTotal := inc1.Amount.Amount() + inc2.Amount.Amount()
-
-		assert.Equal(t, expectedTotal, total)
+		assert.Equal(t, expectedTotalMoney.Amount(), total)
 
 	})
 
@@ -376,7 +374,9 @@ func TestIncomeUseCase_Total(t *testing.T) {
 
 		repo := &MockIncomeRepository{}
 
-		repo.On("FindByUserID", mock.Anything, validUserID).Return([]income.Income{*inc1, *inc2, *inc3}, nil)
+		zeroMoney, err := money.New(0, "USD")
+		require.NoError(t, err)
+		repo.On("TotalByUserIDAndMonth", mock.Anything, validUserID, "2023-12").Return(zeroMoney, nil)
 
 		usecase := newTestIncomeUseCase(repo, nil)
 
@@ -390,11 +390,14 @@ func TestIncomeUseCase_Total(t *testing.T) {
 
 	t.Run("returns error for invalid date format", func(t *testing.T) {
 
-		usecase := newTestIncomeUseCase(nil, nil)
+		expectedErr := errors.New("invalid month")
+		repo := &MockIncomeRepository{}
+		repo.On("TotalByUserIDAndMonth", mock.Anything, validUserID, "invalid-date").Return(money.Money{}, expectedErr)
+
+		usecase := newTestIncomeUseCase(repo, nil)
 
 		_, err := usecase.Total(context.Background(), validUserID.String(), "invalid-date")
-
-		assert.Error(t, err)
+		assert.ErrorIs(t, err, expectedErr)
 
 	})
 

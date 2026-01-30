@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log/slog"
-	"time"
 
 	"github.com/madalinpopa/gocost-web/internal/domain"
 	"github.com/madalinpopa/gocost-web/internal/domain/income"
@@ -203,27 +202,20 @@ func (u IncomeUseCaseImpl) ListByMonth(ctx context.Context, userID string, month
 		return nil, err
 	}
 
-	parsedMonth, err := time.Parse("2006-01", month)
-	if err != nil {
-		return nil, err
-	}
-
 	repo := u.uow.IncomeRepository()
-	incomes, err := repo.FindByUserID(ctx, uID)
+	incomes, err := repo.FindByUserIDAndMonth(ctx, uID, month)
 	if err != nil {
 		return nil, err
 	}
 
-	responses := make([]*IncomeResponse, 0)
+	responses := make([]*IncomeResponse, 0, len(incomes))
 	for _, inc := range incomes {
-		if inc.ReceivedAt.Year() == parsedMonth.Year() && inc.ReceivedAt.Month() == parsedMonth.Month() {
-			responses = append(responses, &IncomeResponse{
-				ID:         inc.ID.String(),
-				Amount:     inc.Amount.Amount(),
-				Source:     inc.Source.Value(),
-				ReceivedAt: inc.ReceivedAt,
-			})
-		}
+		responses = append(responses, &IncomeResponse{
+			ID:         inc.ID.String(),
+			Amount:     inc.Amount.Amount(),
+			Source:     inc.Source.Value(),
+			ReceivedAt: inc.ReceivedAt,
+		})
 	}
 
 	return responses, nil
@@ -235,23 +227,11 @@ func (u IncomeUseCaseImpl) Total(ctx context.Context, userID string, month strin
 		return 0, err
 	}
 
-	parsedMonth, err := time.Parse("2006-01", month)
-	if err != nil {
-		return 0, err
-	}
-
 	repo := u.uow.IncomeRepository()
-	incomes, err := repo.FindByUserID(ctx, uID)
+	total, err := repo.TotalByUserIDAndMonth(ctx, uID, month)
 	if err != nil {
 		return 0, err
 	}
 
-	var total float64
-	for _, inc := range incomes {
-		if inc.ReceivedAt.Year() == parsedMonth.Year() && inc.ReceivedAt.Month() == parsedMonth.Month() {
-			total += inc.Amount.Amount()
-		}
-	}
-
-	return total, nil
+	return total.Amount(), nil
 }
