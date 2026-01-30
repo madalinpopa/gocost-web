@@ -184,14 +184,15 @@ func (p *DashboardPresenter) Present(
 		})
 	}
 
-	totalBudgeted -= paidExpensesTotal
-	totalBudgeted = math.Round(totalBudgeted*100) / 100
+	status := budgetStatus(totalBudgeted, totalIncome)
+	displayBudget := totalBudgeted - paidExpensesTotal
+	displayBudget = math.Round(displayBudget*100) / 100
 
 	return DashboardView{
 		TotalIncome:         totalIncome,
 		TotalExpenses:       totalExpenses,
-		TotalBudgeted:       totalBudgeted,
-		TotalBudgetedStatus: budgetStatus(totalBudgeted, totalIncome),
+		TotalBudgeted:       displayBudget,
+		TotalBudgetedStatus: status,
 		Currency:            p.Currency,
 		Groups:              groupViews,
 	}
