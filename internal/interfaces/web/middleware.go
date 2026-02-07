@@ -6,8 +6,9 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
-	"slices"
+	"runtime/debug"
 	"strings"
+	"sync"
 
 	"github.com/justinas/nosurf"
 	"github.com/madalinpopa/gocost-web/internal/config"
@@ -26,11 +27,23 @@ func (rw *responseWriter) WriteHeader(status int) {
 	rw.ResponseWriter.WriteHeader(status)
 }
 
+// Unwrap returns the underlying ResponseWriter for http.ResponseController compatibility.
+func (rw *responseWriter) Unwrap() http.ResponseWriter {
+	return rw.ResponseWriter
+}
+
 type Middleware struct {
 	logger  *slog.Logger
 	config  *config.Config
 	session AuthSessionManager
 	errors  respond.ErrorHandler
+
+	trustedProxyParseOnce sync.Once
+	trustedProxyCIDRs     []*net.IPNet
+	trustedProxyIPs       []net.IP
+
+	allowedHostsParseOnce  sync.Once
+	normalizedAllowedHosts []string
 }
 
 func NewMiddleware(l *slog.Logger, c *config.Config, s AuthSessionManager, errors respond.ErrorHandler) *Middleware {
@@ -38,12 +51,17 @@ func NewMiddleware(l *slog.Logger, c *config.Config, s AuthSessionManager, error
 		errors = respond.NewErrorHandler(l)
 	}
 
-	return &Middleware{
+	m := &Middleware{
 		logger:  l,
 		config:  c,
 		session: s,
 		errors:  errors,
 	}
+
+	m.parseTrustedProxies()
+	m.parseAllowedHosts()
+
+	return m
 }
 
 // Headers sets HTTP security headers to enhance security and forwards the request to the next handler.
@@ -116,8 +134,9 @@ func (m *Middleware) Recover(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
+				m.logger.Error("panic recovered", "error", err, "stack", string(debug.Stack()))
 				w.Header().Set("Connection", "close")
-				m.errors.ServerError(w, r, fmt.Errorf("%s", err))
+				m.errors.ServerError(w, r, fmt.Errorf("panic recovered: %v", err))
 			}
 		}()
 
@@ -132,6 +151,7 @@ func (m *Middleware) CsrfToken(next http.Handler) http.Handler {
 		HttpOnly: true,
 		MaxAge:   86400, // 24 hours
 		Path:     "/",
+		SameSite: http.SameSiteLaxMode,
 	}
 
 	if m.config.GetEnvironment() == "production" {
@@ -157,18 +177,16 @@ func (m *Middleware) CheckAllowedHosts(next http.Handler) http.Handler {
 		return next
 	}
 
-	hosts := make([]string, 0, len(m.config.AllowedHosts))
-	for _, h := range m.config.AllowedHosts {
-		hosts = append(hosts, strings.ToLower(strings.TrimSpace(h)))
-	}
+	m.parseAllowedHosts()
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		host, _, err := net.SplitHostPort(r.Host)
 		if err != nil {
 			host = r.Host
 		}
+		host = normalizeHost(host)
 
-		if !slices.Contains(hosts, strings.ToLower(host)) {
+		if !isAllowedHost(host, m.normalizedAllowedHosts) {
 			http.Error(w, "Forbidden: host not allowed", http.StatusForbidden)
 			return
 		}
@@ -177,23 +195,132 @@ func (m *Middleware) CheckAllowedHosts(next http.Handler) http.Handler {
 }
 
 func (m *Middleware) getClientIP(r *http.Request) string {
+	remoteIP := extractRemoteIP(r.RemoteAddr)
+
 	xff := r.Header.Get("X-Forwarded-For")
-	if xff != "" {
+	if xff != "" && m.isTrustedProxy(remoteIP) {
 		// Take the first IP and validate it
 		ips := strings.Split(xff, ",")
 		if len(ips) > 0 {
 			ip := strings.TrimSpace(ips[0])
-			if net.ParseIP(ip) != nil {
-				return ip
+			if parsedIP := net.ParseIP(ip); parsedIP != nil {
+				return parsedIP.String()
 			}
 		}
 	}
 
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		return r.RemoteAddr
+	return remoteIP
+}
+
+func (m *Middleware) isTrustedProxy(remoteIP string) bool {
+	ip := net.ParseIP(remoteIP)
+	if ip == nil {
+		return false
 	}
-	return host
+
+	m.parseTrustedProxies()
+
+	for _, trustedCIDR := range m.trustedProxyCIDRs {
+		if trustedCIDR.Contains(ip) {
+			return true
+		}
+	}
+
+	for _, trustedIP := range m.trustedProxyIPs {
+		if trustedIP.Equal(ip) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (m *Middleware) parseTrustedProxies() {
+	m.trustedProxyParseOnce.Do(func() {
+		if m.config == nil || len(m.config.TrustedProxies) == 0 {
+			return
+		}
+
+		for _, trustedProxy := range m.config.TrustedProxies {
+			candidate := strings.TrimSpace(trustedProxy)
+			if candidate == "" {
+				continue
+			}
+
+			if _, cidr, err := net.ParseCIDR(candidate); err == nil {
+				m.trustedProxyCIDRs = append(m.trustedProxyCIDRs, cidr)
+				continue
+			}
+
+			if trustedIP := net.ParseIP(candidate); trustedIP != nil {
+				m.trustedProxyIPs = append(m.trustedProxyIPs, trustedIP)
+			}
+		}
+	})
+}
+
+func isAllowedHost(host string, normalizedAllowedHosts []string) bool {
+	if len(normalizedAllowedHosts) == 0 {
+		return false
+	}
+
+	parsedIP := net.ParseIP(host)
+	for _, candidate := range normalizedAllowedHosts {
+		if candidate == "" {
+			continue
+		}
+
+		if candidate == host {
+			return true
+		}
+
+		if parsedIP == nil {
+			continue
+		}
+
+		if _, cidr, err := net.ParseCIDR(candidate); err == nil && cidr.Contains(parsedIP) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (m *Middleware) parseAllowedHosts() {
+	m.allowedHostsParseOnce.Do(func() {
+		if m.config == nil || len(m.config.AllowedHosts) == 0 {
+			return
+		}
+
+		m.normalizedAllowedHosts = make([]string, 0, len(m.config.AllowedHosts))
+		for _, allowedHost := range m.config.AllowedHosts {
+			m.normalizedAllowedHosts = append(m.normalizedAllowedHosts, normalizeHost(allowedHost))
+		}
+	})
+}
+
+func extractRemoteIP(remoteAddr string) string {
+	host, _, err := net.SplitHostPort(remoteAddr)
+	if err == nil {
+		if parsedIP := net.ParseIP(host); parsedIP != nil {
+			return parsedIP.String()
+		}
+
+		return host
+	}
+
+	if parsedIP := net.ParseIP(remoteAddr); parsedIP != nil {
+		return parsedIP.String()
+	}
+
+	return remoteAddr
+}
+
+func normalizeHost(host string) string {
+	trimmed := strings.TrimSpace(strings.ToLower(host))
+	trimmed = strings.TrimPrefix(trimmed, "[")
+	trimmed = strings.TrimSuffix(trimmed, "]")
+	return strings.TrimSuffix(trimmed, ".")
 }
 
 // LoadSession loads and saves session data to and from the session cookie.
@@ -229,20 +356,14 @@ func (m *Middleware) Authenticate(next http.Handler) http.Handler {
 
 func (m *Middleware) LoginRequired(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// If the user isn't authenticated, redirect them to the login page and return
-		// from the middleware chain so that no later handlers in the chain are
-		// executed.
-		if !m.session.IsAuthenticated(r.Context()) {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
-
 		userID := m.session.GetUserID(r.Context())
 		if userID == "" {
-			// Session exists, but user data is missing - possible tampering
-			if err := m.session.Destroy(r.Context()); err != nil {
-				m.logger.Error(err.Error(), "method", r.Method, "url", r.URL.RequestURI())
-				m.errors.LogServerError(r, fmt.Errorf("failed to destroy session: %w", err))
+			if m.session.IsAuthenticated(r.Context()) {
+				// Session exists, but user data is missing - possible tampering.
+				if err := m.session.Destroy(r.Context()); err != nil {
+					m.logger.Error(err.Error(), "method", r.Method, "url", r.URL.RequestURI())
+					m.errors.LogServerError(r, fmt.Errorf("failed to destroy session: %w", err))
+				}
 			}
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return

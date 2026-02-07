@@ -2,6 +2,7 @@ export CURRENCY="USD"
 export VERSION="latest"
 export DOMAIN="localhost"
 export ALLOWED_HOSTS="localhost"
+# export TRUSTED_PROXIES="127.0.0.1,::1"
 
 # Litestream
 # export DB_PATH="/data/db.sqlite"
