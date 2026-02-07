@@ -180,23 +180,104 @@ func (m *Middleware) CheckAllowedHosts(next http.Handler) http.Handler {
 }
 
 func (m *Middleware) getClientIP(r *http.Request) string {
+	remoteIP := extractRemoteIP(r.RemoteAddr)
+
 	xff := r.Header.Get("X-Forwarded-For")
-	if xff != "" {
+	if xff != "" && m.isTrustedProxy(remoteIP) {
 		// Take the first IP and validate it
 		ips := strings.Split(xff, ",")
 		if len(ips) > 0 {
 			ip := strings.TrimSpace(ips[0])
-			if net.ParseIP(ip) != nil {
-				return ip
+			if parsedIP := net.ParseIP(ip); parsedIP != nil {
+				return parsedIP.String()
 			}
 		}
 	}
 
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		return r.RemoteAddr
+	return remoteIP
+}
+
+func (m *Middleware) isTrustedProxy(remoteIP string) bool {
+	if m.config == nil || len(m.config.TrustedProxies) == 0 {
+		return false
 	}
-	return host
+
+	ip := net.ParseIP(remoteIP)
+	if ip == nil {
+		return false
+	}
+
+	for _, trustedProxy := range m.config.TrustedProxies {
+		candidate := strings.TrimSpace(trustedProxy)
+		if candidate == "" {
+			continue
+		}
+
+		if _, cidr, err := net.ParseCIDR(candidate); err == nil {
+			if cidr.Contains(ip) {
+				return true
+			}
+			continue
+		}
+
+		if trustedIP := net.ParseIP(candidate); trustedIP != nil && trustedIP.Equal(ip) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isAllowedHost(host string, allowedHosts []string) bool {
+	if len(allowedHosts) == 0 {
+		return false
+	}
+
+	parsedIP := net.ParseIP(host)
+	for _, allowedHost := range allowedHosts {
+		candidate := normalizeHost(allowedHost)
+		if candidate == "" {
+			continue
+		}
+
+		if candidate == host {
+			return true
+		}
+
+		if parsedIP == nil {
+			continue
+		}
+
+		if _, cidr, err := net.ParseCIDR(candidate); err == nil && cidr.Contains(parsedIP) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func extractRemoteIP(remoteAddr string) string {
+	host, _, err := net.SplitHostPort(remoteAddr)
+	if err == nil {
+		if parsedIP := net.ParseIP(host); parsedIP != nil {
+			return parsedIP.String()
+		}
+
+		return host
+	}
+
+	if parsedIP := net.ParseIP(remoteAddr); parsedIP != nil {
+		return parsedIP.String()
+	}
+
+	return remoteAddr
+}
+
+func normalizeHost(host string) string {
+	trimmed := strings.TrimSpace(strings.ToLower(host))
+	trimmed = strings.TrimPrefix(trimmed, "[")
+	trimmed = strings.TrimSuffix(trimmed, "]")
+	return strings.TrimSuffix(trimmed, ".")
 }
 
 // LoadSession loads and saves session data to and from the session cookie.
