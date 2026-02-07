@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"runtime/debug"
 	"strings"
+	"sync"
 
 	"github.com/justinas/nosurf"
 	"github.com/madalinpopa/gocost-web/internal/config"
@@ -36,6 +37,10 @@ type Middleware struct {
 	config  *config.Config
 	session AuthSessionManager
 	errors  respond.ErrorHandler
+
+	trustedProxyParseOnce sync.Once
+	trustedProxyCIDRs     []*net.IPNet
+	trustedProxyIPs       []net.IP
 }
 
 func NewMiddleware(l *slog.Logger, c *config.Config, s AuthSessionManager, errors respond.ErrorHandler) *Middleware {
@@ -43,12 +48,16 @@ func NewMiddleware(l *slog.Logger, c *config.Config, s AuthSessionManager, error
 		errors = respond.NewErrorHandler(l)
 	}
 
-	return &Middleware{
+	m := &Middleware{
 		logger:  l,
 		config:  c,
 		session: s,
 		errors:  errors,
 	}
+
+	m.parseTrustedProxies()
+
+	return m
 }
 
 // Headers sets HTTP security headers to enhance security and forwards the request to the next handler.
@@ -198,34 +207,50 @@ func (m *Middleware) getClientIP(r *http.Request) string {
 }
 
 func (m *Middleware) isTrustedProxy(remoteIP string) bool {
-	if m.config == nil || len(m.config.TrustedProxies) == 0 {
-		return false
-	}
-
 	ip := net.ParseIP(remoteIP)
 	if ip == nil {
 		return false
 	}
 
-	for _, trustedProxy := range m.config.TrustedProxies {
-		candidate := strings.TrimSpace(trustedProxy)
-		if candidate == "" {
-			continue
-		}
+	m.parseTrustedProxies()
 
-		if _, cidr, err := net.ParseCIDR(candidate); err == nil {
-			if cidr.Contains(ip) {
-				return true
-			}
-			continue
+	for _, trustedCIDR := range m.trustedProxyCIDRs {
+		if trustedCIDR.Contains(ip) {
+			return true
 		}
+	}
 
-		if trustedIP := net.ParseIP(candidate); trustedIP != nil && trustedIP.Equal(ip) {
+	for _, trustedIP := range m.trustedProxyIPs {
+		if trustedIP.Equal(ip) {
 			return true
 		}
 	}
 
 	return false
+}
+
+func (m *Middleware) parseTrustedProxies() {
+	m.trustedProxyParseOnce.Do(func() {
+		if m.config == nil || len(m.config.TrustedProxies) == 0 {
+			return
+		}
+
+		for _, trustedProxy := range m.config.TrustedProxies {
+			candidate := strings.TrimSpace(trustedProxy)
+			if candidate == "" {
+				continue
+			}
+
+			if _, cidr, err := net.ParseCIDR(candidate); err == nil {
+				m.trustedProxyCIDRs = append(m.trustedProxyCIDRs, cidr)
+				continue
+			}
+
+			if trustedIP := net.ParseIP(candidate); trustedIP != nil {
+				m.trustedProxyIPs = append(m.trustedProxyIPs, trustedIP)
+			}
+		}
+	})
 }
 
 func isAllowedHost(host string, allowedHosts []string) bool {
