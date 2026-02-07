@@ -87,12 +87,12 @@ dev:
 # run go tests
 .PHONY: test
 test:
-	go test ./internal... 
+	go test ./internal/...
 
 # check for data race conditions
 .PHONY: test/race
 test/race:
-	go test -race ./internal...
+	go test -race ./internal/...
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   Run code format and code style commands
@@ -101,12 +101,12 @@ test/race:
 # run go vet tool
 .PHONY: vet
 vet:
-	go vet ./internal...
+	go vet ./internal/...
 
 # run staticcheck tool
 .PHONY: staticcheck
 staticcheck:
-	staticcheck ./internal...
+	staticcheck ./internal/...
 
 # run all tools
 .PHONY: check
