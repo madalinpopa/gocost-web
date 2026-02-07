@@ -169,8 +169,9 @@ func (m *Middleware) CheckAllowedHosts(next http.Handler) http.Handler {
 		if err != nil {
 			host = r.Host
 		}
+		host = normalizeHost(host)
 
-		if !slices.Contains(hosts, strings.ToLower(host)) {
+		if !isAllowedHost(host, m.config.AllowedHosts) {
 			http.Error(w, "Forbidden: host not allowed", http.StatusForbidden)
 			return
 		}
