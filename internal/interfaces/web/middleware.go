@@ -313,20 +313,14 @@ func (m *Middleware) Authenticate(next http.Handler) http.Handler {
 
 func (m *Middleware) LoginRequired(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// If the user isn't authenticated, redirect them to the login page and return
-		// from the middleware chain so that no later handlers in the chain are
-		// executed.
-		if !m.session.IsAuthenticated(r.Context()) {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
-
 		userID := m.session.GetUserID(r.Context())
 		if userID == "" {
-			// Session exists, but user data is missing - possible tampering
-			if err := m.session.Destroy(r.Context()); err != nil {
-				m.logger.Error(err.Error(), "method", r.Method, "url", r.URL.RequestURI())
-				m.errors.LogServerError(r, fmt.Errorf("failed to destroy session: %w", err))
+			if m.session.IsAuthenticated(r.Context()) {
+				// Session exists, but user data is missing - possible tampering.
+				if err := m.session.Destroy(r.Context()); err != nil {
+					m.logger.Error(err.Error(), "method", r.Method, "url", r.URL.RequestURI())
+					m.errors.LogServerError(r, fmt.Errorf("failed to destroy session: %w", err))
+				}
 			}
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
