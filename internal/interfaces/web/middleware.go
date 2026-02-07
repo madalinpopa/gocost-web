@@ -164,11 +164,6 @@ func (m *Middleware) CheckAllowedHosts(next http.Handler) http.Handler {
 		return next
 	}
 
-	hosts := make([]string, 0, len(m.config.AllowedHosts))
-	for _, h := range m.config.AllowedHosts {
-		hosts = append(hosts, strings.ToLower(strings.TrimSpace(h)))
-	}
-
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		host, _, err := net.SplitHostPort(r.Host)
 		if err != nil {
