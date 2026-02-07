@@ -41,6 +41,9 @@ type Middleware struct {
 	trustedProxyParseOnce sync.Once
 	trustedProxyCIDRs     []*net.IPNet
 	trustedProxyIPs       []net.IP
+
+	allowedHostsParseOnce  sync.Once
+	normalizedAllowedHosts []string
 }
 
 func NewMiddleware(l *slog.Logger, c *config.Config, s AuthSessionManager, errors respond.ErrorHandler) *Middleware {
@@ -56,6 +59,7 @@ func NewMiddleware(l *slog.Logger, c *config.Config, s AuthSessionManager, error
 	}
 
 	m.parseTrustedProxies()
+	m.parseAllowedHosts()
 
 	return m
 }
@@ -173,6 +177,8 @@ func (m *Middleware) CheckAllowedHosts(next http.Handler) http.Handler {
 		return next
 	}
 
+	m.parseAllowedHosts()
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		host, _, err := net.SplitHostPort(r.Host)
 		if err != nil {
@@ -180,7 +186,7 @@ func (m *Middleware) CheckAllowedHosts(next http.Handler) http.Handler {
 		}
 		host = normalizeHost(host)
 
-		if !isAllowedHost(host, m.config.AllowedHosts) {
+		if !isAllowedHost(host, m.normalizedAllowedHosts) {
 			http.Error(w, "Forbidden: host not allowed", http.StatusForbidden)
 			return
 		}
@@ -253,14 +259,13 @@ func (m *Middleware) parseTrustedProxies() {
 	})
 }
 
-func isAllowedHost(host string, allowedHosts []string) bool {
-	if len(allowedHosts) == 0 {
+func isAllowedHost(host string, normalizedAllowedHosts []string) bool {
+	if len(normalizedAllowedHosts) == 0 {
 		return false
 	}
 
 	parsedIP := net.ParseIP(host)
-	for _, allowedHost := range allowedHosts {
-		candidate := normalizeHost(allowedHost)
+	for _, candidate := range normalizedAllowedHosts {
 		if candidate == "" {
 			continue
 		}
@@ -279,6 +284,19 @@ func isAllowedHost(host string, allowedHosts []string) bool {
 	}
 
 	return false
+}
+
+func (m *Middleware) parseAllowedHosts() {
+	m.allowedHostsParseOnce.Do(func() {
+		if m.config == nil || len(m.config.AllowedHosts) == 0 {
+			return
+		}
+
+		m.normalizedAllowedHosts = make([]string, 0, len(m.config.AllowedHosts))
+		for _, allowedHost := range m.config.AllowedHosts {
+			m.normalizedAllowedHosts = append(m.normalizedAllowedHosts, normalizeHost(allowedHost))
+		}
+	})
 }
 
 func extractRemoteIP(remoteAddr string) string {
