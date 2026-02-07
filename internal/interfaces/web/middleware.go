@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
-	"slices"
+	"runtime/debug"
 	"strings"
 
 	"github.com/justinas/nosurf"
@@ -24,6 +24,11 @@ type responseWriter struct {
 func (rw *responseWriter) WriteHeader(status int) {
 	rw.status = status
 	rw.ResponseWriter.WriteHeader(status)
+}
+
+// Unwrap returns the underlying ResponseWriter for http.ResponseController compatibility.
+func (rw *responseWriter) Unwrap() http.ResponseWriter {
+	return rw.ResponseWriter
 }
 
 type Middleware struct {
@@ -116,8 +121,9 @@ func (m *Middleware) Recover(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
+				m.logger.Error("panic recovered", "error", err, "stack", string(debug.Stack()))
 				w.Header().Set("Connection", "close")
-				m.errors.ServerError(w, r, fmt.Errorf("%s", err))
+				m.errors.ServerError(w, r, fmt.Errorf("panic recovered: %v", err))
 			}
 		}()
 
@@ -132,6 +138,7 @@ func (m *Middleware) CsrfToken(next http.Handler) http.Handler {
 		HttpOnly: true,
 		MaxAge:   86400, // 24 hours
 		Path:     "/",
+		SameSite: http.SameSiteLaxMode,
 	}
 
 	if m.config.GetEnvironment() == "production" {
