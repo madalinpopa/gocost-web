@@ -27,6 +27,9 @@ type Config struct {
 	// AllowedHosts specifies the allowed hosts for the application.
 	AllowedHosts []string
 
+	// TrustedProxies specifies the trusted proxies for the application.
+	TrustedProxies []string
+
 	// Domain specifies the application web domain
 	Domain string
 
