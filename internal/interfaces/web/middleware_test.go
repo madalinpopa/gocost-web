@@ -1,13 +1,73 @@
 package web
 
 import (
+	"context"
+	"errors"
+	"io"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/madalinpopa/gocost-web/internal/config"
 	"github.com/stretchr/testify/assert"
 )
+
+type stubAuthSessionManager struct {
+	isAuthenticated bool
+	userID          string
+	username        string
+	destroyErr      error
+	destroyCalled   bool
+}
+
+func (s *stubAuthSessionManager) RenewToken(context.Context) error {
+	return nil
+}
+
+func (s *stubAuthSessionManager) Destroy(context.Context) error {
+	s.destroyCalled = true
+	return s.destroyErr
+}
+
+func (s *stubAuthSessionManager) IsAuthenticated(context.Context) bool {
+	return s.isAuthenticated
+}
+
+func (s *stubAuthSessionManager) GetSessionStore() *scs.SessionManager {
+	return nil
+}
+
+func (s *stubAuthSessionManager) GetUserID(context.Context) string {
+	return s.userID
+}
+
+func (s *stubAuthSessionManager) GetUsername(context.Context) string {
+	return s.username
+}
+
+func (s *stubAuthSessionManager) GetCurrency(context.Context) string {
+	return ""
+}
+
+func (s *stubAuthSessionManager) SetUserID(context.Context, string) {}
+
+func (s *stubAuthSessionManager) SetUsername(context.Context, string) {}
+
+func (s *stubAuthSessionManager) SetCurrency(context.Context, string) {}
+
+type stubErrorHandler struct {
+	logServerErrorCalls int
+}
+
+func (s *stubErrorHandler) ServerError(http.ResponseWriter, *http.Request, error) {}
+
+func (s *stubErrorHandler) Error(http.ResponseWriter, *http.Request, int, error) {}
+
+func (s *stubErrorHandler) LogServerError(*http.Request, error) {
+	s.logServerErrorCalls++
+}
 
 func TestMiddleware_getClientIP(t *testing.T) {
 	t.Parallel()
@@ -154,6 +214,107 @@ func TestMiddleware_CheckAllowedHosts(t *testing.T) {
 				return
 			}
 			assert.Equal(t, http.StatusForbidden, rec.Code)
+		})
+	}
+}
+
+func TestMiddleware_LoginRequired(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name                  string
+		session               *stubAuthSessionManager
+		wantStatus            int
+		wantLocation          string
+		wantNextCalled        bool
+		wantDestroyCalled     bool
+		wantLogServerErrCalls int
+		wantCacheControl      string
+	}{
+		{
+			name: "redirects when unauthenticated",
+			session: &stubAuthSessionManager{
+				isAuthenticated: false,
+				userID:          "",
+			},
+			wantStatus:            http.StatusSeeOther,
+			wantLocation:          "/login",
+			wantNextCalled:        false,
+			wantDestroyCalled:     false,
+			wantLogServerErrCalls: 0,
+			wantCacheControl:      "",
+		},
+		{
+			name: "destroys session and redirects when authenticated but user id missing",
+			session: &stubAuthSessionManager{
+				isAuthenticated: true,
+				userID:          "",
+			},
+			wantStatus:            http.StatusSeeOther,
+			wantLocation:          "/login",
+			wantNextCalled:        false,
+			wantDestroyCalled:     true,
+			wantLogServerErrCalls: 0,
+			wantCacheControl:      "",
+		},
+		{
+			name: "logs server error when destroy fails",
+			session: &stubAuthSessionManager{
+				isAuthenticated: true,
+				userID:          "",
+				destroyErr:      errors.New("destroy failed"),
+			},
+			wantStatus:            http.StatusSeeOther,
+			wantLocation:          "/login",
+			wantNextCalled:        false,
+			wantDestroyCalled:     true,
+			wantLogServerErrCalls: 1,
+			wantCacheControl:      "",
+		},
+		{
+			name: "allows request when user id is present",
+			session: &stubAuthSessionManager{
+				isAuthenticated: true,
+				userID:          "user-123",
+			},
+			wantStatus:            http.StatusNoContent,
+			wantLocation:          "",
+			wantNextCalled:        true,
+			wantDestroyCalled:     false,
+			wantLogServerErrCalls: 0,
+			wantCacheControl:      "no-store",
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			errHandler := &stubErrorHandler{}
+			m := &Middleware{
+				logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+				session: tt.session,
+				errors:  errHandler,
+			}
+
+			nextCalled := false
+			next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				nextCalled = true
+				w.WriteHeader(http.StatusNoContent)
+			})
+
+			req := httptest.NewRequest(http.MethodGet, "/dashboard", nil)
+			rec := httptest.NewRecorder()
+
+			m.LoginRequired(next).ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantStatus, rec.Code)
+			assert.Equal(t, tt.wantLocation, rec.Header().Get("Location"))
+			assert.Equal(t, tt.wantNextCalled, nextCalled)
+			assert.Equal(t, tt.wantDestroyCalled, tt.session.destroyCalled)
+			assert.Equal(t, tt.wantLogServerErrCalls, errHandler.logServerErrorCalls)
+			assert.Equal(t, tt.wantCacheControl, rec.Header().Get("Cache-Control"))
 		})
 	}
 }
