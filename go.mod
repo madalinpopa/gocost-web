@@ -1,6 +1,6 @@
 module github.com/madalinpopa/gocost-web
 
-go 1.25.3
+go 1.25.7
 
 require (
 	github.com/a-h/templ v0.3.960
