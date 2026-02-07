@@ -49,8 +49,9 @@ func New() *Config {
 
 func NewWithLogger(logger *slog.Logger) *Config {
 	return &Config{
-		AllowedHosts: make([]string, 0),
-		logger:       logger,
+		AllowedHosts:   make([]string, 0),
+		TrustedProxies: make([]string, 0),
+		logger:         logger,
 	}
 }
 
@@ -88,24 +89,30 @@ func (c *Config) LoadEnvironments() error {
 		}
 	}
 
-	c.AllowedHosts = viper.GetStringSlice("ALLOWED_HOSTS")
-	// If the environment variable is passed as a comma-separated string (e.g. via Docker),
-	// Viper might treat it as a single element slice. We need to handle this manually.
-	if len(c.AllowedHosts) == 1 && strings.Contains(c.AllowedHosts[0], ",") {
-		c.AllowedHosts = strings.Split(c.AllowedHosts[0], ",")
-	}
-	// Also support cases where Viper returns empty slice but the env var is set as string
-	if len(c.AllowedHosts) == 0 {
-		str := viper.GetString("ALLOWED_HOSTS")
-		if str != "" {
-			c.AllowedHosts = strings.Split(str, ",")
-		}
-	}
+	c.AllowedHosts = c.getStringSliceFromEnv("ALLOWED_HOSTS")
+	c.TrustedProxies = c.getStringSliceFromEnv("TRUSTED_PROXIES")
 	c.Domain = viper.GetString("DOMAIN")
 
 	c.Currency = c.currencyCodeOrDefault(viper.GetString("CURRENCY"))
 
 	return nil
+}
+
+func (c *Config) getStringSliceFromEnv(key string) []string {
+	slice := viper.GetStringSlice(key)
+	// If the environment variable is passed as a comma-separated string (e.g. via Docker),
+	// Viper might treat it as a single element slice. We need to handle this manually.
+	if len(slice) == 1 && strings.Contains(slice[0], ",") {
+		return strings.Split(slice[0], ",")
+	}
+	// Also support cases where Viper returns empty slice but the env var is set as string
+	if len(slice) == 0 {
+		str := viper.GetString(key)
+		if str != "" {
+			return strings.Split(str, ",")
+		}
+	}
+	return slice
 }
 
 func (c *Config) GetEnvironment() string {
