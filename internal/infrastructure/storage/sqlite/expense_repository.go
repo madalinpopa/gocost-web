@@ -89,7 +89,16 @@ func (r *SQLiteExpenseRepository) FindByID(ctx context.Context, id identifier.ID
 		return expense.Expense{}, fmt.Errorf("failed to find expense by id: %w", err)
 	}
 
-	return r.mapToExpense(idStr, categoryIDStr, amountCents, currencyStr, descriptionStr, spentAt, isPaidInt == 1, paidAt)
+	return r.mapToExpense(
+		idStr,
+		categoryIDStr,
+		amountCents,
+		currencyStr,
+		descriptionStr,
+		spentAt,
+		isPaidInt == 1,
+		paidAt,
+	)
 }
 
 func (r *SQLiteExpenseRepository) FindByUserID(ctx context.Context, userID identifier.ID) ([]expense.Expense, error) {
