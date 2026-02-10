@@ -158,7 +158,18 @@ func (u ExpenseUseCaseImpl) Update(ctx context.Context, req *UpdateExpenseReques
 	exp.SpentAt = req.SpentAt
 	exp.Payment = payment
 
-	if err := expenseRepo.Save(ctx, exp); err != nil {
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := txUOW.ExpenseRepository().Save(ctx, exp); err != nil {
+		_ = txUOW.Rollback()
+		return nil, err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
 		return nil, err
 	}
 
