@@ -72,7 +72,16 @@ func (r *SQLiteExpenseRepository) FindByID(ctx context.Context, id identifier.ID
 	var isPaidInt int
 	var paidAt sql.NullTime
 
-	err := r.db.QueryRowContext(ctx, query, id.String()).Scan(&idStr, &categoryIDStr, &amountCents, &descriptionStr, &spentAt, &isPaidInt, &paidAt, &currencyStr)
+	err := r.db.QueryRowContext(ctx, query, id.String()).Scan(
+		&idStr,
+		&categoryIDStr,
+		&amountCents,
+		&descriptionStr,
+		&spentAt,
+		&isPaidInt,
+		&paidAt,
+		&currencyStr,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return expense.Expense{}, expense.ErrExpenseNotFound
