@@ -78,42 +78,14 @@ func (r *SQLiteIncomeRepository) FindByID(ctx context.Context, id identifier.ID)
 
 func (r *SQLiteIncomeRepository) FindByUserID(ctx context.Context, userID identifier.ID) ([]income.Income, error) {
 	query := `
-		SELECT i.id, i.user_id, i.amount, i.source, i.received_at, u.currency 
-		FROM incomes i
-		JOIN users u ON i.user_id = u.id
-		WHERE i.user_id = ? 
-		ORDER BY i.received_at DESC
-	`
+			SELECT i.id, i.user_id, i.amount, i.source, i.received_at, u.currency 
+			FROM incomes i
+			JOIN users u ON i.user_id = u.id
+			WHERE i.user_id = ? 
+			ORDER BY i.received_at DESC
+		`
 
-	rows, err := r.db.QueryContext(ctx, query, userID.String())
-	if err != nil {
-		return nil, fmt.Errorf("failed to query incomes by user: %w", err)
-	}
-	defer rows.Close()
-
-	var incomes []income.Income
-	for rows.Next() {
-		var idStr, userIDStr, currencyStr string
-		var amountCents int64
-		var source sql.NullString
-		var receivedAt time.Time
-
-		if err := rows.Scan(&idStr, &userIDStr, &amountCents, &source, &receivedAt, &currencyStr); err != nil {
-			return nil, fmt.Errorf("failed to scan income row: %w", err)
-		}
-
-		inc, err := r.mapToIncome(idStr, userIDStr, amountCents, currencyStr, source, receivedAt)
-		if err != nil {
-			return nil, fmt.Errorf("failed to map income: %w", err)
-		}
-		incomes = append(incomes, inc)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating incomes: %w", err)
-	}
-
-	return incomes, nil
+	return r.fetchIncomes(ctx, query, userID.String())
 }
 
 func (r *SQLiteIncomeRepository) FindByUserIDAndMonth(ctx context.Context, userID identifier.ID, month string) ([]income.Income, error) {
