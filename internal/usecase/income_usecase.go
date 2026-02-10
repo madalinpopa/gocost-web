@@ -53,8 +53,18 @@ func (u IncomeUseCaseImpl) Create(ctx context.Context, req *CreateIncomeRequest)
 		return nil, err
 	}
 
-	repo := u.uow.IncomeRepository()
-	if err := repo.Save(ctx, *inc); err != nil {
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := txUOW.IncomeRepository().Save(ctx, *inc); err != nil {
+		_ = txUOW.Rollback()
+		return nil, err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
 		return nil, err
 	}
 
