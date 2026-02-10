@@ -117,7 +117,18 @@ func (u IncomeUseCaseImpl) Update(ctx context.Context, req *UpdateIncomeRequest)
 		return nil, err
 	}
 
-	if err := repo.Save(ctx, *updatedInc); err != nil {
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := txUOW.IncomeRepository().Save(ctx, *updatedInc); err != nil {
+		_ = txUOW.Rollback()
+		return nil, err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
 		return nil, err
 	}
 
