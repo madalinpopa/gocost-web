@@ -115,6 +115,14 @@ func TestSQLiteTrackingRepository(t *testing.T) {
 		assert.Equal(t, updatedEndMonth, foundGroup.Categories[0].EndMonth)
 	})
 
+	t.Run("FindByUserIDAndMonth_InvalidMonth", func(t *testing.T) {
+		user := createRandomUser(t)
+		require.NoError(t, userRepo.Save(ctx, *user))
+
+		_, err := repo.FindByUserIDAndMonth(ctx, user.ID, "invalid")
+		require.Error(t, err)
+	})
+
 	t.Run("FindGroupByCategoryID_Success", func(t *testing.T) {
 		user := createRandomUser(t)
 		require.NoError(t, userRepo.Save(ctx, *user))
