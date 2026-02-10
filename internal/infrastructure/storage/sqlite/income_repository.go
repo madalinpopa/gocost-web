@@ -105,9 +105,10 @@ func (r *SQLiteIncomeRepository) FindByUserIDAndMonth(ctx context.Context, userI
 	return r.fetchIncomes(ctx, query, userID.String(), start, end)
 }
 
-	rows, err := r.db.QueryContext(ctx, query, userID.String(), start, end)
+func (r *SQLiteIncomeRepository) fetchIncomes(ctx context.Context, query string, args ...any) ([]income.Income, error) {
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query incomes by month: %w", err)
+		return nil, fmt.Errorf("failed to query incomes: %w", err)
 	}
 	defer rows.Close()
 
