@@ -71,8 +71,18 @@ func (u CategoryUseCaseImpl) Create(ctx context.Context, req *CreateCategoryRequ
 		return nil, err
 	}
 
-	repo := u.uow.TrackingRepository()
-	if err := repo.Save(ctx, *group); err != nil {
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := txUOW.TrackingRepository().Save(ctx, *group); err != nil {
+		_ = txUOW.Rollback()
+		return nil, err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
 		return nil, err
 	}
 
