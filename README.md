@@ -55,7 +55,11 @@ Required:
 - `DOMAIN`: base domain for the app (e.g. `localhost` or `gocost.example`).
 
 Optional:
-- `CURRENCY`: symbol shown in the UI (default: `$`).
+- `CURRENCY`: ISO 4217 currency code (default: `USD`).
+- `TRUSTED_PROXIES`: comma-separated list of trusted proxy IP addresses or CIDR ranges.
+- `APP_ENV`: application environment, typically `production` or `development` (default: `development`).
+- `APP_ADDR`: the address the web server listens on (default: `0.0.0.0`).
+- `APP_PORT`: the port the web server listens on (default: `4000`).
 - `DB_PATH`: SQLite file path used by the Docker entrypoint (default: `/app/data/data.sqlite`).
 - `VERSION`: Docker image tag used by `compose.yml` (default: `latest`).
 - `GOOSE_DRIVER`, `GOOSE_DBSTRING`, `GOOSE_MIGRATION_DIR`: used by `goose` during development (see `envrc.template`).
