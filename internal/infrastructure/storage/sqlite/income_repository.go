@@ -95,12 +95,15 @@ func (r *SQLiteIncomeRepository) FindByUserIDAndMonth(ctx context.Context, userI
 	}
 
 	query := `
-		SELECT i.id, i.user_id, i.amount, i.source, i.received_at, u.currency 
-		FROM incomes i
-		JOIN users u ON i.user_id = u.id
-		WHERE i.user_id = ? AND i.received_at >= ? AND i.received_at < ?
-		ORDER BY i.received_at DESC
-	`
+			SELECT i.id, i.user_id, i.amount, i.source, i.received_at, u.currency 
+			FROM incomes i
+			JOIN users u ON i.user_id = u.id
+			WHERE i.user_id = ? AND i.received_at >= ? AND i.received_at < ?
+			ORDER BY i.received_at DESC
+		`
+
+	return r.fetchIncomes(ctx, query, userID.String(), start, end)
+}
 
 	rows, err := r.db.QueryContext(ctx, query, userID.String(), start, end)
 	if err != nil {
