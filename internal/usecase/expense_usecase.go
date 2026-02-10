@@ -202,7 +202,22 @@ func (u ExpenseUseCaseImpl) Delete(ctx context.Context, userID string, id string
 		return errors.New("unauthorized")
 	}
 
-	return expenseRepo.Delete(ctx, expID)
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := txUOW.ExpenseRepository().Delete(ctx, expID); err != nil {
+		_ = txUOW.Rollback()
+		return err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
+		return err
+	}
+
+	return nil
 }
 
 func (u ExpenseUseCaseImpl) Get(ctx context.Context, userID string, id string) (*ExpenseResponse, error) {
