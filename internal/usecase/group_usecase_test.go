@@ -82,11 +82,20 @@ func TestGroupUseCase_Create(t *testing.T) {
 	t.Run("saves group and returns response", func(t *testing.T) {
 		var savedGroup tracking.Group
 		repo := &MockGroupRepository{}
-		repo.On("Save", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+		txRepo := &MockGroupRepository{}
+		txRepo.On("Save", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			savedGroup = args.Get(1).(tracking.Group)
 		})
 
-		usecase := newTestGroupUseCase(repo)
+		txUOW := &MockUnitOfWork{TrackingRepo: txRepo}
+		baseUOW := &MockUnitOfWork{TrackingRepo: repo}
+		baseUOW.On("Begin", mock.Anything).Return(txUOW, nil)
+		txUOW.On("Commit").Return(nil)
+
+		usecase := NewGroupUseCase(
+			baseUOW,
+			slog.New(slog.NewTextHandler(io.Discard, nil)),
+		)
 
 		resp, err := usecase.Create(context.Background(), validReq)
 
@@ -156,12 +165,21 @@ func TestGroupUseCase_Update(t *testing.T) {
 	t.Run("updates group and returns response", func(t *testing.T) {
 		var savedGroup tracking.Group
 		repo := &MockGroupRepository{}
+		txRepo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*existingGroup, nil)
-		repo.On("Save", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+		txRepo.On("Save", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			savedGroup = args.Get(1).(tracking.Group)
 		})
 
-		usecase := newTestGroupUseCase(repo)
+		txUOW := &MockUnitOfWork{TrackingRepo: txRepo}
+		baseUOW := &MockUnitOfWork{TrackingRepo: repo}
+		baseUOW.On("Begin", mock.Anything).Return(txUOW, nil)
+		txUOW.On("Commit").Return(nil)
+
+		usecase := NewGroupUseCase(
+			baseUOW,
+			slog.New(slog.NewTextHandler(io.Discard, nil)),
+		)
 
 		resp, err := usecase.Update(context.Background(), validReq)
 
@@ -210,12 +228,21 @@ func TestGroupUseCase_Delete(t *testing.T) {
 	t.Run("deletes group successfully", func(t *testing.T) {
 		var deletedID identifier.ID
 		repo := &MockGroupRepository{}
+		txRepo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*existingGroup, nil)
-		repo.On("Delete", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+		txRepo.On("Delete", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			deletedID = args.Get(1).(identifier.ID)
 		})
 
-		usecase := newTestGroupUseCase(repo)
+		txUOW := &MockUnitOfWork{TrackingRepo: txRepo}
+		baseUOW := &MockUnitOfWork{TrackingRepo: repo}
+		baseUOW.On("Begin", mock.Anything).Return(txUOW, nil)
+		txUOW.On("Commit").Return(nil)
+
+		usecase := NewGroupUseCase(
+			baseUOW,
+			slog.New(slog.NewTextHandler(io.Discard, nil)),
+		)
 
 		err := usecase.Delete(context.Background(), validUserID.String(), existingGroup.ID.String())
 		require.NoError(t, err)
