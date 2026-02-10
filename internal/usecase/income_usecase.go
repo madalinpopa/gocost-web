@@ -162,7 +162,22 @@ func (u IncomeUseCaseImpl) Delete(ctx context.Context, userID string, id string)
 		return errors.New("unauthorized")
 	}
 
-	return repo.Delete(ctx, incID)
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := txUOW.IncomeRepository().Delete(ctx, incID); err != nil {
+		_ = txUOW.Rollback()
+		return err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
+		return err
+	}
+
+	return nil
 }
 
 func (u IncomeUseCaseImpl) Get(ctx context.Context, userID string, id string) (*IncomeResponse, error) {
