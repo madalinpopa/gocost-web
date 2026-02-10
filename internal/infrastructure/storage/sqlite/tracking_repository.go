@@ -203,6 +203,10 @@ func (r *SQLiteTrackingRepository) FindByUserID(ctx context.Context, userID trac
 }
 
 func (r *SQLiteTrackingRepository) FindByUserIDAndMonth(ctx context.Context, userID tracking.ID, month string) ([]tracking.Group, error) {
+	if _, err := tracking.ParseMonth(month); err != nil {
+		return nil, fmt.Errorf("failed to parse month: %w", err)
+	}
+
 	groupQuery := `SELECT id, user_id, name, description, display_order FROM groups WHERE user_id = ? ORDER BY display_order, name`
 
 	rows, err := r.db.QueryContext(ctx, groupQuery, userID.String())
