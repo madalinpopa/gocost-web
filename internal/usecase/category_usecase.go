@@ -222,12 +222,26 @@ func (u CategoryUseCaseImpl) Delete(ctx context.Context, userID string, groupID 
 		return err
 	}
 
-	repo := u.uow.TrackingRepository()
 	if err := group.RemoveCategory(cID); err != nil {
 		return err
 	}
 
-	return repo.DeleteCategory(ctx, cID)
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := txUOW.TrackingRepository().DeleteCategory(ctx, cID); err != nil {
+		_ = txUOW.Rollback()
+		return err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
+		return err
+	}
+
+	return nil
 }
 
 func (u CategoryUseCaseImpl) Get(ctx context.Context, userID string, groupID string, id string) (*CategoryResponse, error) {
