@@ -183,6 +183,29 @@ func TestSQLiteExpenseRepository(t *testing.T) {
 		assert.Equal(t, newCategory.ID, updatedMar.CategoryID)
 	})
 
+	t.Run("ReassignCategoryFromMonth_DoesNotReassignToAnotherUsersCategory", func(t *testing.T) {
+		user := createRandomUser(t)
+		require.NoError(t, userRepo.Save(ctx, *user))
+		group := createRandomGroup(t, user.ID)
+		oldCategory := createRandomCategory(t, group.ID)
+
+		otherUser := createRandomUser(t)
+		require.NoError(t, userRepo.Save(ctx, *otherUser))
+		otherGroup := createRandomGroup(t, otherUser.ID)
+		otherCategory := createRandomCategory(t, otherGroup.ID)
+
+		expMar := createRandomExpense(t, oldCategory.ID)
+		expMar.SpentAt = time.Date(2023, 3, 5, 0, 0, 0, 0, time.UTC)
+		require.NoError(t, repo.Save(ctx, *expMar))
+
+		err := repo.ReassignCategoryFromMonth(ctx, user.ID, oldCategory.ID, otherCategory.ID, "2023-03")
+		require.NoError(t, err)
+
+		updatedMar, err := repo.FindByID(ctx, expMar.ID)
+		require.NoError(t, err)
+		assert.Equal(t, oldCategory.ID, updatedMar.CategoryID)
+	})
+
 	t.Run("Total_Success", func(t *testing.T) {
 		user := createRandomUser(t)
 		require.NoError(t, userRepo.Save(ctx, *user))
