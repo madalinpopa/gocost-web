@@ -205,19 +205,25 @@ func (r *SQLiteExpenseRepository) ReassignCategoryFromMonth(ctx context.Context,
 	}
 
 	query := `
-		UPDATE expenses
-		SET category_id = ?
-		WHERE category_id = ?
-		  AND spent_at >= ?
-		  AND EXISTS (
-			SELECT 1
-			FROM categories c
-			JOIN groups g ON c.group_id = g.id
-			WHERE c.id = expenses.category_id AND g.user_id = ?
-		  )
-	`
+			UPDATE expenses
+			SET category_id = ?
+			WHERE category_id = ?
+			  AND spent_at >= ?
+			  AND EXISTS (
+				SELECT 1
+				FROM categories c
+				JOIN groups g ON c.group_id = g.id
+				WHERE c.id = expenses.category_id AND g.user_id = ?
+			  )
+			  AND EXISTS (
+				SELECT 1
+				FROM categories c
+				JOIN groups g ON c.group_id = g.id
+				WHERE c.id = ? AND g.user_id = ?
+			  )
+		`
 
-	_, err = r.db.ExecContext(ctx, query, toCategoryID.String(), fromCategoryID.String(), start, userID.String())
+	_, err = r.db.ExecContext(ctx, query, toCategoryID.String(), fromCategoryID.String(), start, userID.String(), toCategoryID.String(), userID.String())
 	if err != nil {
 		return fmt.Errorf("failed to reassign expenses: %w", err)
 	}
