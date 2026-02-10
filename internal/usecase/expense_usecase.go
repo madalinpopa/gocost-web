@@ -73,7 +73,18 @@ func (u ExpenseUseCaseImpl) Create(ctx context.Context, req *CreateExpenseReques
 		return nil, err
 	}
 
-	if err := u.uow.ExpenseRepository().Save(ctx, *exp); err != nil {
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := txUOW.ExpenseRepository().Save(ctx, *exp); err != nil {
+		_ = txUOW.Rollback()
+		return nil, err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
 		return nil, err
 	}
 
