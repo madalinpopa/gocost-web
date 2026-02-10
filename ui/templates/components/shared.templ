@@ -1,13 +1,10 @@
 package components
 
-import (
-	"fmt"
-)
+import "fmt"
 
 // ============================================================================
 // Modal Wrapper
 // ============================================================================
-
 templ Modal(id string, title string) {
 	<div
 		x-data="{ open: false }"
@@ -77,7 +74,6 @@ templ Modal(id string, title string) {
 // ============================================================================
 // Loaders & Indicators
 // ============================================================================
-
 templ Spinner() {
 	<div id="spinner" class="htmx-indicator absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-10 pointer-events-none">
 		<div class="pointer-events-auto">
@@ -204,7 +200,6 @@ templ ModalButtons(cancelText string, confirmText string) {
 // ============================================================================
 // Error Components
 // ============================================================================
-
 templ Error(message string) {
 	if message != "" {
 		<p class="mt-2 text-sm text-secondary-600" x-data="{ show: true }" x-show="show" x-cloak x-init="setTimeout(() => show = false, 5000)" x-transition>
@@ -230,11 +225,14 @@ templ FieldError(field string, fieldErrors map[string]string) {
 // NonFieldErrors displays a list of non-field-specific errors
 templ NonFieldErrors(errors []string) {
 	if len(errors) > 0 {
-		<div class="rounded-md bg-red-50 p-4 mb-4">
+		<div class="mb-4 rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-900/60 dark:bg-red-950/40" role="alert" aria-live="polite">
 			<div class="flex">
+				<div class="flex-shrink-0 pt-0.5">
+					<iconify-icon icon="heroicons:exclamation-triangle-solid" class="h-5 w-5 text-red-600 dark:text-red-400"></iconify-icon>
+				</div>
 				<div class="ml-3">
-					<h3 class="text-sm font-medium text-red-800">Error</h3>
-					<div class="mt-2 text-sm text-red-700">
+					<h3 class="text-sm font-medium text-red-800 dark:text-red-300">Error</h3>
+					<div class="mt-2 text-sm text-red-700 dark:text-red-200">
 						<ul role="list" class="list-disc pl-5 space-y-1">
 							for _, err := range errors {
 								<li>{ err }</li>
@@ -250,8 +248,11 @@ templ NonFieldErrors(errors []string) {
 // FieldErrorInline displays a single field error message inline
 templ FieldErrorInline(err string) {
 	if err != "" {
-		<div class="rounded-md bg-red-50 p-4 mb-4">
-			<p class="text-sm text-red-700">{ err }</p>
+		<div class="mb-4 rounded-md border border-red-200 bg-red-50 p-3 dark:border-red-900/60 dark:bg-red-950/40" role="alert" aria-live="polite">
+			<div class="flex items-start gap-2">
+				<iconify-icon icon="heroicons:exclamation-triangle-solid" class="mt-0.5 h-4 w-4 text-red-600 dark:text-red-400"></iconify-icon>
+				<p class="text-sm text-red-700 dark:text-red-200">{ err }</p>
+			</div>
 		</div>
 	}
 }
@@ -259,7 +260,6 @@ templ FieldErrorInline(err string) {
 // ============================================================================
 // Toast Components
 // ============================================================================
-
 templ ToastEvent() {
 	<div
 		x-data="toastManager"
