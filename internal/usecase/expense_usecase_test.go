@@ -26,8 +26,16 @@ func newTestExpenseUseCase(trackingRepo *MockGroupRepository, expenseRepo *MockE
 	if userRepo == nil {
 		userRepo = &MockUserRepository{}
 	}
+
+	txUOW := &MockUnitOfWork{TrackingRepo: trackingRepo, ExpenseRepo: expenseRepo, UserRepo: userRepo}
+	txUOW.On("Commit").Return(nil)
+	txUOW.On("Rollback").Return(nil)
+
+	baseUOW := &MockUnitOfWork{TrackingRepo: trackingRepo, ExpenseRepo: expenseRepo, UserRepo: userRepo}
+	baseUOW.On("Begin", mock.Anything).Return(txUOW, nil)
+
 	return NewExpenseUseCase(
-		&MockUnitOfWork{TrackingRepo: trackingRepo, ExpenseRepo: expenseRepo, UserRepo: userRepo},
+		baseUOW,
 		slog.New(slog.NewTextHandler(io.Discard, nil)),
 	)
 }

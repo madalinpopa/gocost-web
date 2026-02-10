@@ -23,8 +23,16 @@ func newTestIncomeUseCase(repo *MockIncomeRepository, userRepo *MockUserReposito
 	if userRepo == nil {
 		userRepo = &MockUserRepository{}
 	}
+
+	txUOW := &MockUnitOfWork{IncomeRepo: repo, UserRepo: userRepo}
+	txUOW.On("Commit").Return(nil)
+	txUOW.On("Rollback").Return(nil)
+
+	baseUOW := &MockUnitOfWork{IncomeRepo: repo, UserRepo: userRepo}
+	baseUOW.On("Begin", mock.Anything).Return(txUOW, nil)
+
 	return NewIncomeUseCase(
-		&MockUnitOfWork{IncomeRepo: repo, UserRepo: userRepo},
+		baseUOW,
 		slog.New(slog.NewTextHandler(io.Discard, nil)),
 	)
 }

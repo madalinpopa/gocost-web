@@ -53,8 +53,18 @@ func (u IncomeUseCaseImpl) Create(ctx context.Context, req *CreateIncomeRequest)
 		return nil, err
 	}
 
-	repo := u.uow.IncomeRepository()
-	if err := repo.Save(ctx, *inc); err != nil {
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := txUOW.IncomeRepository().Save(ctx, *inc); err != nil {
+		_ = txUOW.Rollback()
+		return nil, err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
 		return nil, err
 	}
 
@@ -107,7 +117,18 @@ func (u IncomeUseCaseImpl) Update(ctx context.Context, req *UpdateIncomeRequest)
 		return nil, err
 	}
 
-	if err := repo.Save(ctx, *updatedInc); err != nil {
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := txUOW.IncomeRepository().Save(ctx, *updatedInc); err != nil {
+		_ = txUOW.Rollback()
+		return nil, err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
 		return nil, err
 	}
 
@@ -141,7 +162,22 @@ func (u IncomeUseCaseImpl) Delete(ctx context.Context, userID string, id string)
 		return errors.New("unauthorized")
 	}
 
-	return repo.Delete(ctx, incID)
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := txUOW.IncomeRepository().Delete(ctx, incID); err != nil {
+		_ = txUOW.Rollback()
+		return err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
+		return err
+	}
+
+	return nil
 }
 
 func (u IncomeUseCaseImpl) Get(ctx context.Context, userID string, id string) (*IncomeResponse, error) {

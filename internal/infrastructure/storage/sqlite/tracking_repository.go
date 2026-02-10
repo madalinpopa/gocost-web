@@ -21,6 +21,10 @@ func NewSQLiteTrackingRepository(db DBExecutor) *SQLiteTrackingRepository {
 }
 
 func (r *SQLiteTrackingRepository) Save(ctx context.Context, group tracking.Group) error {
+	return r.saveWithExecutor(ctx, r.db, group)
+}
+
+func (r *SQLiteTrackingRepository) saveWithExecutor(ctx context.Context, exec DBExecutor, group tracking.Group) error {
 	groupQuery := `
 		INSERT INTO groups (id, user_id, name, description, display_order)
 		VALUES (?, ?, ?, ?, ?)
@@ -30,7 +34,7 @@ func (r *SQLiteTrackingRepository) Save(ctx context.Context, group tracking.Grou
 			description = excluded.description,
 			display_order = excluded.display_order
 	`
-	_, err := r.db.ExecContext(ctx, groupQuery,
+	_, err := exec.ExecContext(ctx, groupQuery,
 		group.ID.String(),
 		group.UserID.String(),
 		group.Name.Value(),
@@ -61,7 +65,7 @@ func (r *SQLiteTrackingRepository) Save(ctx context.Context, group tracking.Grou
 			endMonth = sql.NullString{String: category.EndMonth.Value(), Valid: true}
 		}
 
-		_, err = r.db.ExecContext(ctx, categoryQuery,
+		_, err = exec.ExecContext(ctx, categoryQuery,
 			category.ID.String(),
 			category.GroupID.String(),
 			category.Name.Value(),
@@ -94,17 +98,17 @@ func (r *SQLiteTrackingRepository) FindByID(ctx context.Context, id tracking.ID)
 
 	group, err := r.mapToGroup(idStr, userIDStr, nameStr, descriptionStr, orderInt)
 	if err != nil {
-		return tracking.Group{}, err
+		return tracking.Group{}, fmt.Errorf("failed to map group: %w", err)
 	}
 
 	categories, err := r.findCategoriesByGroupID(ctx, group.ID.String())
 	if err != nil {
-		return tracking.Group{}, err
+		return tracking.Group{}, fmt.Errorf("failed to find categories by group id: %w", err)
 	}
 
 	for _, category := range categories {
 		if err := group.AddCategory(category); err != nil {
-			return tracking.Group{}, err
+			return tracking.Group{}, fmt.Errorf("failed to add category to group: %w", err)
 		}
 	}
 
@@ -116,7 +120,7 @@ func (r *SQLiteTrackingRepository) FindByUserID(ctx context.Context, userID trac
 
 	rows, err := r.db.QueryContext(ctx, groupQuery, userID.String())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to query groups by user id: %w", err)
 	}
 	defer rows.Close()
 
@@ -127,12 +131,12 @@ func (r *SQLiteTrackingRepository) FindByUserID(ctx context.Context, userID trac
 		var idStr, userIDStr, nameStr, descriptionStr string
 		var orderInt int
 		if err := rows.Scan(&idStr, &userIDStr, &nameStr, &descriptionStr, &orderInt); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan group row: %w", err)
 		}
 
 		group, err := r.mapToGroup(idStr, userIDStr, nameStr, descriptionStr, orderInt)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to map group: %w", err)
 		}
 
 		groupByID[group.ID.String()] = group
@@ -140,7 +144,7 @@ func (r *SQLiteTrackingRepository) FindByUserID(ctx context.Context, userID trac
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error iterating group rows: %w", err)
 	}
 
 	if len(groups) == 0 {
@@ -168,26 +172,26 @@ func (r *SQLiteTrackingRepository) FindByUserID(ctx context.Context, userID trac
 		)
 
 		if err := categoryRows.Scan(&idStr, &groupIDStr, &nameStr, &descriptionStr, &isRecurrentInt, &startMonthStr, &endMonth, &budgetCents, &currencyStr); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan category row: %w", err)
 		}
 
 		category, err := r.mapToCategory(idStr, groupIDStr, nameStr, descriptionStr, isRecurrentInt == 1, startMonthStr, endMonth, budgetCents, currencyStr)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to map category: %w", err)
 		}
 
 		group, ok := groupByID[groupIDStr]
 		if !ok {
-			return nil, tracking.ErrGroupNotFound
+			return nil, fmt.Errorf("failed to resolve group for category %s: %w", groupIDStr, tracking.ErrGroupNotFound)
 		}
 
 		if err := group.AddCategory(category); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to add category to group: %w", err)
 		}
 	}
 
 	if err := categoryRows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error iterating category rows: %w", err)
 	}
 
 	result := make([]tracking.Group, 0, len(groups))
@@ -199,11 +203,15 @@ func (r *SQLiteTrackingRepository) FindByUserID(ctx context.Context, userID trac
 }
 
 func (r *SQLiteTrackingRepository) FindByUserIDAndMonth(ctx context.Context, userID tracking.ID, month string) ([]tracking.Group, error) {
+	if _, err := tracking.ParseMonth(month); err != nil {
+		return nil, fmt.Errorf("failed to parse month: %w", err)
+	}
+
 	groupQuery := `SELECT id, user_id, name, description, display_order FROM groups WHERE user_id = ? ORDER BY display_order, name`
 
 	rows, err := r.db.QueryContext(ctx, groupQuery, userID.String())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to query groups by user id and month: %w", err)
 	}
 	defer rows.Close()
 
@@ -214,12 +222,12 @@ func (r *SQLiteTrackingRepository) FindByUserIDAndMonth(ctx context.Context, use
 		var idStr, userIDStr, nameStr, descriptionStr string
 		var orderInt int
 		if err := rows.Scan(&idStr, &userIDStr, &nameStr, &descriptionStr, &orderInt); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan group row: %w", err)
 		}
 
 		group, err := r.mapToGroup(idStr, userIDStr, nameStr, descriptionStr, orderInt)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to map group: %w", err)
 		}
 
 		groupByID[group.ID.String()] = group
@@ -227,7 +235,7 @@ func (r *SQLiteTrackingRepository) FindByUserIDAndMonth(ctx context.Context, use
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error iterating group rows: %w", err)
 	}
 
 	if len(groups) == 0 {
@@ -243,7 +251,7 @@ func (r *SQLiteTrackingRepository) FindByUserIDAndMonth(ctx context.Context, use
 	args := append(groupIDs, month, month, month)
 	categoryRows, err := r.db.QueryContext(ctx, categoryQuery, args...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to query categories by group ids and month: %w", err)
 	}
 	defer categoryRows.Close()
 
@@ -256,26 +264,26 @@ func (r *SQLiteTrackingRepository) FindByUserIDAndMonth(ctx context.Context, use
 		)
 
 		if err := categoryRows.Scan(&idStr, &groupIDStr, &nameStr, &descriptionStr, &isRecurrentInt, &startMonthStr, &endMonth, &budgetCents, &currencyStr); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan category row: %w", err)
 		}
 
 		category, err := r.mapToCategory(idStr, groupIDStr, nameStr, descriptionStr, isRecurrentInt == 1, startMonthStr, endMonth, budgetCents, currencyStr)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to map category: %w", err)
 		}
 
 		group, ok := groupByID[groupIDStr]
 		if !ok {
-			return nil, tracking.ErrGroupNotFound
+			return nil, fmt.Errorf("failed to resolve group for category %s: %w", groupIDStr, tracking.ErrGroupNotFound)
 		}
 
 		if err := group.AddCategory(category); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to add category to group: %w", err)
 		}
 	}
 
 	if err := categoryRows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error iterating category rows: %w", err)
 	}
 
 	result := make([]tracking.Group, 0, len(groups))
@@ -300,22 +308,22 @@ func (r *SQLiteTrackingRepository) FindGroupByCategoryID(ctx context.Context, ca
 		if errors.Is(err, sql.ErrNoRows) {
 			return tracking.Group{}, tracking.ErrGroupNotFound
 		}
-		return tracking.Group{}, err
+		return tracking.Group{}, fmt.Errorf("failed to find group by category id: %w", err)
 	}
 
 	group, err := r.mapToGroup(idStr, userIDStr, nameStr, descriptionStr, orderInt)
 	if err != nil {
-		return tracking.Group{}, err
+		return tracking.Group{}, fmt.Errorf("failed to map group: %w", err)
 	}
 
 	categories, err := r.findCategoriesByGroupID(ctx, group.ID.String())
 	if err != nil {
-		return tracking.Group{}, err
+		return tracking.Group{}, fmt.Errorf("failed to find categories by group id: %w", err)
 	}
 
 	for _, category := range categories {
 		if err := group.AddCategory(category); err != nil {
-			return tracking.Group{}, err
+			return tracking.Group{}, fmt.Errorf("failed to add category to group: %w", err)
 		}
 	}
 

@@ -20,8 +20,16 @@ func newTestAuthUseCase(repo *MockUserRepository) AuthUseCaseImpl {
 	if repo == nil {
 		repo = &MockUserRepository{}
 	}
+
+	txUOW := &MockUnitOfWork{UserRepo: repo}
+	txUOW.On("Commit").Return(nil)
+	txUOW.On("Rollback").Return(nil)
+
+	baseUOW := &MockUnitOfWork{UserRepo: repo}
+	baseUOW.On("Begin", mock.Anything).Return(txUOW, nil)
+
 	return NewAuthUseCase(
-		&MockUnitOfWork{UserRepo: repo},
+		baseUOW,
 		slog.New(slog.NewTextHandler(io.Discard, nil)),
 		security.NewPasswordHasher(),
 	)
@@ -427,7 +435,7 @@ func TestAuthUseCase_Login(t *testing.T) {
 		require.NoError(t, err)
 
 		user := newTestUser(t, "user@example.com", "validuser", hash)
-		
+
 		repo := &MockUserRepository{}
 		repo.On("FindByUsername", mock.Anything, mock.Anything).Return(user, nil)
 

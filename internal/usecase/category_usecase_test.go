@@ -87,12 +87,20 @@ func TestCategoryUseCase_Create(t *testing.T) {
 	t.Run("creates category and saves group", func(t *testing.T) {
 		var savedGroup tracking.Group
 		repo := &MockGroupRepository{}
+		txRepo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
-		repo.On("Save", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+		txRepo.On("Save", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			savedGroup = args.Get(1).(tracking.Group)
 		})
+		txUOW := &MockUnitOfWork{TrackingRepo: txRepo}
+		baseUOW := &MockUnitOfWork{TrackingRepo: repo}
+		baseUOW.On("Begin", mock.Anything).Return(txUOW, nil)
+		txUOW.On("Commit").Return(nil)
 
-		usecase := newTestCategoryUseCase(repo, nil, nil)
+		usecase := NewCategoryUseCase(
+			baseUOW,
+			slog.New(slog.NewTextHandler(io.Discard, nil)),
+		)
 
 		resp, err := usecase.Create(context.Background(), validReq)
 
@@ -170,7 +178,9 @@ func TestCategoryUseCase_Update(t *testing.T) {
 	t.Run("forks recurrent category when updating in future month", func(t *testing.T) {
 		var savedGroup tracking.Group
 		repo := &MockGroupRepository{}
+		txRepo := &MockGroupRepository{}
 		expenseRepo := &MockExpenseRepository{}
+		txExpenseRepo := &MockExpenseRepository{}
 
 		// Setup clean group and category
 		forkGroup := newTestGroup(t, validUserID)
@@ -182,12 +192,26 @@ func TestCategoryUseCase_Update(t *testing.T) {
 		_, _ = forkGroup.CreateCategory(fCatID, fName, fDesc, true, fStart, tracking.Month{}, fBudget)
 
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*forkGroup, nil)
-		repo.On("Save", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+		txRepo.On("Save", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			savedGroup = args.Get(1).(tracking.Group)
 		})
-		expenseRepo.On("ReassignCategoryFromMonth", mock.Anything, validUserID, fCatID, mock.Anything, "2023-03").Return(nil)
+		txExpenseRepo.On("ReassignCategoryFromMonth", mock.Anything, validUserID, fCatID, mock.Anything, "2023-03").Return(nil)
 
-		usecase := newTestCategoryUseCase(repo, nil, expenseRepo)
+		txUOW := &MockUnitOfWork{
+			TrackingRepo: txRepo,
+			ExpenseRepo:  txExpenseRepo,
+		}
+		baseUOW := &MockUnitOfWork{
+			TrackingRepo: repo,
+			ExpenseRepo:  expenseRepo,
+		}
+		baseUOW.On("Begin", mock.Anything).Return(txUOW, nil)
+		txUOW.On("Commit").Return(nil)
+
+		usecase := NewCategoryUseCase(
+			baseUOW,
+			slog.New(slog.NewTextHandler(io.Discard, nil)),
+		)
 
 		req := &UpdateCategoryRequest{
 			ID:           fCatID.String(),
@@ -234,18 +258,84 @@ func TestCategoryUseCase_Update(t *testing.T) {
 		assert.Equal(t, "2023-03", forked.StartMonth.Value())
 		assert.Equal(t, "Forked Cat", forked.Name.Value())
 		assert.Equal(t, 200.0, forked.Budget.Amount())
-		expenseRepo.AssertExpectations(t)
+		baseUOW.AssertExpectations(t)
+		txUOW.AssertExpectations(t)
+		txExpenseRepo.AssertExpectations(t)
+	})
+
+	t.Run("rolls back transaction when reassignment fails in fork flow", func(t *testing.T) {
+		repo := &MockGroupRepository{}
+		txRepo := &MockGroupRepository{}
+		expenseRepo := &MockExpenseRepository{}
+		txExpenseRepo := &MockExpenseRepository{}
+
+		forkGroup := newTestGroup(t, validUserID)
+		fCatID, _ := identifier.NewID()
+		fName, _ := tracking.NewNameVO("Recurrent Cat")
+		fDesc, _ := tracking.NewDescriptionVO("Desc")
+		fStart, _ := tracking.ParseMonth("2023-01")
+		fBudget, _ := money.NewFromFloat(100.0, "USD")
+		_, _ = forkGroup.CreateCategory(fCatID, fName, fDesc, true, fStart, tracking.Month{}, fBudget)
+
+		repo.On("FindByID", mock.Anything, mock.Anything).Return(*forkGroup, nil)
+		txRepo.On("Save", mock.Anything, mock.Anything).Return(nil)
+		txExpenseRepo.On("ReassignCategoryFromMonth", mock.Anything, validUserID, fCatID, mock.Anything, "2023-03").Return(assert.AnError)
+
+		txUOW := &MockUnitOfWork{
+			TrackingRepo: txRepo,
+			ExpenseRepo:  txExpenseRepo,
+		}
+		baseUOW := &MockUnitOfWork{
+			TrackingRepo: repo,
+			ExpenseRepo:  expenseRepo,
+		}
+		baseUOW.On("Begin", mock.Anything).Return(txUOW, nil)
+		txUOW.On("Rollback").Return(nil)
+
+		usecase := NewCategoryUseCase(
+			baseUOW,
+			slog.New(slog.NewTextHandler(io.Discard, nil)),
+		)
+
+		req := &UpdateCategoryRequest{
+			ID:           fCatID.String(),
+			UserID:       validUserID.String(),
+			GroupID:      forkGroup.ID.String(),
+			Currency:     "USD",
+			Name:         "Forked Cat",
+			Description:  "New Desc",
+			StartMonth:   "2023-01",
+			CurrentMonth: "2023-03",
+			IsRecurrent:  true,
+			Budget:       200.0,
+		}
+
+		resp, err := usecase.Update(context.Background(), req)
+		assert.Nil(t, resp)
+		assert.ErrorIs(t, err, assert.AnError)
+
+		baseUOW.AssertExpectations(t)
+		txUOW.AssertExpectations(t)
+		txExpenseRepo.AssertExpectations(t)
 	})
 
 	t.Run("updates category and saves group", func(t *testing.T) {
 		var savedGroup tracking.Group
 		repo := &MockGroupRepository{}
+		txRepo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
-		repo.On("Save", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+		txRepo.On("Save", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			savedGroup = args.Get(1).(tracking.Group)
 		})
+		txUOW := &MockUnitOfWork{TrackingRepo: txRepo}
+		baseUOW := &MockUnitOfWork{TrackingRepo: repo}
+		baseUOW.On("Begin", mock.Anything).Return(txUOW, nil)
+		txUOW.On("Commit").Return(nil)
 
-		usecase := newTestCategoryUseCase(repo, nil, nil)
+		usecase := NewCategoryUseCase(
+			baseUOW,
+			slog.New(slog.NewTextHandler(io.Discard, nil)),
+		)
 
 		resp, err := usecase.Update(context.Background(), validReq)
 
@@ -293,10 +383,18 @@ func TestCategoryUseCase_Delete(t *testing.T) {
 
 	t.Run("deletes category and saves group", func(t *testing.T) {
 		repo := &MockGroupRepository{}
+		txRepo := &MockGroupRepository{}
 		repo.On("FindByID", mock.Anything, mock.Anything).Return(*group, nil)
-		repo.On("DeleteCategory", mock.Anything, catID).Return(nil)
+		txRepo.On("DeleteCategory", mock.Anything, catID).Return(nil)
+		txUOW := &MockUnitOfWork{TrackingRepo: txRepo}
+		baseUOW := &MockUnitOfWork{TrackingRepo: repo}
+		baseUOW.On("Begin", mock.Anything).Return(txUOW, nil)
+		txUOW.On("Commit").Return(nil)
 
-		usecase := newTestCategoryUseCase(repo, nil, nil)
+		usecase := NewCategoryUseCase(
+			baseUOW,
+			slog.New(slog.NewTextHandler(io.Discard, nil)),
+		)
 
 		err := usecase.Delete(context.Background(), validUserID.String(), group.ID.String(), catID.String())
 		require.NoError(t, err)

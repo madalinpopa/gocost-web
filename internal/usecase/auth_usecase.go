@@ -89,7 +89,19 @@ func (u AuthUseCaseImpl) Register(ctx context.Context, req *RegisterUserRequest)
 	}
 
 	user := identity.NewUser(id, username, email, password, currency)
-	if err := repo.Save(ctx, *user); err != nil {
+
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := txUOW.UserRepository().Save(ctx, *user); err != nil {
+		_ = txUOW.Rollback()
+		return nil, err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
 		return nil, err
 	}
 

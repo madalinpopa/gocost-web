@@ -72,7 +72,16 @@ func (r *SQLiteExpenseRepository) FindByID(ctx context.Context, id identifier.ID
 	var isPaidInt int
 	var paidAt sql.NullTime
 
-	err := r.db.QueryRowContext(ctx, query, id.String()).Scan(&idStr, &categoryIDStr, &amountCents, &descriptionStr, &spentAt, &isPaidInt, &paidAt, &currencyStr)
+	err := r.db.QueryRowContext(ctx, query, id.String()).Scan(
+		&idStr,
+		&categoryIDStr,
+		&amountCents,
+		&descriptionStr,
+		&spentAt,
+		&isPaidInt,
+		&paidAt,
+		&currencyStr,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return expense.Expense{}, expense.ErrExpenseNotFound
@@ -80,7 +89,16 @@ func (r *SQLiteExpenseRepository) FindByID(ctx context.Context, id identifier.ID
 		return expense.Expense{}, fmt.Errorf("failed to find expense by id: %w", err)
 	}
 
-	return r.mapToExpense(idStr, categoryIDStr, amountCents, currencyStr, descriptionStr, spentAt, isPaidInt == 1, paidAt)
+	return r.mapToExpense(
+		idStr,
+		categoryIDStr,
+		amountCents,
+		currencyStr,
+		descriptionStr,
+		spentAt,
+		isPaidInt == 1,
+		paidAt,
+	)
 }
 
 func (r *SQLiteExpenseRepository) FindByUserID(ctx context.Context, userID identifier.ID) ([]expense.Expense, error) {
@@ -187,19 +205,25 @@ func (r *SQLiteExpenseRepository) ReassignCategoryFromMonth(ctx context.Context,
 	}
 
 	query := `
-		UPDATE expenses
-		SET category_id = ?
-		WHERE category_id = ?
-		  AND spent_at >= ?
-		  AND EXISTS (
-			SELECT 1
-			FROM categories c
-			JOIN groups g ON c.group_id = g.id
-			WHERE c.id = expenses.category_id AND g.user_id = ?
-		  )
-	`
+			UPDATE expenses
+			SET category_id = ?
+			WHERE category_id = ?
+			  AND spent_at >= ?
+			  AND EXISTS (
+				SELECT 1
+				FROM categories c
+				JOIN groups g ON c.group_id = g.id
+				WHERE c.id = expenses.category_id AND g.user_id = ?
+			  )
+			  AND EXISTS (
+				SELECT 1
+				FROM categories c
+				JOIN groups g ON c.group_id = g.id
+				WHERE c.id = ? AND g.user_id = ?
+			  )
+		`
 
-	_, err = r.db.ExecContext(ctx, query, toCategoryID.String(), fromCategoryID.String(), start, userID.String())
+	_, err = r.db.ExecContext(ctx, query, toCategoryID.String(), fromCategoryID.String(), start, userID.String(), toCategoryID.String(), userID.String())
 	if err != nil {
 		return fmt.Errorf("failed to reassign expenses: %w", err)
 	}

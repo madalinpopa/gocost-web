@@ -54,8 +54,18 @@ func (u GroupUseCaseImpl) Create(ctx context.Context, req *CreateGroupRequest) (
 
 	group := tracking.NewGroup(id, uID, name, description, order)
 
-	repo := u.uow.TrackingRepository()
-	if err := repo.Save(ctx, *group); err != nil {
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := txUOW.TrackingRepository().Save(ctx, *group); err != nil {
+		_ = txUOW.Rollback()
+		return nil, err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
 		return nil, err
 	}
 
@@ -106,7 +116,18 @@ func (u GroupUseCaseImpl) Update(ctx context.Context, req *UpdateGroupRequest) (
 	group.Description = description
 	group.Order = order
 
-	if err := repo.Save(ctx, group); err != nil {
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := txUOW.TrackingRepository().Save(ctx, group); err != nil {
+		_ = txUOW.Rollback()
+		return nil, err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
 		return nil, err
 	}
 
@@ -134,7 +155,22 @@ func (u GroupUseCaseImpl) Delete(ctx context.Context, userID string, id string) 
 		return errors.New("unauthorized")
 	}
 
-	return repo.Delete(ctx, groupID)
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := txUOW.TrackingRepository().Delete(ctx, groupID); err != nil {
+		_ = txUOW.Rollback()
+		return err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
+		return err
+	}
+
+	return nil
 }
 
 func (u GroupUseCaseImpl) Get(ctx context.Context, userID string, id string) (*GroupResponse, error) {

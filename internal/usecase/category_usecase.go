@@ -71,8 +71,18 @@ func (u CategoryUseCaseImpl) Create(ctx context.Context, req *CreateCategoryRequ
 		return nil, err
 	}
 
-	repo := u.uow.TrackingRepository()
-	if err := repo.Save(ctx, *group); err != nil {
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := txUOW.TrackingRepository().Save(ctx, *group); err != nil {
+		_ = txUOW.Rollback()
+		return nil, err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
 		return nil, err
 	}
 
@@ -176,16 +186,26 @@ func (u CategoryUseCaseImpl) Update(ctx context.Context, req *UpdateCategoryRequ
 		}
 	}
 
-	repo := u.uow.TrackingRepository()
-	if err := repo.Save(ctx, *group); err != nil {
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := txUOW.TrackingRepository().Save(ctx, *group); err != nil {
+		_ = txUOW.Rollback()
 		return nil, err
 	}
 
 	if shouldFork && existingCategory.IsRecurrent {
-		expenseRepo := u.uow.ExpenseRepository()
-		if err := expenseRepo.ReassignCategoryFromMonth(ctx, group.UserID, existingCategory.ID, category.ID, viewMonth.Value()); err != nil {
+		if err := txUOW.ExpenseRepository().ReassignCategoryFromMonth(ctx, group.UserID, existingCategory.ID, category.ID, viewMonth.Value()); err != nil {
+			_ = txUOW.Rollback()
 			return nil, err
 		}
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
+		return nil, err
 	}
 
 	return u.mapToResponse(category), nil
@@ -202,12 +222,26 @@ func (u CategoryUseCaseImpl) Delete(ctx context.Context, userID string, groupID 
 		return err
 	}
 
-	repo := u.uow.TrackingRepository()
 	if err := group.RemoveCategory(cID); err != nil {
 		return err
 	}
 
-	return repo.DeleteCategory(ctx, cID)
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := txUOW.TrackingRepository().DeleteCategory(ctx, cID); err != nil {
+		_ = txUOW.Rollback()
+		return err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
+		return err
+	}
+
+	return nil
 }
 
 func (u CategoryUseCaseImpl) Get(ctx context.Context, userID string, groupID string, id string) (*CategoryResponse, error) {

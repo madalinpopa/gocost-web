@@ -73,7 +73,18 @@ func (u ExpenseUseCaseImpl) Create(ctx context.Context, req *CreateExpenseReques
 		return nil, err
 	}
 
-	if err := u.uow.ExpenseRepository().Save(ctx, *exp); err != nil {
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := txUOW.ExpenseRepository().Save(ctx, *exp); err != nil {
+		_ = txUOW.Rollback()
+		return nil, err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
 		return nil, err
 	}
 
@@ -147,7 +158,18 @@ func (u ExpenseUseCaseImpl) Update(ctx context.Context, req *UpdateExpenseReques
 	exp.SpentAt = req.SpentAt
 	exp.Payment = payment
 
-	if err := expenseRepo.Save(ctx, exp); err != nil {
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := txUOW.ExpenseRepository().Save(ctx, exp); err != nil {
+		_ = txUOW.Rollback()
+		return nil, err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
 		return nil, err
 	}
 
@@ -180,7 +202,22 @@ func (u ExpenseUseCaseImpl) Delete(ctx context.Context, userID string, id string
 		return errors.New("unauthorized")
 	}
 
-	return expenseRepo.Delete(ctx, expID)
+	txUOW, err := u.uow.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := txUOW.ExpenseRepository().Delete(ctx, expID); err != nil {
+		_ = txUOW.Rollback()
+		return err
+	}
+
+	if err := txUOW.Commit(); err != nil {
+		_ = txUOW.Rollback()
+		return err
+	}
+
+	return nil
 }
 
 func (u ExpenseUseCaseImpl) Get(ctx context.Context, userID string, id string) (*ExpenseResponse, error) {
