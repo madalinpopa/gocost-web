@@ -16,7 +16,7 @@ The project follows a standard Go project layout with a strong separation of con
 *   **`migrations/`**: SQL database migrations managed by `goose`.
 
 ### Tech Stack
-*   **Backend:** Go 1.25+
+*   **Backend:** Go 1.26.1+
     *   **Router:** Standard `net/http` mux with `justinas/alice` for middleware chaining.
     *   **Database:** SQLite with `mattn/go-sqlite3`.
     *   **Migrations:** `goose` (embedded via `internal/infrastructure/storage/sqlite/connection.go`).
@@ -33,7 +33,7 @@ The project follows a standard Go project layout with a strong separation of con
 The project uses a `Makefile` to manage common tasks.
 
 ### Prerequisites
-*   Go 1.25+
+*   Go 1.26.1+
 *   Node.js & npm (for Tailwind CSS)
 *   `direnv` (recommended for environment management)
 *   `1Password CLI` (optional, for secret injection via `op inject`)

@@ -42,7 +42,7 @@ The payment status is visually reflected in the category so the user can immedia
 
 ## Technical Details
 
-- **Backend:** Go (1.25+), `net/http`, `a-h/templ` for server-side UI rendering.
+- **Backend:** Go (1.26.1+), `net/http`, `a-h/templ` for server-side UI rendering.
 - **Frontend:** Tailwind CSS, HTMX for server-driven updates, Alpine.js for lightweight client state.
 - **Data:** SQLite database with migrations managed by `goose`.
 - **Configuration:** Environment-driven configuration via `.envrc` (generated from `envrc.template`).
@@ -116,7 +116,7 @@ docker run -d \
 
 ### Prerequisites
 
-- Go 1.25+
+- Go 1.26.1+
 - Node.js + npm (Tailwind CLI)
 - Optional: `direnv` and 1Password CLI (`op`) for `.envrc` generation
 
