@@ -57,6 +57,8 @@ func (s *stubAuthSessionManager) SetUsername(context.Context, string) {}
 
 func (s *stubAuthSessionManager) SetCurrency(context.Context, string) {}
 
+func (s *stubAuthSessionManager) RememberMe(context.Context, bool) {}
+
 type stubErrorHandler struct {
 	logServerErrorCalls int
 }

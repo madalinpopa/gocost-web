@@ -56,6 +56,7 @@ func (lh LoginHandler) SubmitLoginForm(w http.ResponseWriter, r *http.Request) {
 	req := &usecase.LoginRequest{
 		EmailOrUsername: loginForm.Email,
 		Password:        loginForm.Password,
+		RememberMe:      loginForm.RememberMe,
 	}
 
 	resp, err := lh.auth.Login(r.Context(), req)
@@ -78,6 +79,10 @@ func (lh LoginHandler) SubmitLoginForm(w http.ResponseWriter, r *http.Request) {
 			fmt.Errorf("failed to renew session token: %w", err),
 		)
 		return
+	}
+
+	if req.RememberMe == "true" {
+		lh.app.Session.RememberMe(r.Context(), true)
 	}
 
 	lh.app.Session.SetUserID(r.Context(), resp.UserID)

@@ -36,6 +36,12 @@ type Config struct {
 	// Currency specifies the currency symbol
 	Currency string
 
+	// RememberMeDays specifies the number of days users stay logged in
+	RememberMeDays int
+
+	// RememberMeDaysInactive specifies the number of days users stay logged in when inactive
+	RememberMeDaysInactive int
+
 	// logger is used for config-level logging.
 	logger *slog.Logger
 
@@ -94,6 +100,12 @@ func (c *Config) LoadEnvironments() error {
 	c.Domain = viper.GetString("DOMAIN")
 
 	c.Currency = c.currencyCodeOrDefault(viper.GetString("CURRENCY"))
+
+	viper.SetDefault("REMEMBER_ME_DAYS", 28)
+	c.RememberMeDays = viper.GetInt("REMEMBER_ME_DAYS")
+
+	viper.SetDefault("REMEMBER_ME_DAYS_INACTIVE", 7)
+	c.RememberMeDaysInactive = viper.GetInt("REMEMBER_ME_DAYS_INACTIVE")
 
 	return nil
 }

@@ -24,6 +24,7 @@ type RegisterUserRequest struct {
 type LoginRequest struct {
 	EmailOrUsername string `json:"email_or_username" validate:"required"`
 	Password        string `json:"password" validate:"required"`
+	RememberMe      string `json:"remember_me"`
 }
 
 type LoginResponse struct {

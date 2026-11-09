@@ -57,3 +57,7 @@ func (m *mockAuthSessionManager) SetUsername(ctx context.Context, username strin
 func (m *mockAuthSessionManager) SetCurrency(ctx context.Context, currency string) {
 	m.Called(ctx, currency)
 }
+
+func (m *mockAuthSessionManager) RememberMe(ctx context.Context, rememberMe bool) {
+	m.Called(ctx, rememberMe)
+}
