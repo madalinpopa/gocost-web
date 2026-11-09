@@ -45,6 +45,8 @@ func newTestManagerWithContext(t *testing.T) (*web.Manager, context.Context) {
 func TestNew_NonProductionDefaults(t *testing.T) {
 	db := newTestDB(t)
 	cfg := config.New().WithEnvironment("development")
+	cfg.RememberMeDays = 28
+	cfg.RememberMeDaysInactive = 7
 
 	manager := web.NewSession(db, cfg)
 	assert.NotNil(t, manager)
@@ -63,8 +65,8 @@ func TestNew_NonProductionDefaults(t *testing.T) {
 	}
 	t.Cleanup(store.StopCleanup)
 
-	assert.Equal(t, time.Hour, manager.Manager.Lifetime)
-	assert.Equal(t, 20*time.Minute, manager.Manager.IdleTimeout)
+	assert.Equal(t, 28*24*time.Hour, manager.Manager.Lifetime)
+	assert.Equal(t, 7*24*time.Hour, manager.Manager.IdleTimeout)
 	assert.True(t, manager.Manager.Cookie.HttpOnly)
 	assert.False(t, manager.Manager.Cookie.Persist)
 	assert.Equal(t, http.SameSiteLaxMode, manager.Manager.Cookie.SameSite)

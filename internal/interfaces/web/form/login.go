@@ -1,9 +1,10 @@
 package form
 
 type LoginForm struct {
-	Email    string `form:"email"`
-	Password string `form:"password"`
-	Base     `form:"-"`
+	Email      string `form:"email"`
+	Password   string `form:"password"`
+	RememberMe string `form:"remember_me"`
+	Base       `form:"-"`
 }
 
 func (f *LoginForm) Validate() {

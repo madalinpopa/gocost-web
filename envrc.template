@@ -2,6 +2,8 @@ export CURRENCY="USD"
 export VERSION="latest"
 export DOMAIN="localhost"
 export ALLOWED_HOSTS="localhost"
+export REMEMBER_ME_DAYS="28"
+export REMEMBER_ME_DAYS_INACTIVE="7"
 # export TRUSTED_PROXIES="127.0.0.1,::1"
 
 # Litestream

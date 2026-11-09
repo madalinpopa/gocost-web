@@ -76,6 +76,10 @@ func (m *MockSessionManager) SetCurrency(ctx context.Context, currency string) {
 	m.Called(ctx, currency)
 }
 
+func (m *MockSessionManager) RememberMe(ctx context.Context, rememberMe bool) {
+	m.Called(ctx, rememberMe)
+}
+
 type MockAuthUseCase struct {
 	mock.Mock
 }

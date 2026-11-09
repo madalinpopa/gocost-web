@@ -32,6 +32,7 @@ type AuthSessionManager interface {
 	SetUserID(ctx context.Context, userID string)
 	SetUsername(ctx context.Context, username string)
 	SetCurrency(ctx context.Context, currency string)
+	RememberMe(ctx context.Context, rememberMe bool)
 }
 
 // AuthenticatedUser represents the user data stored in the session and context.
@@ -51,10 +52,10 @@ type Manager struct {
 func NewSession(db *sql.DB, c *config.Config) *Manager {
 	sessionManager := scs.New()
 	sessionManager.Store = sqlite3store.New(db)
-	sessionManager.Lifetime = 1 * time.Hour
-	sessionManager.IdleTimeout = 20 * time.Minute
+	sessionManager.Lifetime = time.Duration(c.RememberMeDays) * 24 * time.Hour
+	sessionManager.IdleTimeout = time.Duration(c.RememberMeDaysInactive) * 24 * time.Hour
 	sessionManager.Cookie.HttpOnly = true
-	sessionManager.Cookie.Persist = false // TODO: Need to implement remember me
+	sessionManager.Cookie.Persist = false
 	if c.GetEnvironment() == "production" {
 		sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 		sessionManager.Cookie.Secure = true
@@ -102,4 +103,8 @@ func (m *Manager) SetUsername(ctx context.Context, username string) {
 
 func (m *Manager) SetCurrency(ctx context.Context, currency string) {
 	m.Manager.Put(ctx, authenticatedCurrency, currency)
+}
+
+func (m *Manager) RememberMe(ctx context.Context, rememberMe bool) {
+	m.Manager.RememberMe(ctx, rememberMe)
 }
